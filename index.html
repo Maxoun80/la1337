@@ -174,17 +174,15 @@
         <div class="input-group">
             <label>👤 Sélectionner le Membre de l'équipe</label>
             <select id="inMemberSelect" onchange="handleMemberChange()">
-                <!-- Rempli automatiquement par le JavaScript -->
+                <!-- Rempli automatiquement -->
             </select>
         </div>
         
+        <!-- SÉLECTEUR DE BANNIÈRE -->
         <div class="input-group">
             <label>🎭 Sélectionner la Bannière Thématique</label>
             <select id="inPresetTheme" onchange="applyPresetTheme()">
-                <option value="cyber">🎧 Mode Radio Cyber (Par défaut - Officiel)</option>
-                <option value="ete">☀️ Mode Été (Fond Officiel)</option>
-                <option value="noel">🎄 Mode Noël (Fond Officiel)</option>
-                <option value="nouvelan">🥂 Nouvel An (Fond Officiel)</option>
+                <!-- Rempli automatiquement -->
             </select>
         </div>
 
@@ -204,10 +202,11 @@
             </div>
         </div>
 
+        <!-- SÉLECTEUR DE LOGO -->
         <div class="input-group full-width">
             <label>💿 Sélectionner le Logo</label>
             <select id="inPresetLogo" onchange="applyPresetLogo()">
-                <option value="blanc">⚪ Logo Blanc Officiel</option>
+                <!-- Rempli automatiquement -->
             </select>
         </div>
 
@@ -215,7 +214,7 @@
         <div class="input-group full-width">
             <label>💼 Choisir ton ou tes rôles (Plusieurs choix possibles)</label>
             <div id="rolesContainer" class="roles-checkbox-container">
-                <!-- Rempli automatiquement par le script -->
+                <!-- Rempli automatiquement -->
             </div>
         </div>
     </div>
@@ -240,7 +239,7 @@
                     <td style="vertical-align: middle; width: 180px; text-align: right;">
                         <div style="display: inline-block; background: #ff3366; color: #ffffff; font-size: 9px; font-weight: 900; padding: 4px 10px; border-radius: 4px; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.5);">🎙️ LIVE ON</div>
                         <div style="font-size: 14px; font-weight: 900; color: #ff3366; margin-bottom: 15px; letter-spacing: 0.5px; text-shadow: 2px 2px 4px rgba(0,0,0,0.9);">WWW.LA1337.COM</div>
-                        <div style="block; text-align: right;">
+                        <div style="display: block; text-align: right;">
                             <div style="display: inline-flex; align-items: center; margin-left: 10px; font-size: 10px; font-weight: bold; color: #ffffff; text-shadow: 2px 2px 4px rgba(0,0,0,1);">
                                 <svg style="width: 11px; height: 11px; fill: #ffffff; margin-right: 4px;" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.051.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
                                 <span>@LA1337RADIO</span>
@@ -262,18 +261,9 @@
     </div>
 </div>
 
-<!-- CHARGEMENT DE LA BASE DE DONNÉES DEPUIS LE FICHIER JS SÉPARÉ -->
 <script src="team.js"></script>
 
 <script>
-    const THEME_IMAGES = {
-        cyber:     "https://i.postimg.cc/63Y5PbDR/LA1337-Signatures-de-mail.png", 
-        ete:       "https://i.postimg.cc/7YyJTjw9/LA1337-Signatures-de-mail(1).png",
-        noel:      "https://i.postimg.cc/XqWNpSdT/LA1337-Signatures-de-mail(2).png",
-        nouvelan:  "https://i.postimg.cc/4x0Jphpd/LA1337-Signatures-de-mail(3).png"
-    };
-
-    const LOGO_IMAGES = { blanc: "https://i.postimg.cc/4x659pDr/logo-small.png" };
     const base64Cache = {};
 
     function initRolesCheckboxes() {
@@ -303,6 +293,30 @@
         });
     }
 
+    // CORRIGÉ : Lit directement l'objet de team.js pour avoir le joli nom complet
+    function initThemeSelector() {
+        var select = document.getElementById('inPresetTheme');
+        select.innerHTML = '';
+        for (const key in THEME_IMAGES) {
+            var opt = document.createElement('option');
+            opt.value = key;
+            opt.innerText = THEME_IMAGES[key].name; // Récupère le nom écrit dans team.js
+            select.appendChild(opt);
+        }
+    }
+
+    // CORRIGÉ : Lit directement le joli nom complet pour le logo
+    function initLogoSelector() {
+        var select = document.getElementById('inPresetLogo');
+        select.innerHTML = '';
+        for (const key in LOGO_IMAGES) {
+            var opt = document.createElement('option');
+            opt.value = key;
+            opt.innerText = LOGO_IMAGES[key].name; // Récupère le nom écrit dans team.js
+            select.appendChild(opt);
+        }
+    }
+
     function setSecureImage(url, targetId, isBackground, callback) {
         if (base64Cache[url]) { 
             applyImageToTarget(base64Cache[url], targetId, isBackground); 
@@ -324,14 +338,30 @@
     }
 
     window.onload = function() {
-        initRolesCheckboxes(); initMemberSelector();
-        setSecureImage(THEME_IMAGES.cyber, 'sigPreview', true);
-        setSecureImage(LOGO_IMAGES.blanc, 'logoPreview', false);
+        initRolesCheckboxes(); 
+        initMemberSelector();
+        initThemeSelector(); 
+        initLogoSelector();  
+        
+        const firstThemeKey = Object.keys(THEME_IMAGES)[0];
+        const firstLogoKey = Object.keys(LOGO_IMAGES)[0];
+
+        setSecureImage(THEME_IMAGES[firstThemeKey].url, 'sigPreview', true);
+        setSecureImage(LOGO_IMAGES[firstLogoKey].url, 'logoPreview', false);
         handleMemberChange();
     };
 
-    function applyPresetLogo() { setSecureImage(LOGO_IMAGES.blanc, 'logoPreview', false); updateSig(); }
-    function applyPresetTheme() { var theme = document.getElementById('inPresetTheme').value; if (THEME_IMAGES[theme]) setSecureImage(THEME_IMAGES[theme], 'sigPreview', true); updateSig(); }
+    function applyPresetLogo() { 
+        var logoKey = document.getElementById('inPresetLogo').value;
+        if (LOGO_IMAGES[logoKey]) setSecureImage(LOGO_IMAGES[logoKey].url, 'logoPreview', false); 
+        updateSig(); 
+    }
+    
+    function applyPresetTheme() { 
+        var themeKey = document.getElementById('inPresetTheme').value; 
+        if (THEME_IMAGES[themeKey]) setSecureImage(THEME_IMAGES[themeKey].url, 'sigPreview', true); 
+        updateSig(); 
+    }
 
     function handleMemberChange() {
         var choice = document.getElementById('inMemberSelect').value;
