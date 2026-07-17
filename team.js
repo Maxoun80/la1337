@@ -59,6 +59,10 @@ const LOGO_IMAGES = {
     blanc: {
         name: "⚪ Logo Blanc Officiel",
         url: "https://i.postimg.cc/4x659pDr/logo-small.png"
+    },
+    noel: {
+        name: "⚪ Logo Noe Officiel",
+        url: "https://i.postimg.cc/50Ty8Btq/Capture-d-ecran-2026-07-18-002918.png"
     }
 };
 
