@@ -1,4 +1,6 @@
-// team.js - Base de données officielle de LA 1337 RADIO
+// team.js - Base de données & Configurations officielles de LA 1337 RADIO
+
+// 1. CARTOGRAPHIE DES RÔLES
 const ROLE_MAP = {
     1:  "Directeur",
     2:  "Directeur Adjoint",
@@ -16,6 +18,40 @@ const ROLE_MAP = {
     14: "Membre extérieur"
 };
 
+// 2. BANNIÈRES THÉMATIQUES (Ajoute ou modifie ici, ça changera le texte sur le site !)
+const THEME_IMAGES = {
+    cyber: {
+        name: "🎧 Mode Radio Cyber (Par défaut - Officiel)",
+        url: "https://i.postimg.cc/63Y5PbDR/LA1337-Signatures-de-mail.png"
+    },
+    ete: {
+        name: "☀️ Mode Été (Fond Officiel)",
+        url: "https://i.postimg.cc/7YyJTjw9/LA1337-Signatures-de-mail(1).png"
+    },
+    noel: {
+        name: "🎄 Mode Noël (Fond Officiel)",
+        url: "https://i.postimg.cc/XqWNpSdT/LA1337-Signatures-de-mail(2).png"
+    },
+    nouvelan: {
+        name: "🥂 Nouvel An (Fond Officiel)",
+        url: "https://i.postimg.cc/4x0Jphpd/LA1337-Signatures-de-mail(3).png"
+    }
+    // EXEMPLE POUR AJOUTER UNE BANNIÈRE PLUS TARD :
+    // halloween: {
+    //     name: "🎃 Mode Halloween (Spécial)",
+    //     url: "https://lien_vers_ton_image.png"
+    // }
+};
+
+// 3. LOGOS DE LA RADIO
+const LOGO_IMAGES = { 
+    blanc: {
+        name: "⚪ Logo Blanc Officiel",
+        url: "https://i.postimg.cc/4x659pDr/logo-small.png"
+    }
+};
+
+// 4. BASE DE DONNÉES DE L'ÉQUIPE
 const TEAM_DATABASE = [
     { id: "archer",     name: "ARCHER Vincent",      mail: "vincent.a@la1337.com",      phone: "03 65 17 00 63", roles: [7] },
     { id: "bernard",    name: "BERNARD Elise",       mail: "elise.b@la1337.com",        phone: "03 65 17 00 63", roles: [7, 11, 13] },
