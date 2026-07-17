@@ -66,7 +66,38 @@ const LOGO_IMAGES = {
     }
 };
 
-// 4. BASE DE DONNÉES DE L'ÉQUIPE
+// 5. FONCTIONS DE STOCKAGE LOCALSTORAGE POUR LES BÉNÉVOLES PERSONNALISÉS
+function getCustomMembers() {
+    const stored = localStorage.getItem('customMembers');
+    return stored ? JSON.parse(stored) : [];
+}
+
+function addCustomMember(member) {
+    const customMembers = getCustomMembers();
+    // Vérifier si le bénévole existe déjà
+    const exists = customMembers.some(m => m.mail === member.mail);
+    if (!exists) {
+        customMembers.push(member);
+        localStorage.setItem('customMembers', JSON.stringify(customMembers));
+    }
+}
+
+function clearCustomMembers() {
+    localStorage.removeItem('customMembers');
+}
+
+// Intégrer les bénévoles personnalisés à la base de données au chargement
+function loadCustomMembers() {
+    const customMembers = getCustomMembers();
+    customMembers.forEach(member => {
+        // Éviter les doublons
+        if (!TEAM_DATABASE.find(m => m.mail === member.mail)) {
+            TEAM_DATABASE.push(member);
+        }
+    });
+}
+
+// 5. BASE DE DONNÉES DE L'ÉQUIPE
 const TEAM_DATABASE = [
     { id: "archer",     name: "ARCHER Vincent",      mail: "vincent.a@la1337.com",      phone: "03 65 17 00 63", roles: [7] },
     { id: "bernard",    name: "BERNARD Elise",       mail: "elise.b@la1337.com",        phone: "03 65 17 00 63", roles: [7, 11, 13] },

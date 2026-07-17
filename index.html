@@ -540,6 +540,7 @@
     }
 
     window.onload = function() {
+        loadCustomMembers();
         initRolesCheckboxes(); 
         initMemberSelector();
         initThemeSelector(); 
@@ -822,6 +823,9 @@
             phone: phone || '',
             roles: selectedRoles
         };
+
+        // Sauvegarder le bénévole en LocalStorage
+        addCustomMember(newMember);
 
         // Injecter les données dans la signature
         forceInjectMemberData(newMember);
