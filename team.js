@@ -18,29 +18,40 @@ const ROLE_MAP = {
     14: "Membre extérieur"
 };
 
-// 2. BANNIÈRES THÉMATIQUES (Ajoute ou modifie ici, ça changera le texte sur le site !)
+// 2. BANNIÈRES THÉMATIQUES AVEC COULEURS ADAPTÉES
 const THEME_IMAGES = {
     cyber: {
         name: "🎧 Mode Radio Cyber (Par défaut - Officiel)",
-        url: "https://i.postimg.cc/63Y5PbDR/LA1337-Signatures-de-mail.png"
+        url: "https://i.postimg.cc/63Y5PbDR/LA1337-Signatures-de-mail.png",
+        textColor: "#ff3366",       // Rose/Rouge cyber d'origine
+        roleColor: "#e1e1e6",       // Gris clair
+        liveBgColor: "#ff3366",     // Fond du Live On
+        liveTxtColor: "#ffffff"     // Texte du Live On
     },
     ete: {
         name: "☀️ Mode Été (Fond Officiel)",
-        url: "https://i.postimg.cc/7YyJTjw9/LA1337-Signatures-de-mail(1).png"
+        url: "https://i.postimg.cc/7YyJTjw9/LA1337-Signatures-de-mail(1).png",
+        textColor: "#ff3366",       // À ajuster si besoin
+        roleColor: "#e1e1e6",
+        liveBgColor: "#ff3366",
+        liveTxtColor: "#ffffff"
     },
     noel: {
         name: "🎄 Mode Noël (Fond Officiel)",
-        url: "https://i.postimg.cc/XqWNpSdT/LA1337-Signatures-de-mail(2).png"
+        url: "https://i.postimg.cc/XqWNpSdT/LA1337-Signatures-de-mail(2).png",
+        textColor: "#ffffff",       // Blanc pour que ça ressorte sur le fond Noël
+        roleColor: "#f0a5a5",       // Rose/Rouge très clair pour le rôle
+        liveBgColor: "#ffffff",     // Badge blanc
+        liveTxtColor: "#b71c1c"     // Écrit en rouge foncé à l'intérieur
     },
     nouvelan: {
         name: "🥂 Nouvel An (Fond Officiel)",
-        url: "https://i.postimg.cc/4x0Jphpd/LA1337-Signatures-de-mail(3).png"
+        url: "https://i.postimg.cc/4x0Jphpd/LA1337-Signatures-de-mail(3).png",
+        textColor: "#dfb76c",       // Doré pour le Nouvel An !
+        roleColor: "#ffffff",       // Blanc pour le rôle
+        liveBgColor: "#dfb76c",     // Badge doré
+        liveTxtColor: "#000000"     // Écrit en noir à l'intérieur
     }
-    // EXEMPLE POUR AJOUTER UNE BANNIÈRE PLUS TARD :
-    // halloween: {
-    //     name: "🎃 Mode Halloween (Spécial)",
-    //     url: "https://lien_vers_ton_image.png"
-    // }
 };
 
 // 3. LOGOS DE LA RADIO
