@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Générateur de Signatures - La 1337</title>
-    <!-- On charge html2canvas et jszip pour les exports -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
@@ -32,112 +31,19 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            overflow-x: hidden;
-        }
-
-        /* --- ÉCRAN DE SÉLECTION INITIAL --- */
-        #selector-screen {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
             padding: 20px;
-            z-index: 10;
         }
 
-        #selector-screen h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            letter-spacing: 2px;
-        }
-
-        #selector-screen p {
-            color: var(--text-muted);
-            margin-bottom: 40px;
-            font-size: 1.1rem;
-        }
-
-        .choices-container {
-            display: flex;
-            gap: 30px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .choice-card {
-            background: var(--bg-card);
-            border: 2px solid var(--border);
-            border-radius: 12px;
-            padding: 40px 30px;
-            width: 320px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .choice-card:hover {
-            border-color: var(--accent);
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 255, 102, 0.1);
-        }
-
-        .choice-card h2 {
-            font-size: 1.6rem;
-            margin-bottom: 15px;
-            color: var(--text);
-        }
-
-        .choice-card p {
-            font-size: 0.95rem;
-            color: var(--text-muted);
-            margin-bottom: 0;
-            line-height: 1.5;
-        }
-
-        /* --- INTERFACE PRINCIPALE (Masquée au début) --- */
-        #app-container {
-            display: none;
+        .container {
             width: 100%;
-            max-width: 1200px;
-            padding: 40px 20px;
-            flex-direction: column;
-            gap: 30px;
-        }
-
-        .header-nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 15px;
-        }
-
-        .btn-back {
-            background: transparent;
-            border: 1px solid var(--border);
-            color: var(--text-muted);
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-back:hover {
-            color: var(--text);
-            border-color: var(--text);
-        }
-
-        .main-content {
+            max-width: 1100px;
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 30px;
         }
 
         @media (max-width: 900px) {
-            .main-content { grid-template-columns: 1fr; }
+            .container { grid-template-columns: 1fr; }
         }
 
         .panel {
@@ -145,9 +51,11 @@
             border: 1px solid var(--border);
             border-radius: 12px;
             padding: 25px;
+            display: flex;
+            flex-direction: column;
         }
 
-        .panel h3 {
+        h2 {
             margin-bottom: 20px;
             font-size: 1.2rem;
             border-left: 3px solid var(--accent);
@@ -165,7 +73,7 @@
             font-size: 0.9rem;
         }
 
-        input, select {
+        select {
             width: 100%;
             background: var(--bg-main);
             border: 1px solid var(--border);
@@ -174,14 +82,14 @@
             color: var(--text);
             font-size: 1rem;
             outline: none;
+            cursor: pointer;
         }
 
-        input:focus, select:focus {
+        select:focus {
             border-color: var(--accent);
         }
 
-        .btn-action {
-            width: 100%;
+        .btn {
             background: var(--accent);
             color: #000000;
             border: none;
@@ -192,18 +100,23 @@
             cursor: pointer;
             transition: opacity 0.2s;
             margin-top: 10px;
+            width: 100%;
         }
 
-        .btn-action:hover { opacity: 0.9; }
-        .btn-secondary {
+        .btn:hover { opacity: 0.9; }
+
+        .btn-zip {
             background: transparent;
             border: 1px solid var(--border);
             color: var(--text);
-            margin-top: 10px;
+            margin-top: 12px;
         }
-        .btn-secondary:hover { background: rgba(255,255,255,0.05); }
 
-        /* --- PRÉVISUALISATION DE LA SIGNATURE --- */
+        .btn-zip:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* zone prévisualisation */
         .preview-box {
             display: flex;
             align-items: center;
@@ -213,29 +126,28 @@
             padding: 20px;
             border-radius: 8px;
             min-height: 200px;
-            margin-bottom: 20px;
-            overflow: hidden;
+            margin-bottom: 15px;
         }
 
-        /* Structure Signature V1 & V2 */
+        /* STRUCTURE REALISTE DE LA SIGNATURE (600x150) */
         .signature-container {
             width: 600px;
             height: 150px;
-            position: relative;
             background: #000000;
             color: #ffffff;
             display: flex;
             align-items: center;
+            overflow: hidden;
             box-sizing: border-box;
         }
 
-        /* Style V1 - Bannière classique */
-        .sig-v1 .sig-banner {
+        .sig-banner {
             width: 250px;
             height: 150px;
             object-fit: cover;
         }
-        .sig-v1 .sig-content {
+
+        .sig-content {
             flex: 1;
             padding: 20px;
             display: flex;
@@ -243,27 +155,6 @@
             justify-content: center;
         }
 
-        /* Style V2 - Carte Blanche */
-        .sig-v2 {
-            justify-content: space-between;
-            padding: 0 40px;
-        }
-        .sig-v2 .sig-content {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-        .sig-v2 .sig-logo-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .sig-v2 .sig-logo {
-            height: 95px; /* Logo agrandi */
-            width: auto;
-        }
-
-        /* Textes communs */
         .sig-name {
             font-size: 22px;
             font-weight: 800;
@@ -271,6 +162,7 @@
             margin-bottom: 4px;
             letter-spacing: 1px;
         }
+
         .sig-role {
             font-size: 13px;
             color: var(--accent);
@@ -279,12 +171,14 @@
             margin-bottom: 12px;
             letter-spacing: 0.5px;
         }
+
         .sig-meta {
             font-size: 11px;
             color: #a0a0aa;
             line-height: 1.4;
         }
 
+        /* Barre de chargement ZIP */
         #progress-bar {
             display: none;
             width: 100%;
@@ -294,6 +188,7 @@
             margin-top: 15px;
             overflow: hidden;
         }
+
         #progress-fill {
             background: var(--accent);
             width: 0%;
@@ -304,71 +199,45 @@
 </head>
 <body>
 
-    <!-- 1. ÉCRAN DE SÉLECTION -->
-    <div id="selector-screen">
-        <h1>LA 1337</h1>
-        <p>Sélectionnez le style de signature à générer</p>
-        <div class="choices-container">
-            <div class="choice-card" onclick="startApp(1)">
-                <h2>Version 1</h2>
-                <p>Modèle classique avec bannières thématiques interchangeables (Cyber, Été, Halloween, Noël...).</p>
+    <div class="container">
+        <!-- PANNEAU DE CONFIGURATION -->
+        <div class="panel">
+            <h2>Générateur La 1337 (V1)</h2>
+            
+            <div class="form-group">
+                <label for="member-select">Sélectionner le membre de l'équipe</label>
+                <select id="member-select" onchange="updateSignature()"></select>
             </div>
-            <div class="choice-card" onclick="startApp(2)">
-                <h2>Version 2</h2>
-                <p>Concept épuré "Carte Blanche". Focus typographique fort et logo de la radio agrandi au maximum.</p>
+
+            <div class="form-group">
+                <label for="banner-select">Style de la bannière gauche</label>
+                <select id="banner-select" onchange="updateSignature()">
+                    <option value="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400&q=80">Cyberpunk (Par défaut)</option>
+                    <option value="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&q=80">Saison d'Été</option>
+                    <option value="https://images.unsplash.com/photo-1508349682734-1828d7165187?w=400&q=80">Halloween</option>
+                    <option value="https://images.unsplash.com/photo-1544816155-12df9643f363?w=400&q=80">Fêtes de Noël</option>
+                </select>
             </div>
+
+            <button class="btn" onclick="downloadSignature()">Télécharger la signature PNG</button>
+            <button class="btn btn-zip" onclick="generateAllSignaturesZip()">Télécharger le Pack ZIP complet</button>
+            
+            <div id="progress-bar"><div id="progress-fill"></div></div>
         </div>
-    </div>
 
-    <!-- 2. INTERFACE APPLICATION -->
-    <div id="app-container">
-        <div class="header-nav">
-            <h2 id="app-title">Générateur</h2>
-            <button class="btn-back" onclick="resetToSelector()">← Changer de version</button>
-        </div>
-
-        <div class="main-content">
-            <!-- Panneau de gauche : Formulaire -->
-            <div class="panel">
-                <h3>Configuration</h3>
-                
-                <div class="form-group" id="member-group">
-                    <label for="member-select">Sélectionner un membre</label>
-                    <select id="member-select" onchange="updatePreview()">
-                        <!-- Rempli en JS -->
-                    </select>
-                </div>
-
-                <div class="form-group" id="banner-group">
-                    <label for="banner-select">Thème de la bannière</label>
-                    <select id="banner-select" onchange="updatePreview()">
-                        <option value="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400&q=80">Cyberpunk (Par défaut)</option>
-                        <option value="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400&q=80">Saison d'Été</option>
-                        <option value="https://images.unsplash.com/photo-1508349682734-1828d7165187?w=400&q=80">Halloween</option>
-                        <option value="https://images.unsplash.com/photo-1544816155-12df9643f363?w=400&q=80">Fêtes de Noël</option>
-                    </select>
-                </div>
-
-                <button class="btn-action" onclick="downloadSingle()">Télécharger cette signature</button>
-                <button class="btn-action btn-secondary" onclick="downloadAllZip()">Générer le Pack ZIP global</button>
-                
-                <div id="progress-bar"><div id="progress-fill"></div></div>
+        <!-- PANNEAU DE PREVISUALISATION -->
+        <div class="panel">
+            <h2>Prévisualisation en direct</h2>
+            <div class="preview-box">
+                <!-- C'est ce bloc exact qui sera pris en photo -->
+                <div id="signature-element"></div>
             </div>
-
-            <!-- Panneau de droite : Rendu visuel -->
-            <div class="panel">
-                <h3>Prévisualisation</h3>
-                <div class="preview-box">
-                    <!-- Zone capturée par html2canvas -->
-                    <div id="signature-element"></div>
-                </div>
-                <p style="font-size:0.85rem; color:var(--text-muted); text-align:center;">Le rendu final respectera les dimensions exactes (600x150px).</p>
-            </div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); text-align: center;">Taille réelle de l'export : 600px x 150px</p>
         </div>
     </div>
 
     <script>
-        // LISTE DE L'ÉQUIPE (Centralisée pour faciliter les futures mises à jour)
+        // Ta base de données de l'équipe
         const teamMembers = [
             { name: "Maxime", role: "Directeur d'Antenne", mail: "maxime@la1337.fr", phone: "06 00 00 00 01" },
             { name: "Lucas", role: "Animateur - Drive", mail: "lucas@la1337.fr", phone: "06 00 00 00 02" },
@@ -376,103 +245,61 @@
             { name: "Thomas", role: "Technicien Réseau", mail: "thomas@la1337.fr", phone: "06 00 00 00 04" }
         ];
 
-        // URL du logo transparent officiel de la radio
-        const logoUrl = "https://i.postimg.cc/m2FdM6v8/logo-la1337.png";
+        // Remplissage du sélecteur au démarrage
+        const select = document.getElementById('member-select');
+        teamMembers.forEach((member, index) => {
+            const option = document.createElement('option');
+            option.value = index;
+            option.textContent = `${member.name} (${member.role})`;
+            select.appendChild(option);
+        });
 
-        let currentVersion = 1;
-
-        // Initialisation de la liste déroulante au chargement
-        function initDropdown() {
-            const select = document.getElementById('member-select');
-            select.innerHTML = teamMembers.map((m, i) => `<option value="${i}">${m.name} (${m.role})</option>`).join('');
-        }
-
-        // Lancement de la version choisie
-        function startApp(version) {
-            currentVersion = version;
-            document.getElementById('selector-screen').style.display = 'none';
-            document.getElementById('app-container').style.display = 'flex';
-            
-            // Ajustement des libellés et options selon le mode
-            if(version === 1) {
-                document.getElementById('app-title').innerText = "La 1337 — Version 1 (Bannières)";
-                document.getElementById('banner-group').style.display = 'block';
-            } else {
-                document.getElementById('app-title').innerText = "La 1337 — Version 2 (Carte Blanche)";
-                document.getElementById('banner-group').style.display = 'none';
-            }
-            initDropdown();
-            updatePreview();
-        }
-
-        // Retour à l'écran de sélection
-        function resetToSelector() {
-            document.getElementById('app-container').style.display = 'none';
-            document.getElementById('selector-screen').style.display = 'flex';
-        }
-
-        // Met à jour la zone de dessin HTML de la signature
-        function updatePreview() {
+        // Fonction pour mettre à jour la prévisualisation
+        function updateSignature() {
             const memberIndex = document.getElementById('member-select').value;
             const member = teamMembers[memberIndex];
             const bannerUrl = document.getElementById('banner-select').value;
             const container = document.getElementById('signature-element');
 
-            if(currentVersion === 1) {
-                // Rendu HTML Structure Version 1
-                container.innerHTML = `
-                    <div class="signature-container sig-v1">
-                        <img class="sig-banner" src="${bannerUrl}" alt="banner" crossOrigin="anonymous">
-                        <div class="sig-content">
-                            <div class="sig-name">${member.name}</div>
-                            <div class="sig-role">${member.role}</div>
-                            <div class="sig-meta">
-                                🌐 www.la1337.fr<br>
-                                ✉️ ${member.mail}<br>
-                                📞 ${member.phone}
-                            </div>
+            container.innerHTML = `
+                <div class="signature-container">
+                    <img class="sig-banner" src="${bannerUrl}" alt="banner" crossOrigin="anonymous">
+                    <div class="sig-content">
+                        <div class="sig-name">${member.name}</div>
+                        <div class="sig-role">${member.role}</div>
+                        <div class="sig-meta">
+                            🌐 www.la1337.fr<br>
+                            ✉️ ${member.mail}<br>
+                            📞 ${member.phone}
                         </div>
                     </div>
-                `;
-            } else {
-                // Rendu HTML Structure Version 2 (Carte Blanche)
-                container.innerHTML = `
-                    <div class="signature-container sig-v2">
-                        <div class="sig-content">
-                            <div class="sig-name">${member.name}</div>
-                            <div class="sig-role">${member.role}</div>
-                            <div class="sig-meta">
-                                🌐 www.la1337.fr &nbsp;|&nbsp; ✉️ ${member.mail}<br>
-                                📞 ${member.phone}
-                            </div>
-                        </div>
-                        <div class="sig-logo-container">
-                            <img class="sig-logo" src="${logoUrl}" alt="La 1337" crossOrigin="anonymous">
-                        </div>
-                    </div>
-                `;
-            }
+                </div>
+            `;
         }
 
-        // Export unitaire en PNG
-        function downloadSingle() {
-            const element = document.getElementById('signature-element').querySelector('.signature-container');
-            const memberName = teamMembers[document.getElementById('member-select').value].name.toLowerCase();
-            
-            html2canvas(element, { width: 600, height: 150, scale: 2, useCORS: true }).then(canvas => {
+        // Premier affichage automatique
+        updateSignature();
+
+        // Téléchargement unitaire
+        function downloadSignature() {
+            const container = document.getElementById('signature-element').querySelector('.signature-container');
+            const currentMember = teamMembers[document.getElementById('member-select').value];
+            const cleanName = currentMember.name.toLowerCase();
+
+            html2canvas(container, { width: 600, height: 150, scale: 2, useCORS: true }).then(canvas => {
                 const link = document.createElement('a');
-                link.download = `signature-${memberName}-v${currentVersion}.png`;
+                link.download = `signature-${cleanName}.png`;
                 link.href = canvas.toDataURL('image/png');
                 link.click();
             });
         }
 
-        // Export global de toute l'équipe dans un ZIP
-        function downloadAllZip() {
+        // Génération automatique du ZIP global
+        function generateAllSignaturesZip() {
             const zip = new JSZip();
             const progressBar = document.getElementById('progress-bar');
             const progressFill = document.getElementById('progress-fill');
-            const select = document.getElementById('member-select');
+            const selectMenu = document.getElementById('member-select');
             
             progressBar.style.display = 'block';
             progressFill.style.width = '0%';
@@ -481,37 +308,33 @@
 
             function processNext() {
                 if (index >= teamMembers.length) {
-                    // Fin du traitement : génération du fichier ZIP
-                    zip.generateAsync({ type: 'blob' }).then(content => {
+                    zip.generateAsync({type: 'blob'}).then(function(content) {
                         const link = document.createElement('a');
-                        link.download = `signatures-la1337-v${currentVersion}.zip`;
+                        link.download = "signatures-equipe-la1337.zip";
                         link.href = URL.createObjectURL(content);
                         link.click();
                         progressBar.style.display = 'none';
-                        updatePreview(); // Remet la prévisualisation sur le bon membre
+                        updateSignature(); // Remet le visuel propre
                     });
                     return;
                 }
 
-                // On force le selecteur et la prévisualisation sur l'index en cours
-                select.value = index;
-                updatePreview();
+                selectMenu.value = index;
+                updateSignature();
 
-                // Petit délai pour laisser les images se charger proprement dans le DOM
-                setTimeout(() => {
-                    const element = document.getElementById('signature-element').querySelector('.signature-container');
-                    html2canvas(element, { width: 600, height: 150, scale: 2, useCORS: true }).then(canvas => {
-                        const cleanName = teamMembers[index].name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-                        const dataUrl = canvas.toDataURL('image/png');
-                        const base64Data = dataUrl.split(',')[1];
-                        
+                setTimeout(function() {
+                    const container = document.getElementById('signature-element').querySelector('.signature-container');
+                    html2canvas(container, { width: 600, height: 150, scale: 2, useCORS: true }).then(function(canvas) {
+                        var cleanName = teamMembers[index].name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-');
+                        var dataUrl = canvas.toDataURL('image/png');
+                        var base64Data = dataUrl.split(',')[1];
+
                         zip.file(`signature-${cleanName}.png`, base64Data, { base64: true });
-                        
                         index++;
-                        progressFill.style.width = `${(index / teamMembers.length) * 100}%`;
+                        progressFill.style.width = (index / teamMembers.length) * 100 + '%';
                         processNext();
                     });
-                }, 150);
+                }, 100);
             }
 
             processNext();
