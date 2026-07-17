@@ -38,6 +38,5 @@ const TEAM_DATABASE = [
     { id: "stef",       name: "STEF Laura",          mail: "laura.s@la1337.com",      phone: "03 65 17 00 63", roles: [12] },
     { id: "vankets",    name: "VAN KETS Guillaume",  mail: "guillaume.v@la1337.com",  phone: "03 65 17 00 63", roles: [1, 7] },
     { id: "vernet",     name: "VERNET Jeremy",       mail: "jeremy.v@la1337.com",     phone: "03 65 17 00 63", roles: [7] },
-    { id: "wagne",      name: "WAGNE Coumba",        mail: "coumba.w@la1337.com",     phone: "03 65 17 00 63", roles: [7, 11] },
-    { id: "test",      name: "TEST",        mail: "test@la1337.com",     phone: "03 65 17 00 63", roles: [7, 11] }
+    { id: "wagne",      name: "WAGNE Coumba",        mail: "coumba.w@la1337.com",     phone: "03 65 17 00 63", roles: [7, 11] }
 ];
