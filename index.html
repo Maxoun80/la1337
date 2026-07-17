@@ -180,6 +180,123 @@
         .btn-bulk:hover {
             box-shadow: 0 6px 20px rgba(19, 153, 117, 0.4);
         }
+
+        /* MODAL STYLES */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal-content {
+            background: #1a1a22;
+            border: 2px solid #ff3366;
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(255, 51, 102, 0.3);
+        }
+        .modal-header {
+            color: #ff3366;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .modal-field {
+            margin-bottom: 20px;
+        }
+        .modal-field label {
+            display: block;
+            margin-bottom: 8px;
+            color: #ff3366;
+            font-size: 11px;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        .modal-field input {
+            width: 100%;
+            box-sizing: border-box;
+            background: #0d0d12;
+            border: 1px solid #333344;
+            color: #fff;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .modal-field input:focus {
+            border-color: #ff3366;
+            outline: none;
+            box-shadow: 0 0 8px rgba(255, 51, 102, 0.2);
+        }
+        .modal-roles {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            background: #0d0d12;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #333344;
+            margin-bottom: 20px;
+        }
+        .modal-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #e1e1e6;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .modal-checkbox input {
+            width: auto;
+            accent-color: #ff3366;
+            cursor: pointer;
+        }
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+        }
+        .modal-btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-size: 13px;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+        }
+        .modal-btn-confirm {
+            background: linear-gradient(135deg, #ff3366, #ff66cc);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(255, 51, 102, 0.3);
+        }
+        .modal-btn-confirm:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 51, 102, 0.4);
+        }
+        .modal-btn-cancel {
+            background: #333344;
+            color: #aaa;
+        }
+        .modal-btn-cancel:hover {
+            background: #444455;
+            color: #ddd;
+        }
     </style>
 </head>
 <body>
@@ -286,6 +403,41 @@
     </div>
 </div>
 
+<!-- MODAL NOUVEAU MEMBRE -->
+<div id="modalNewMember" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">✍️ Nouveau Membre</div>
+        
+        <div class="modal-field">
+            <label>Nom Prénom</label>
+            <input type="text" id="modalName" placeholder="Ex: MARTIN Lucas">
+        </div>
+        
+        <div class="modal-field">
+            <label>Email Radio</label>
+            <input type="email" id="modalMail" placeholder="lucas@la1337.com">
+            <div class="email-error" id="modalEmailError">⚠️ Email invalide</div>
+        </div>
+        
+        <div class="modal-field">
+            <label>Numéro de Téléphone</label>
+            <input type="text" id="modalPhone" placeholder="06 00 00 00 00">
+        </div>
+        
+        <div class="modal-field">
+            <label>Rôles (plusieurs choix possibles)</label>
+            <div class="modal-roles" id="modalRolesContainer">
+                <!-- Rempli automatiquement par JS -->
+            </div>
+        </div>
+        
+        <div class="modal-actions">
+            <button class="modal-btn modal-btn-confirm" onclick="confirmNewMember()">✓ Valider</button>
+            <button class="modal-btn modal-btn-cancel" onclick="closeModalNewMember()">✕ Annuler</button>
+        </div>
+    </div>
+</div>
+
 <script src="team.js"></script>
 
 <script>
@@ -327,7 +479,6 @@
         var optCustom = document.createElement('option');
         optCustom.value = 'custom';
         optCustom.innerText = '✍️ [NOUVEAU MEMBRE - Saisie libre]';
-        optCustom.selected = true; 
         select.appendChild(optCustom);
         TEAM_DATABASE.forEach(function(member) {
             var opt = document.createElement('option');
@@ -424,16 +575,8 @@
         var customZone = document.getElementById('customMemberZone');
         var checkboxes = document.getElementsByName('roleCheck');
         
-        document.getElementById('chkCustomRole').checked = false;
-        document.getElementById('customRoleInputZone').style.display = 'none';
-        document.getElementById('inCustomRoleText').value = '';
-
         if (choice === 'custom') {
-            customZone.style.display = 'grid';
-            document.getElementById('inCustomName').value = '';
-            document.getElementById('inCustomMail').value = '';
-            document.getElementById('inCustomPhone').value = '';
-            for (var i = 0; i < checkboxes.length; i++) { checkboxes[i].checked = false; }
+            openModalNewMember();
         } else {
             customZone.style.display = 'none';
             var data = TEAM_DATABASE.find(m => m.id === choice);
@@ -598,6 +741,105 @@
 
         processNext();
     }
+
+    // ===== FONCTIONS MODAL NOUVEAU MEMBRE =====
+    function initModalRoles() {
+        const container = document.getElementById('modalRolesContainer');
+        container.innerHTML = '';
+        for (const [code, name] of Object.entries(ROLE_MAP)) {
+            const label = document.createElement('label');
+            label.className = 'modal-checkbox';
+            label.innerHTML = `<input type="checkbox" name="modalRole" value="${code}"> ${name}`;
+            container.appendChild(label);
+        }
+    }
+
+    function openModalNewMember() {
+        initModalRoles();
+        document.getElementById('modalName').value = '';
+        document.getElementById('modalMail').value = '';
+        document.getElementById('modalPhone').value = '';
+        document.getElementById('modalEmailError').style.display = 'none';
+        const checkboxes = document.querySelectorAll('input[name="modalRole"]');
+        checkboxes.forEach(cb => cb.checked = false);
+        document.getElementById('modalNewMember').classList.add('active');
+    }
+
+    function closeModalNewMember() {
+        document.getElementById('modalNewMember').classList.remove('active');
+        // Revenir au premier membre de la liste
+        document.getElementById('inMemberSelect').value = TEAM_DATABASE[0].id;
+        handleMemberChange();
+    }
+
+    function confirmNewMember() {
+        const name = document.getElementById('modalName').value.trim();
+        const mail = document.getElementById('modalMail').value.trim();
+        const phone = document.getElementById('modalPhone').value.trim();
+        const emailError = document.getElementById('modalEmailError');
+        const mailInput = document.getElementById('modalMail');
+
+        // Validation d'email
+        if (mail && !isValidEmail(mail)) {
+            emailError.style.display = 'block';
+            mailInput.classList.add('invalid-email');
+            return;
+        }
+        emailError.style.display = 'none';
+        mailInput.classList.remove('invalid-email');
+
+        // Validation du nom
+        if (!name) {
+            alert('❌ Veuillez entrer un nom');
+            return;
+        }
+
+        // Récupérer les rôles sélectionnés
+        const checkboxes = document.querySelectorAll('input[name="modalRole"]');
+        const selectedRoles = [];
+        checkboxes.forEach(cb => {
+            if (cb.checked) {
+                selectedRoles.push(parseInt(cb.value));
+            }
+        });
+
+        // Créer l'objet membre
+        const newMember = {
+            name: name,
+            mail: mail || 'contact@la1337.com',
+            phone: phone || '',
+            roles: selectedRoles
+        };
+
+        // Injecter les données dans la signature
+        forceInjectMemberData(newMember);
+
+        // Fermer la modal
+        document.getElementById('modalNewMember').classList.remove('active');
+        
+        // Mettre à jour la sélection du formulaire
+        document.getElementById('inMemberSelect').value = 'custom';
+    }
+
+    // Initialiser les rôles de la modal au chargement
+    window.addEventListener('DOMContentLoaded', function() {
+        initModalRoles();
+    });
+
+    // Fermer la modal en cliquant en dehors
+    document.getElementById('modalNewMember').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeModalNewMember();
+        }
+    });
+
+    // Valider avec Entrée
+    document.addEventListener('keydown', function(e) {
+        const modal = document.getElementById('modalNewMember');
+        if (modal.classList.contains('active') && e.key === 'Enter') {
+            confirmNewMember();
+        }
+    });
 </script>
 
 </body>
