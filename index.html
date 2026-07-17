@@ -2,6 +2,515 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <title>LA 1337 - Générateur Signature Mail</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #0f0f12;
+            color: #fff;
+            text-align: center;
+            padding: 40px 20px;
+            margin: 0;
+        }
+        .wrapper {
+            max-width: 850px;
+            margin: 0 auto;
+            background: #1a1a22;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+            border: 1px solid #2a2a35;
+        }
+        h1 {
+            color: #ff3366;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin: 0 0 5px 0;
+            font-size: 28px;
+        }
+        .subtitle {
+            color: #aaa;
+            font-size: 14px;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .form-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+            text-align: left;
+        }
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .full-width {
+            grid-column: span 2;
+        }
+        label {
+            font-size: 11px;
+            color: #ff3366;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        input, select {
+            background: #0d0d12;
+            border: 1px solid #333344;
+            color: #fff;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        input:focus, select:focus {
+            border-color: #ff3366;
+            outline: none;
+            box-shadow: 0 0 8px rgba(255, 51, 102, 0.2);
+        }
+        
+        .custom-member-zone {
+            display: none;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            background: #20202b;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #ff3366;
+            margin-top: 5px;
+        }
+
+        .roles-checkbox-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            background: #0d0d12;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #333344;
+        }
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #e1e1e6;
+            font-size: 13px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .checkbox-item input {
+            cursor: pointer;
+            accent-color: #ff3366;
+            width: 16px;
+            height: 16px;
+        }
+        .checkbox-item:hover {
+            color: #fff;
+        }
+
+        .preview-header {
+            text-align: left;
+            font-weight: bold;
+            color: #888;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 1px;
+        }
+        .preview-area {
+            background: #252530;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border: 1px dashed #444455;
+            display: flex;
+            justify-content: center;
+        }
+        .actions-container {
+            display: flex;
+            gap: 15px;
+        }
+        .btn-download {
+            background: linear-gradient(135deg, #ff3366, #ff66cc);
+            color: #fff;
+            border: none;
+            padding: 16px 40px;
+            border-radius: 30px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 15px;
+            box-shadow: 0 4px 15px rgba(255, 51, 102, 0.3);
+            transition: all 0.2s;
+            flex: 1;
+        }
+        .btn-download:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 51, 102, 0.4);
+        }
+        .btn-bulk {
+            background: linear-gradient(135deg, #33cc99, #139975);
+            box-shadow: 0 4px 15px rgba(19, 153, 117, 0.3);
+        }
+        .btn-bulk:hover {
+            box-shadow: 0 6px 20px rgba(19, 153, 117, 0.4);
+        }
+    </style>
+</head>
+<body>
+
+<div class="wrapper">
+    <h1>🎙️ LA 1337 RADIO 🎙️</h1>
+    <div class="subtitle">Générateur Signature Mail</div>
+    
+    <div class="form-container">
+        
+        <!-- SÉLECTEUR DE MEMBRES -->
+        <div class="input-group">
+            <label>👤 Sélectionner le Membre de l'équipe</label>
+            <select id="inMemberSelect" onchange="handleMemberChange()">
+                <!-- Rempli automatiquement par le JavaScript -->
+            </select>
+        </div>
+        
+        <div class="input-group">
+            <label>🎭 Sélectionner la Bannière Thématique</label>
+            <select id="inPresetTheme" onchange="applyPresetTheme()">
+                <option value="cyber">🎧 Mode Radio Cyber (Par défaut - Officiel)</option>
+                <option value="ete">☀️ Mode Été (Fond Officiel)</option>
+                <option value="noel">🎄 Mode Noël (Fond Officiel)</option>
+                <option value="nouvelan">🥂 Nouvel An (Fond Officiel)</option>
+            </select>
+        </div>
+
+        <!-- ZONE DE SAISIE LIBRE -->
+        <div id="customMemberZone" class="input-group full-width custom-member-zone">
+            <div>
+                <label style="color: #fff;">Nom Prénom du nouveau</label>
+                <input type="text" id="inCustomName" placeholder="Ex: MARTIN Lucas" style="width:100%; box-sizing:border-box;" oninput="updateSig()">
+            </div>
+            <div>
+                <label style="color: #fff;">Email Radio</label>
+                <input type="email" id="inCustomMail" placeholder="lucas@la1337.com" style="width:100%; box-sizing:border-box;" oninput="updateSig()">
+            </div>
+            <div style="grid-column: span 2;">
+                <label style="color: #fff;">Numéro de Téléphone</label>
+                <input type="text" id="inCustomPhone" placeholder="06 00 00 00 00" style="width:100%; box-sizing:border-box;" oninput="updateSig()">
+            </div>
+        </div>
+
+        <div class="input-group full-width">
+            <label>💿 Sélectionner le Logo</label>
+            <select id="inPresetLogo" onchange="applyPresetLogo()">
+                <option value="blanc">⚪ Logo Blanc Officiel</option>
+            </select>
+        </div>
+
+        <!-- CASES À COCHER DES RÔLES -->
+        <div class="input-group full-width">
+            <label>💼 Choisir ton ou tes rôles (Plusieurs choix possibles)</label>
+            <div id="rolesContainer" class="roles-checkbox-container">
+                <!-- Rempli automatiquement par le script -->
+            </div>
+        </div>
+    </div>
+
+    <div class="preview-header">Aperçu de la signature :</div>
+    
+    <div class="preview-area">
+        <div id="sigPreview" style="width: 650px; height: 135px; background-size: cover; background-position: center; border: 1px solid #22222b; border-radius: 8px; overflow: hidden; padding: 20px 25px; box-sizing: border-box; position: relative;">
+            <table cellpadding="0" cellspacing="0" style="width: 100%; height: 100%; border-collapse: collapse; text-align: left; font-family: 'Segoe UI', Arial, sans-serif; color: #ffffff; position: relative; z-index: 2;">
+                <tr>
+                    <td style="width: 110px; vertical-align: middle; padding-right: 15px; border-right: 3px solid #ff3366;">
+                        <img id="logoPreview" crossorigin="anonymous" src="" alt="LA 1337" style="width: 95px; height: auto; display: block; filter: drop-shadow(0px 2px 5px rgba(0,0,0,0.5));">
+                    </td>
+                    <td style="vertical-align: middle; padding-left: 20px;">
+                        <div id="outName" style="font-size: 21px; font-weight: bold; color: #ff3366; margin-bottom: 1px; letter-spacing: 0.5px; text-shadow: 2px 2px 4px rgba(0,0,0,0.9);">Prénom NOM</div>
+                        <div id="outRole" style="font-size: 13px; font-weight: bold; color: #e1e1e6; font-style: italic; margin-bottom: 15px; text-shadow: 2px 2px 5px rgba(0,0,0,1), -1px -1px 2px rgba(0,0,0,1);">Votre Rôle / Poste</div>
+                        <div style="font-size: 11px; color: #ffffff; text-shadow: 2px 2px 4px rgba(0,0,0,1), -1px -1px 2px rgba(0,0,0,1); display: flex; gap: 15px;">
+                            <span><strong style="color: #ff3366; text-shadow: none;">📧</strong> <span id="outMail">contact@la1337.com</span></span>
+                            <span id="outPhoneContainer"><strong style="color: #ff3366; text-shadow: none;">📞</strong> <span id="outPhone">03 65 17 00 63</span></span>
+                        </div>
+                    </td>
+                    <td style="vertical-align: middle; width: 180px; text-align: right;">
+                        <div style="display: inline-block; background: #ff3366; color: #ffffff; font-size: 9px; font-weight: 900; padding: 4px 10px; border-radius: 4px; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.5);">🎙️ LIVE ON</div>
+                        <div style="font-size: 14px; font-weight: 900; color: #ff3366; margin-bottom: 15px; letter-spacing: 0.5px; text-shadow: 2px 2px 4px rgba(0,0,0,0.9);">WWW.LA1337.COM</div>
+                        <div style="display: block; text-align: right;">
+                            <div style="display: inline-flex; align-items: center; margin-left: 10px; font-size: 10px; font-weight: bold; color: #ffffff; text-shadow: 2px 2px 4px rgba(0,0,0,1);">
+                                <svg style="width: 11px; height: 11px; fill: #ffffff; margin-right: 4px;" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.051.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                                <span>@LA1337RADIO</span>
+                            </div>
+                            <div style="display: inline-flex; align-items: center; margin-left: 10px; font-size: 10px; font-weight: bold; color: #ffffff; text-shadow: 2px 2px 4px rgba(0,0,0,1);">
+                                <svg style="width: 11px; height: 11px; fill: #ffffff; margin-right: 4px;" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                                <span>@LA1337RADIO</span>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <div class="actions-container">
+        <button class="btn-download" onclick="generateAndDownloadImage()">📸 Télécharger la Signature (PNG)</button>
+        <button class="btn-download btn-bulk" id="bulkBtn" onclick="generateAllSignaturesZip()">⚡ Générer TOUTES les signatures de l'équipe (ZIP)</button>
+    </div>
+</div>
+
+<script>
+    const ROLE_MAP = {
+        1:  "Directeur",
+        2:  "Directeur Adjoint",
+        3:  "Président",
+        4:  "Vice-Président",
+        5:  "Secrétaire",
+        6:  "Trésorière",
+        7:  "Animateur",
+        8:  "Programmation",
+        9:  "Technique",
+        10: "RH",
+        11: "Événementiel",
+        12: "Communication",
+        13: "Journaliste",
+        14: "Membre extérieur"
+    };
+
+    // Base de données de l'équipe (Ingrid replacée dans l'ordre alphabétique)
+    const TEAM_DATABASE = [
+        { id: "archer",     name: "ARCHER Vincent",      mail: "vincent.a@la1337.com",      phone: "03 65 17 00 63", roles: [7] },
+        { id: "bernard",    name: "BERNARD Elise",        mail: "elise.b@la1337.com",        phone: "03 65 17 00 63", roles: [7, 11, 13] },
+        { id: "dafflon",    name: "DAFFLON Anais",        mail: "anais.d@la1337.com",        phone: "03 65 17 00 63", roles: [7] },
+        { id: "dherbomez",  name: "DHERBOMEZ Margaux",    mail: "margaux.d@la1337.com",    phone: "03 65 17 00 63", roles: [11] },
+        { id: "dossantos",  name: "DOS SANTOS Cindy",     mail: "cindy.d@la1337.com",      phone: "03 65 17 00 63", roles: [7] },
+        { id: "fonvielle",  name: "FONVIELLE Magali",     mail: "magali.f@la1337.com",     phone: "03 65 17 00 63", roles: [7] },
+        { id: "haliti",     name: "HALITI Merema",        mail: "merema.h@la1337.com",     phone: "03 65 17 00 63", roles: [7] },
+        { id: "jaffrezic",  name: "JAFFREZIC Solenn",     mail: "solenn.j@la1337.com",     phone: "03 65 17 00 63", roles: [10] },
+        { id: "kirsz",      name: "KIRSZ Rafael",          mail: "rafael.k@la1337.com",     phone: "03 65 17 00 63", roles: [7, 8, 10] },
+        { id: "marechal",   name: "MARECHAL Laurence",    mail: "laurence.m@la1337.com",   phone: "03 65 17 00 63", roles: [7] },
+        { id: "morel",      name: "MOREL Enzo",           mail: "enzo.m@la1337.com",       phone: "03 65 17 00 63", roles: [3] },
+        { id: "noel",       name: "NOEL Axel",            mail: "axel.n@la1337.com",        phone: "03 65 17 00 63", roles: [4, 7] },
+        { id: "philippon",  name: "PHILIPPON Pierre",     mail: "pierre.p@la1337.com",     phone: "03 65 17 00 63", roles: [7] },
+        { id: "porino",     name: "PORINO Laeticia",      mail: "laeticia.p@la1337.com",   phone: "03 65 17 00 63", roles: [7] },
+        { id: "rocquemont", name: "ROCQUEMONT Maxence",   mail: "maxence.r@la1337.com",    phone: "03 65 17 00 63", roles: [2, 5, 7, 9, 10] },
+        { id: "samson",     name: "SAMSON Solyvan",       mail: "solyvan.s@la1337.com",    phone: "03 65 17 00 63", roles: [14] },
+        { id: "schilling",  name: "SCHILLING Ingrid",     mail: "ingrid.s@la1337.com",     phone: "03 65 17 00 63", roles: [6] },
+        { id: "schneider",  name: "SCHNEIDER Thibault",   mail: "thibault.s@la1337.com",   phone: "03 65 17 00 63", roles: [9] },
+        { id: "stef",       name: "STEF Laura",           mail: "laura.s@la1337.com",      phone: "03 65 17 00 63", roles: [12] },
+        { id: "vankets",    name: "VAN KETS Guillaume",   mail: "guillaume.v@la1337.com",   phone: "03 65 17 00 63", roles: [1, 7] },
+        { id: "vernet",     name: "VERNET Jeremy",        mail: "jeremy.v@la1337.com",     phone: "03 65 17 00 63", roles: [7] },
+        { id: "wagne",      name: "WAGNE Coumba",          mail: "coumba.w@la1337.com",     phone: "03 65 17 00 63", roles: [7, 11] }
+    ];
+
+    const THEME_IMAGES = {
+        cyber:     "https://i.postimg.cc/63Y5PbDR/LA1337-Signatures-de-mail.png", 
+        ete:       "https://i.postimg.cc/7YyJTjw9/LA1337-Signatures-de-mail(1).png",
+        noel:      "https://i.postimg.cc/XqWNpSdT/LA1337-Signatures-de-mail(2).png",
+        nouvelan:  "https://i.postimg.cc/4x0Jphpd/LA1337-Signatures-de-mail(3).png"
+    };
+
+    const LOGO_IMAGES = { blanc: "https://i.postimg.cc/4x659pDr/logo-small.png" };
+    const base64Cache = {};
+
+    function initRolesCheckboxes() {
+        const container = document.getElementById('rolesContainer');
+        container.innerHTML = '';
+        for (const [code, name] of Object.entries(ROLE_MAP)) {
+            const label = document.createElement('label');
+            label.className = 'checkbox-item';
+            label.innerHTML = `<input type="checkbox" name="roleCheck" value="${code}" onchange="updateSig()"> ${name}`;
+            container.appendChild(label);
+        }
+    }
+
+    function initMemberSelector() {
+        var select = document.getElementById('inMemberSelect');
+        select.innerHTML = '';
+        var optCustom = document.createElement('option');
+        optCustom.value = 'custom';
+        optCustom.innerText = '✍️ [NOUVEAU MEMBRE - Saisie libre]';
+        optCustom.selected = true; 
+        select.appendChild(optCustom);
+        TEAM_DATABASE.forEach(function(member) {
+            var opt = document.createElement('option');
+            opt.value = member.id;
+            opt.innerText = member.name;
+            select.appendChild(opt);
+        });
+    }
+
+    function setSecureImage(url, targetId, isBackground, callback) {
+        if (base64Cache[url]) { 
+            applyImageToTarget(base64Cache[url], targetId, isBackground); 
+            if(callback) callback();
+            return; 
+        }
+        const img = new Image(); img.crossOrigin = "Anonymous";
+        img.onload = function() {
+            const canvas = document.createElement("canvas"); canvas.width = img.width; canvas.height = img.height;
+            canvas.getContext("2d").drawImage(img, 0, 0); base64Cache[url] = canvas.toDataURL("image/png");
+            applyImageToTarget(base64Cache[url], targetId, isBackground);
+            if(callback) callback();
+        }; img.src = url;
+    }
+
+    function applyImageToTarget(dataUrl, targetId, isBackground) {
+        const element = document.getElementById(targetId);
+        if (isBackground) { element.style.background = `url('${dataUrl}') center/cover`; } else { element.src = dataUrl; }
+    }
+
+    window.onload = function() {
+        initRolesCheckboxes(); initMemberSelector();
+        setSecureImage(THEME_IMAGES.cyber, 'sigPreview', true);
+        setSecureImage(LOGO_IMAGES.blanc, 'logoPreview', false);
+        handleMemberChange();
+    };
+
+    function applyPresetLogo() { setSecureImage(LOGO_IMAGES.blanc, 'logoPreview', false); updateSig(); }
+    function applyPresetTheme() { var theme = document.getElementById('inPresetTheme').value; if (THEME_IMAGES[theme]) setSecureImage(THEME_IMAGES[theme], 'sigPreview', true); updateSig(); }
+
+    function handleMemberChange() {
+        var choice = document.getElementById('inMemberSelect').value;
+        var customZone = document.getElementById('customMemberZone');
+        var checkboxes = document.getElementsByName('roleCheck');
+        if (choice === 'custom') {
+            customZone.style.display = 'grid';
+            document.getElementById('inCustomName').value = '';
+            document.getElementById('inCustomMail').value = '';
+            document.getElementById('inCustomPhone').value = '';
+            for (var i = 0; i < checkboxes.length; i++) { checkboxes[i].checked = false; }
+        } else {
+            customZone.style.display = 'none';
+            var data = TEAM_DATABASE.find(m => m.id === choice);
+            if (data && data.roles) {
+                for (var i = 0; i < checkboxes.length; i++) {
+                    checkboxes[i].checked = data.roles.includes(parseInt(checkboxes[i].value));
+                }
+            }
+        }
+        updateSig();
+    }
+
+    function forceInjectMemberData(memberObj) {
+        document.getElementById('outName').innerText = memberObj.name; 
+        document.getElementById('outMail').innerText = memberObj.mail;
+        if(memberObj.phone && memberObj.phone.trim() !== "") { 
+            document.getElementById('outPhoneContainer').style.display = 'inline'; 
+            document.getElementById('outPhone').innerText = memberObj.phone; 
+        } else { 
+            document.getElementById('outPhoneContainer').style.display = 'none'; 
+        }
+        var rolesNames = (memberObj.roles || []).map(code => ROLE_MAP[code]);
+        document.getElementById('outRole').innerText = rolesNames.join(' / ') || 'Votre Rôle / Poste';
+    }
+
+    function updateSig() {
+        var choice = document.getElementById('inMemberSelect').value;
+        var name = "", mail = "", phone = "";
+        if (choice === 'custom') {
+            name = document.getElementById('inCustomName').value || 'Prénom NOM';
+            mail = document.getElementById('inCustomMail').value || 'contact@la1337.com';
+            phone = document.getElementById('inCustomPhone').value || '';
+            document.getElementById('outName').innerText = name; document.getElementById('outMail').innerText = mail;
+            if(phone.trim() !== "") { document.getElementById('outPhoneContainer').style.display = 'inline'; document.getElementById('outPhone').innerText = phone; } else { document.getElementById('outPhoneContainer').style.display = 'none'; }
+
+            var checkboxes = document.getElementsByName('roleCheck');
+            var selectedRolesNames = [];
+            for (var i = 0; i < checkboxes.length; i++) {
+                if (checkboxes[i].checked) {
+                    var codeCoche = parseInt(checkboxes[i].value);
+                    selectedRolesNames.push(ROLE_MAP[codeCoche]);
+                }
+            }
+            document.getElementById('outRole').innerText = selectedRolesNames.join(' / ') || 'Votre Rôle / Poste';
+        } else {
+            var data = TEAM_DATABASE.find(m => m.id === choice);
+            if(data) { forceInjectMemberData(data); }
+        }
+    }
+
+    function generateAndDownloadImage() {
+        var container = document.getElementById('sigPreview'); var logo = document.getElementById('logoPreview');
+        var choice = document.getElementById('inMemberSelect').value;
+        var name = 'signature';
+        if (choice === 'custom') { name = document.getElementById('inCustomName').value || 'signature'; } else { var data = TEAM_DATABASE.find(m => m.id === choice); if(data) name = data.name; }
+        var cleanName = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-');
+        if (!logo.complete) { setTimeout(generateAndDownloadImage, 100); return; }
+        html2canvas(container, { backgroundColor: null, logging: false, scale: 2, useCORS: true, allowTaint: false }).then(function(canvas) {
+            var link = document.createElement('a'); link.download = 'signature-' + cleanName + '.png';
+            link.href = canvas.toDataURL('image/png'); link.click();
+        });
+    }
+
+    // Fonction de génération globale
+    function generateAllSignaturesZip() {
+        const btn = document.getElementById('bulkBtn');
+        const originalText = btn.innerText;
+        btn.disabled = true;
+        btn.innerText = "⏳ Génération en cours...";
+
+        const container = document.getElementById('sigPreview');
+        const zip = new JSZip();
+        let index = 0;
+
+        // On sauvegarde le membre sélectionné actuellement pour le restaurer à la fin
+        const previousChoice = document.getElementById('inMemberSelect').value;
+
+        function processNext() {
+            if (index >= TEAM_DATABASE.length) {
+                // Fin de la boucle -> On compile le Zip
+                btn.innerText = "⚡ Création du ZIP...";
+                zip.generateAsync({ type: "blob" }).then(function(content) {
+                    var theme = document.getElementById('inPresetTheme').value;
+                    var link = document.createElement('a');
+                    link.download = `signatures-la1337-${theme}.zip`;
+                    link.href = URL.createObjectURL(content);
+                    link.click();
+                    
+                    // Restauration de l'état initial du formulaire
+                    document.getElementById('inMemberSelect').value = previousChoice;
+                    handleMemberChange();
+                    btn.disabled = false;
+                    btn.innerText = originalText;
+                });
+                return;
+            }
+
+            const currentMember = TEAM_DATABASE[index];
+            btn.innerText = `⏳ (${index + 1}/${TEAM_DATABASE.length}) ${currentMember.name}`;
+            
+            // On force l'injection visuelle sans modifier les états du formulaire complet
+            forceInjectMemberData(currentMember);
+
+            // Petit timeout pour laisser le DOM respirer avant le snapshot canvas
+            setTimeout(function() {
+                html2canvas(container, { backgroundColor: null, logging: false, scale: 2, useCORS: true, allowTaint: false }).then(function(canvas) {
+                    var cleanName = currentMember.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-');
+                    var dataUrl = canvas.toDataURL('image/png');
+                    // Extraction des données base64 pures pour JSZip
+                    var base64Data = dataUrl.split(',')[1];
+                    
+                    zip.file(`signature-${cleanName}.png`, base64Data, { base64: true });
+                    index++;
+                    processNext();
+                });
+            }, 60);
+        }
+
+        processNext();
+    }
+</script>
+
+</body>
+</html><!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Générateur de Signatures - La 1337</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
