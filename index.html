@@ -170,7 +170,6 @@
     <div class="subtitle">Générateur Signature Mail</div>
     
     <div class="form-container">
-        
         <!-- SÉLECTEUR DE MEMBRES -->
         <div class="input-group">
             <label>👤 Sélectionner le Membre de l'équipe</label>
@@ -241,7 +240,7 @@
                     <td style="vertical-align: middle; width: 180px; text-align: right;">
                         <div style="display: inline-block; background: #ff3366; color: #ffffff; font-size: 9px; font-weight: 900; padding: 4px 10px; border-radius: 4px; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.5);">🎙️ LIVE ON</div>
                         <div style="font-size: 14px; font-weight: 900; color: #ff3366; margin-bottom: 15px; letter-spacing: 0.5px; text-shadow: 2px 2px 4px rgba(0,0,0,0.9);">WWW.LA1337.COM</div>
-                        <div style="display: block; text-align: right;">
+                        <div style="block; text-align: right;">
                             <div style="display: inline-flex; align-items: center; margin-left: 10px; font-size: 10px; font-weight: bold; color: #ffffff; text-shadow: 2px 2px 4px rgba(0,0,0,1);">
                                 <svg style="width: 11px; height: 11px; fill: #ffffff; margin-right: 4px;" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.051.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
                                 <span>@LA1337RADIO</span>
@@ -263,50 +262,10 @@
     </div>
 </div>
 
+<!-- CHARGEMENT DE LA BASE DE DONNÉES DEPUIS LE FICHIER JS SÉPARÉ -->
+<script src="team.js"></script>
+
 <script>
-    const ROLE_MAP = {
-        1:  "Directeur",
-        2:  "Directeur Adjoint",
-        3:  "Président",
-        4:  "Vice-Président",
-        5:  "Secrétaire",
-        6:  "Trésorière",
-        7:  "Animateur",
-        8:  "Programmation",
-        9:  "Technique",
-        10: "RH",
-        11: "Événementiel",
-        12: "Communication",
-        13: "Journaliste",
-        14: "Membre extérieur"
-    };
-
-    // Base de données de l'équipe (Ingrid replacée dans l'ordre alphabétique)
-    const TEAM_DATABASE = [
-        { id: "archer",     name: "ARCHER Vincent",      mail: "vincent.a@la1337.com",      phone: "03 65 17 00 63", roles: [7] },
-        { id: "bernard",    name: "BERNARD Elise",        mail: "elise.b@la1337.com",        phone: "03 65 17 00 63", roles: [7, 11, 13] },
-        { id: "dafflon",    name: "DAFFLON Anais",        mail: "anais.d@la1337.com",        phone: "03 65 17 00 63", roles: [7] },
-        { id: "dherbomez",  name: "DHERBOMEZ Margaux",    mail: "margaux.d@la1337.com",    phone: "03 65 17 00 63", roles: [11] },
-        { id: "dossantos",  name: "DOS SANTOS Cindy",     mail: "cindy.d@la1337.com",      phone: "03 65 17 00 63", roles: [7] },
-        { id: "fonvielle",  name: "FONVIELLE Magali",     mail: "magali.f@la1337.com",     phone: "03 65 17 00 63", roles: [7] },
-        { id: "haliti",     name: "HALITI Merema",        mail: "merema.h@la1337.com",     phone: "03 65 17 00 63", roles: [7] },
-        { id: "jaffrezic",  name: "JAFFREZIC Solenn",     mail: "solenn.j@la1337.com",     phone: "03 65 17 00 63", roles: [10] },
-        { id: "kirsz",      name: "KIRSZ Rafael",          mail: "rafael.k@la1337.com",     phone: "03 65 17 00 63", roles: [7, 8, 10] },
-        { id: "marechal",   name: "MARECHAL Laurence",    mail: "laurence.m@la1337.com",   phone: "03 65 17 00 63", roles: [7] },
-        { id: "morel",      name: "MOREL Enzo",           mail: "enzo.m@la1337.com",       phone: "03 65 17 00 63", roles: [3] },
-        { id: "noel",       name: "NOEL Axel",            mail: "axel.n@la1337.com",        phone: "03 65 17 00 63", roles: [4, 7] },
-        { id: "philippon",  name: "PHILIPPON Pierre",     mail: "pierre.p@la1337.com",     phone: "03 65 17 00 63", roles: [7] },
-        { id: "porino",     name: "PORINO Laeticia",      mail: "laeticia.p@la1337.com",   phone: "03 65 17 00 63", roles: [7] },
-        { id: "rocquemont", name: "ROCQUEMONT Maxence",   mail: "maxence.r@la1337.com",    phone: "03 65 17 00 63", roles: [2, 5, 7, 9, 10] },
-        { id: "samson",     name: "SAMSON Solyvan",       mail: "solyvan.s@la1337.com",    phone: "03 65 17 00 63", roles: [14] },
-        { id: "schilling",  name: "SCHILLING Ingrid",     mail: "ingrid.s@la1337.com",     phone: "03 65 17 00 63", roles: [6] },
-        { id: "schneider",  name: "SCHNEIDER Thibault",   mail: "thibault.s@la1337.com",   phone: "03 65 17 00 63", roles: [9] },
-        { id: "stef",       name: "STEF Laura",           mail: "laura.s@la1337.com",      phone: "03 65 17 00 63", roles: [12] },
-        { id: "vankets",    name: "VAN KETS Guillaume",   mail: "guillaume.v@la1337.com",   phone: "03 65 17 00 63", roles: [1, 7] },
-        { id: "vernet",     name: "VERNET Jeremy",        mail: "jeremy.v@la1337.com",     phone: "03 65 17 00 63", roles: [7] },
-        { id: "wagne",      name: "WAGNE Coumba",          mail: "coumba.w@la1337.com",     phone: "03 65 17 00 63", roles: [7, 11] }
-    ];
-
     const THEME_IMAGES = {
         cyber:     "https://i.postimg.cc/63Y5PbDR/LA1337-Signatures-de-mail.png", 
         ete:       "https://i.postimg.cc/7YyJTjw9/LA1337-Signatures-de-mail(1).png",
@@ -447,7 +406,6 @@
         });
     }
 
-    // Fonction de génération globale
     function generateAllSignaturesZip() {
         const btn = document.getElementById('bulkBtn');
         const originalText = btn.innerText;
@@ -458,12 +416,10 @@
         const zip = new JSZip();
         let index = 0;
 
-        // On sauvegarde le membre sélectionné actuellement pour le restaurer à la fin
         const previousChoice = document.getElementById('inMemberSelect').value;
 
         function processNext() {
             if (index >= TEAM_DATABASE.length) {
-                // Fin de la boucle -> On compile le Zip
                 btn.innerText = "⚡ Création du ZIP...";
                 zip.generateAsync({ type: "blob" }).then(function(content) {
                     var theme = document.getElementById('inPresetTheme').value;
@@ -472,7 +428,6 @@
                     link.href = URL.createObjectURL(content);
                     link.click();
                     
-                    // Restauration de l'état initial du formulaire
                     document.getElementById('inMemberSelect').value = previousChoice;
                     handleMemberChange();
                     btn.disabled = false;
@@ -484,15 +439,12 @@
             const currentMember = TEAM_DATABASE[index];
             btn.innerText = `⏳ (${index + 1}/${TEAM_DATABASE.length}) ${currentMember.name}`;
             
-            // On force l'injection visuelle sans modifier les états du formulaire complet
             forceInjectMemberData(currentMember);
 
-            // Petit timeout pour laisser le DOM respirer avant le snapshot canvas
             setTimeout(function() {
                 html2canvas(container, { backgroundColor: null, logging: false, scale: 2, useCORS: true, allowTaint: false }).then(function(canvas) {
                     var cleanName = currentMember.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-');
                     var dataUrl = canvas.toDataURL('image/png');
-                    // Extraction des données base64 pures pour JSZip
                     var base64Data = dataUrl.split(',')[1];
                     
                     zip.file(`signature-${cleanName}.png`, base64Data, { base64: true });
