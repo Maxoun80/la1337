@@ -113,6 +113,16 @@
             color: #fff;
         }
 
+        /* Zone de texte pour rôle personnalisé */
+        .custom-role-input-zone {
+            display: none;
+            margin-top: 12px;
+            padding: 12px;
+            background: #20202b;
+            border-radius: 8px;
+            border: 1px dashed #ff3366;
+        }
+
         .preview-header {
             text-align: left;
             font-weight: bold;
@@ -216,6 +226,12 @@
             <div id="rolesContainer" class="roles-checkbox-container">
                 <!-- Rempli automatiquement -->
             </div>
+            
+            <!-- NOUVEAU : Bloc champ texte pour le rôle personnalisé -->
+            <div id="customRoleInputZone" class="custom-role-input-zone">
+                <label style="color: #fff; margin-bottom: 5px; display: block;">Saisir le rôle personnalisé :</label>
+                <input type="text" id="inCustomRoleText" placeholder="Ex: Grand Maître des Platines / Stagiaire" style="width: 100%; box-sizing: border-box;" oninput="updateSig()">
+            </div>
         </div>
     </div>
 
@@ -225,12 +241,10 @@
         <div id="sigPreview" style="width: 650px; height: 135px; background-size: cover; background-position: center; border: 1px solid #22222b; border-radius: 8px; overflow: hidden; padding: 20px 25px; box-sizing: border-box; position: relative;">
             <table cellpadding="0" cellspacing="0" style="width: 100%; height: 100%; border-collapse: collapse; text-align: left; font-family: 'Segoe UI', Arial, sans-serif; color: #ffffff; position: relative; z-index: 2;">
                 <tr>
-                    <!-- Bordure gauche dynamique -->
                     <td id="borderContainer" style="width: 110px; vertical-align: middle; padding-right: 15px; border-right: 3px solid #ff3366;">
                         <img id="logoPreview" crossorigin="anonymous" src="" alt="LA 1337" style="width: 95px; height: auto; display: block; filter: drop-shadow(0px 2px 5px rgba(0,0,0,0.5));">
                     </td>
                     <td style="vertical-align: middle; padding-left: 20px;">
-                        <!-- Éléments de texte à couleurs dynamiques -->
                         <div id="outName" style="font-size: 21px; font-weight: bold; color: #ff3366; margin-bottom: 1px; letter-spacing: 0.5px; text-shadow: 2px 2px 4px rgba(0,0,0,0.9);">Prénom NOM</div>
                         <div id="outRole" style="font-size: 13px; font-weight: bold; color: #e1e1e6; font-style: italic; margin-bottom: 15px; text-shadow: 2px 2px 5px rgba(0,0,0,1), -1px -1px 2px rgba(0,0,0,1);">Votre Rôle / Poste</div>
                         <div style="font-size: 11px; color: #ffffff; text-shadow: 2px 2px 4px rgba(0,0,0,1), -1px -1px 2px rgba(0,0,0,1); display: flex; gap: 15px;">
@@ -239,7 +253,6 @@
                         </div>
                     </td>
                     <td style="vertical-align: middle; width: 180px; text-align: right;">
-                        <!-- Éléments de badge à couleurs dynamiques -->
                         <div id="liveBadge" style="display: inline-block; background: #ff3366; color: #ffffff; font-size: 9px; font-weight: 900; padding: 4px 10px; border-radius: 4px; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.5);">🎙️ LIVE ON</div>
                         <div id="outUrlText" style="font-size: 14px; font-weight: 900; color: #ff3366; margin-bottom: 15px; letter-spacing: 0.5px; text-shadow: 2px 2px 4px rgba(0,0,0,0.9);">WWW.LA1337.COM</div>
                         <div style="display: block; text-align: right;">
@@ -269,6 +282,7 @@
 <script>
     const base64Cache = {};
 
+    // MODIFIÉ : Ajoute la case à cocher pour le rôle personnalisé à la fin
     function initRolesCheckboxes() {
         const container = document.getElementById('rolesContainer');
         container.innerHTML = '';
@@ -278,6 +292,27 @@
             label.innerHTML = `<input type="checkbox" name="roleCheck" value="${code}" onchange="updateSig()"> ${name}`;
             container.appendChild(label);
         }
+        
+        // Ajout de l'option personnalisée
+        const customLabel = document.createElement('label');
+        customLabel.className = 'checkbox-item';
+        customLabel.style.color = '#ff3366';
+        customLabel.style.fontWeight = 'bold';
+        customLabel.innerHTML = `<input type="checkbox" id="chkCustomRole" onchange="toggleCustomRoleInput()"> ✍️ [Rôle personnalisé]`;
+        container.appendChild(customLabel);
+    }
+
+    // Gestion de l'affichage du champ texte pour le rôle personnalisé
+    function toggleCustomRoleInput() {
+        var chk = document.getElementById('chkCustomRole');
+        var zone = document.getElementById('customRoleInputZone');
+        if (chk.checked) {
+            zone.style.display = 'block';
+        } else {
+            zone.style.display = 'none';
+            document.getElementById('inCustomRoleText').value = '';
+        }
+        updateSig();
     }
 
     function initMemberSelector() {
@@ -349,7 +384,7 @@
 
         setSecureImage(THEME_IMAGES[firstThemeKey].url, 'sigPreview', true);
         setSecureImage(LOGO_IMAGES[firstLogoKey].url, 'logoPreview', false);
-        applyPresetTheme(); // Applique le premier thème et ses couleurs
+        applyPresetTheme();
     };
 
     function applyPresetLogo() { 
@@ -358,14 +393,12 @@
         updateSig(); 
     }
     
-    // MODIFIÉ : Injecte dynamiquement les styles de couleur définis dans team.js
     function applyPresetTheme() { 
         var themeKey = document.getElementById('inPresetTheme').value; 
         var themeData = THEME_IMAGES[themeKey];
         if (themeData) {
             setSecureImage(themeData.url, 'sigPreview', true);
             
-            // On applique les couleurs configurées
             document.getElementById('outName').style.color = themeData.textColor;
             document.getElementById('outUrlText').style.color = themeData.textColor;
             document.getElementById('borderContainer').style.borderRightColor = themeData.textColor;
@@ -384,6 +417,12 @@
         var choice = document.getElementById('inMemberSelect').value;
         var customZone = document.getElementById('customMemberZone');
         var checkboxes = document.getElementsByName('roleCheck');
+        
+        // Reset la case personnalisée à chaque changement de membre
+        document.getElementById('chkCustomRole').checked = false;
+        document.getElementById('customRoleInputZone').style.display = 'none';
+        document.getElementById('inCustomRoleText').value = '';
+
         if (choice === 'custom') {
             customZone.style.display = 'grid';
             document.getElementById('inCustomName').value = '';
@@ -411,33 +450,59 @@
         } else { 
             document.getElementById('outPhoneContainer').style.display = 'none'; 
         }
+        
         var rolesNames = (memberObj.roles || []).map(code => ROLE_MAP[code]);
+        
+        // Ajout du rôle perso s'il est coché (Utile si utilisé pendant la prévisualisation libre)
+        var chkCustom = document.getElementById('chkCustomRole');
+        var customTxt = document.getElementById('inCustomRoleText').value.trim();
+        if (chkCustom && chkCustom.checked && customTxt !== "") {
+            rolesNames.push(customTxt);
+        }
+
         document.getElementById('outRole').innerText = rolesNames.join(' / ') || 'Votre Rôle / Poste';
     }
 
+    // MODIFIÉ : Calcule l'affichage final des rôles classiques + le rôle libre
     function updateSig() {
         var choice = document.getElementById('inMemberSelect').value;
-        var name = "", mail = "", phone = "";
+        
         if (choice === 'custom') {
-            name = document.getElementById('inCustomName').value || 'Prénom NOM';
-            mail = document.getElementById('inCustomMail').value || 'contact@la1337.com';
-            phone = document.getElementById('inCustomPhone').value || '';
-            document.getElementById('outName').innerText = name; document.getElementById('outMail').innerText = mail;
-            if(phone.trim() !== "") { document.getElementById('outPhoneContainer').style.display = 'inline'; document.getElementById('outPhone').innerText = phone; } else { document.getElementById('outPhoneContainer').style.display = 'none'; }
-
-            var checkboxes = document.getElementsByName('roleCheck');
-            var selectedRolesNames = [];
-            for (var i = 0; i < checkboxes.length; i++) {
-                if (checkboxes[i].checked) {
-                    var codeCoche = parseInt(checkboxes[i].value);
-                    selectedRolesNames.push(ROLE_MAP[codeCoche]);
-                }
+            var name = document.getElementById('inCustomName').value || 'Prénom NOM';
+            var mail = document.getElementById('inCustomMail').value || 'contact@la1337.com';
+            var phone = document.getElementById('inCustomPhone').value || '';
+            document.getElementById('outName').innerText = name; 
+            document.getElementById('outMail').innerText = mail;
+            
+            if(phone.trim() !== "") { 
+                document.getElementById('outPhoneContainer').style.display = 'inline'; 
+                document.getElementById('outPhone').innerText = phone; 
+            } else { 
+                document.getElementById('outPhoneContainer').style.display = 'none'; 
             }
-            document.getElementById('outRole').innerText = selectedRolesNames.join(' / ') || 'Votre Rôle / Poste';
         } else {
             var data = TEAM_DATABASE.find(m => m.id === choice);
-            if(data) { forceInjectMemberData(data); }
+            if(data) { forceInjectMemberData(data); return; } // Géré par forceInject
         }
+
+        // Si on est en mode "custom" ou si on ajuste à la main les rôles d'un membre existant :
+        var checkboxes = document.getElementsByName('roleCheck');
+        var selectedRolesNames = [];
+        for (var i = 0; i < checkboxes.length; i++) {
+            if (checkboxes[i].checked) {
+                var codeCoche = parseInt(checkboxes[i].value);
+                selectedRolesNames.push(ROLE_MAP[codeCoche]);
+            }
+        }
+        
+        // Récupération et ajout du rôle saisi manuellement
+        var chkCustom = document.getElementById('chkCustomRole');
+        var customTxt = document.getElementById('inCustomRoleText').value.trim();
+        if (chkCustom && chkCustom.checked && customTxt !== "") {
+            selectedRolesNames.push(customTxt);
+        }
+
+        document.getElementById('outRole').innerText = selectedRolesNames.join(' / ') || 'Votre Rôle / Poste';
     }
 
     function generateAndDownloadImage() {
@@ -476,7 +541,7 @@
                     link.click();
                     
                     document.getElementById('inMemberSelect').value = previousChoice;
-                    applyPresetTheme(); // Restaure les couleurs de l'aperçu
+                    applyPresetTheme();
                     btn.disabled = false;
                     btn.innerText = originalText;
                 });
