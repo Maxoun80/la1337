@@ -73,6 +73,16 @@
             outline: none;
             box-shadow: 0 0 8px rgba(255, 51, 102, 0.2);
         }
+        input.invalid-email {
+            border-color: #ff6666;
+            box-shadow: 0 0 8px rgba(255, 102, 102, 0.3);
+        }
+        .email-error {
+            color: #ff6666;
+            font-size: 11px;
+            margin-top: 5px;
+            display: none;
+        }
         
         .custom-member-zone {
             display: none;
@@ -204,6 +214,7 @@
             <div>
                 <label style="color: #fff;">Email Radio</label>
                 <input type="email" id="inCustomMail" placeholder="lucas@la1337.com" style="width:100%; box-sizing:border-box;" oninput="updateSig()">
+                <div class="email-error" id="emailError">⚠️ Email invalide</div>
             </div>
             <div style="grid-column: span 2;">
                 <label style="color: #fff;">Numéro de Téléphone</label>
@@ -446,6 +457,11 @@
         }
     }
 
+    function isValidEmail(email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    }
+
     // CORRIGÉ : Met à jour dynamiquement les rôles en scannant TOUTES les cases cochées à l'instant T
     function updateSig() {
         var choice = document.getElementById('inMemberSelect').value;
@@ -456,6 +472,17 @@
             var phone = document.getElementById('inCustomPhone').value || '';
             document.getElementById('outName').innerText = name; 
             document.getElementById('outMail').innerText = mail;
+            
+            // Validation d'email en temps réel
+            const mailInput = document.getElementById('inCustomMail');
+            const emailError = document.getElementById('emailError');
+            if (mail && mail !== 'contact@la1337.com' && !isValidEmail(mail)) {
+                mailInput.classList.add('invalid-email');
+                emailError.style.display = 'block';
+            } else {
+                mailInput.classList.remove('invalid-email');
+                emailError.style.display = 'none';
+            }
             
             if(phone.trim() !== "") { 
                 document.getElementById('outPhoneContainer').style.display = 'inline'; 
@@ -489,8 +516,17 @@
     }
 
     function generateAndDownloadImage() {
-        var container = document.getElementById('sigPreview'); var logo = document.getElementById('logoPreview');
         var choice = document.getElementById('inMemberSelect').value;
+        // Vérification d'email si custom
+        if (choice === 'custom') {
+            var mail = document.getElementById('inCustomMail').value;
+            if (mail && mail !== 'contact@la1337.com' && !isValidEmail(mail)) {
+                alert('❌ Veuillez entrer un email valide (ex: nom@domaine.com)');
+                return;
+            }
+        }
+        
+        var container = document.getElementById('sigPreview'); var logo = document.getElementById('logoPreview');
         var name = 'signature';
         if (choice === 'custom') { name = document.getElementById('inCustomName').value || 'signature'; } else { var data = TEAM_DATABASE.find(m => m.id === choice); if(data) name = data.name; }
         var cleanName = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-');
