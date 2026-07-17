@@ -476,10 +476,19 @@
     function initMemberSelector() {
         var select = document.getElementById('inMemberSelect');
         select.innerHTML = '';
+        
+        var optPlaceholder = document.createElement('option');
+        optPlaceholder.value = '';
+        optPlaceholder.innerText = '👥 Choisissez un membre';
+        optPlaceholder.selected = true;
+        optPlaceholder.disabled = true;
+        select.appendChild(optPlaceholder);
+        
         var optCustom = document.createElement('option');
         optCustom.value = 'custom';
         optCustom.innerText = '✍️ [NOUVEAU MEMBRE - Saisie libre]';
         select.appendChild(optCustom);
+        
         TEAM_DATABASE.forEach(function(member) {
             var opt = document.createElement('option');
             opt.value = member.id;
@@ -575,7 +584,10 @@
         var customZone = document.getElementById('customMemberZone');
         var checkboxes = document.getElementsByName('roleCheck');
         
-        if (choice === 'custom') {
+        if (choice === '') {
+            // Placeholder sélectionné - ne rien faire
+            return;
+        } else if (choice === 'custom') {
             openModalNewMember();
         } else {
             customZone.style.display = 'none';
@@ -767,8 +779,8 @@
 
     function closeModalNewMember() {
         document.getElementById('modalNewMember').classList.remove('active');
-        // Revenir au premier membre de la liste
-        document.getElementById('inMemberSelect').value = TEAM_DATABASE[0].id;
+        // Revenir au placeholder
+        document.getElementById('inMemberSelect').value = '';
         handleMemberChange();
     }
 
