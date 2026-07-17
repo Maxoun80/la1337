@@ -61,7 +61,7 @@ const LOGO_IMAGES = {
         url: "https://i.postimg.cc/4x659pDr/logo-small.png"
     },
     noel: {
-        name: "⚪ Logo Noe Officiel",
+        name: "🎄 Logo Noël Officiel",
         url: "https://i.postimg.cc/50Ty8Btq/Capture-d-ecran-2026-07-18-002918.png"
     }
 };
