@@ -9,7 +9,7 @@ const ROLE_MAP = {
     5:  "Secrétaire",
     6:  "Trésorière",
     7:  "Animateur",
-    71: "Animatrice"
+    71: "Animatrice",
     8:  "Programmation",
     9:  "Technique",
     10: "RH",
