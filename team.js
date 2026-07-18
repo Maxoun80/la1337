@@ -9,14 +9,14 @@ const ROLE_MAP = {
     5:  "Secrétaire",
     6:  "Trésorière",
     7:  "Animateur",
-    71: "Animatrice",
-    8:  "Programmation",
-    9:  "Technique",
-    10: "RH",
-    11: "Événementiel",
-    12: "Communication",
-    13: "Journaliste",
-    14: "Membre extérieur"
+    8: "Animatrice",
+    9:  "Programmation",
+    10:  "Technique",
+    11: "RH",
+    12: "Événementiel",
+    13: "Communication",
+    14: "Journaliste",
+    15: "Membre extérieur"
 };
 
 // 2. BANNIÈRES THÉMATIQUES AVEC COULEURS ADAPTÉES
@@ -101,25 +101,25 @@ function loadCustomMembers() {
 // 5. BASE DE DONNÉES DE L'ÉQUIPE
 const TEAM_DATABASE = [
     { id: "archer",     name: "ARCHER Vincent",      mail: "vincent.a@la1337.com",      phone: "03 65 17 00 63", roles: [7] },
-    { id: "bernard",    name: "BERNARD Elise",       mail: "elise.b@la1337.com",        phone: "03 65 17 00 63", roles: [71, 11, 13] },
-    { id: "dafflon",    name: "DAFFLON Anais",       mail: "anais.d@la1337.com",        phone: "03 65 17 00 63", roles: [71] },
-    { id: "dherbomez",  name: "DHERBOMEZ Margaux",   mail: "margaux.d@la1337.com",    phone: "03 65 17 00 63", roles: [11] },
-    { id: "dossantos",  name: "DOS SANTOS Cindy",    mail: "cindy.d@la1337.com",      phone: "03 65 17 00 63", roles: [71] },
-    { id: "fonvielle",  name: "FONVIELLE Magali",    mail: "magali.f@la1337.com",     phone: "03 65 17 00 63", roles: [71] },
-    { id: "haliti",     name: "HALITI Merema",       mail: "merema.h@la1337.com",     phone: "03 65 17 00 63", roles: [71] },
-    { id: "jaffrezic",  name: "JAFFREZIC Solenn",    mail: "solenn.j@la1337.com",     phone: "03 65 17 00 63", roles: [10] },
-    { id: "kirsz",      name: "KIRSZ Rafael",        mail: "rafael.k@la1337.com",     phone: "03 65 17 00 63", roles: [7, 8, 10] },
-    { id: "marechal",   name: "MARECHAL Laurence",   mail: "laurence.m@la1337.com",   phone: "03 65 17 00 63", roles: [71] },
+    { id: "bernard",    name: "BERNARD Elise",       mail: "elise.b@la1337.com",        phone: "03 65 17 00 63", roles: [8, 12, 14] },
+    { id: "dafflon",    name: "DAFFLON Anais",       mail: "anais.d@la1337.com",        phone: "03 65 17 00 63", roles: [8] },
+    { id: "dherbomez",  name: "DHERBOMEZ Margaux",   mail: "margaux.d@la1337.com",    phone: "03 65 17 00 63", roles: [12] },
+    { id: "dossantos",  name: "DOS SANTOS Cindy",    mail: "cindy.d@la1337.com",      phone: "03 65 17 00 63", roles: [8] },
+    { id: "fonvielle",  name: "FONVIELLE Magali",    mail: "magali.f@la1337.com",     phone: "03 65 17 00 63", roles: [8] },
+    { id: "haliti",     name: "HALITI Merema",       mail: "merema.h@la1337.com",     phone: "03 65 17 00 63", roles: [8] },
+    { id: "jaffrezic",  name: "JAFFREZIC Solenn",    mail: "solenn.j@la1337.com",     phone: "03 65 17 00 63", roles: [11] },
+    { id: "kirsz",      name: "KIRSZ Rafael",        mail: "rafael.k@la1337.com",     phone: "03 65 17 00 63", roles: [7, 9, 11] },
+    { id: "marechal",   name: "MARECHAL Laurence",   mail: "laurence.m@la1337.com",   phone: "03 65 17 00 63", roles: [8] },
     { id: "morel",      name: "MOREL Enzo",          mail: "enzo.m@la1337.com",       phone: "03 65 17 00 63", roles: [3] },
     { id: "noel",       name: "NOEL Axel",           mail: "axel.n@la1337.com",        phone: "03 65 17 00 63", roles: [4, 7] },
     { id: "philippon",  name: "PHILIPPON Pierre",    mail: "pierre.p@la1337.com",     phone: "03 65 17 00 63", roles: [7] },
-    { id: "porino",     name: "PORINO Laeticia",     mail: "laeticia.p@la1337.com",   phone: "03 65 17 00 63", roles: [71] },
-    { id: "rocquemont", name: "ROCQUEMONT Maxence",  mail: "maxence.r@la1337.com",    phone: "03 65 17 00 63", roles: [2, 5, 7, 9, 10] },
-    { id: "samson",     name: "SAMSON Solyvan",      mail: "solyvan.s@la1337.com",    phone: "03 65 17 00 63", roles: [14] },
+    { id: "porino",     name: "PORINO Laeticia",     mail: "laeticia.p@la1337.com",   phone: "03 65 17 00 63", roles: [8] },
+    { id: "rocquemont", name: "ROCQUEMONT Maxence",  mail: "maxence.r@la1337.com",    phone: "03 65 17 00 63", roles: [2, 5, 7, 10, 11] },
+    { id: "samson",     name: "SAMSON Solyvan",      mail: "solyvan.s@la1337.com",    phone: "03 65 17 00 63", roles: [15] },
     { id: "schilling",  name: "SCHILLING Ingrid",    mail: "ingrid.s@la1337.com",     phone: "03 65 17 00 63", roles: [6] },
-    { id: "schneider",  name: "SCHNEIDER Thibault",  mail: "thibault.s@la1337.com",   phone: "03 65 17 00 63", roles: [9] },
-    { id: "stef",       name: "STEF Laura",          mail: "laura.s@la1337.com",      phone: "03 65 17 00 63", roles: [12] },
+    { id: "schneider",  name: "SCHNEIDER Thibault",  mail: "thibault.s@la1337.com",   phone: "03 65 17 00 63", roles: [10] },
+    { id: "stef",       name: "STEF Laura",          mail: "laura.s@la1337.com",      phone: "03 65 17 00 63", roles: [13] },
     { id: "vankets",    name: "VAN KETS Guillaume",  mail: "guillaume.v@la1337.com",  phone: "03 65 17 00 63", roles: [1, 7] },
     { id: "vernet",     name: "VERNET Jeremy",       mail: "jeremy.v@la1337.com",     phone: "03 65 17 00 63", roles: [7] },
-    { id: "wagne",      name: "WAGNE Coumba",        mail: "coumba.w@la1337.com",     phone: "03 65 17 00 63", roles: [71, 11] }
+    { id: "wagne",      name: "WAGNE Coumba",        mail: "coumba.w@la1337.com",     phone: "03 65 17 00 63", roles: [8, 12] }
 ];
