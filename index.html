@@ -755,7 +755,6 @@
     }
 
     window.onload = function() {
-        loadCustomMembers();
         initRolesCheckboxes(); 
         initMemberSelector();
         initThemeSelector(); 
@@ -768,7 +767,6 @@
         setSecureImage(LOGO_IMAGES[firstLogoKey].url, 'logoPreview', false);
         applyPresetTheme();
         
-        // Chargement du changelog JSON avec catégories
         loadChangelog();
     };
 
@@ -902,7 +900,6 @@
         }
     }
 
-    /* SUFFIXE COURT POUR LE TYPE DE SIGNATURE */
     function getSignatureTypeSuffix(sigStyle) {
         if (sigStyle === 'radio') return 'radio';
         if (sigStyle === 'baweb_line') return 'line';
@@ -910,7 +907,6 @@
         return 'sig';
     }
 
-    /* MODAL DE NOM DE FICHIER TÉLÉCHARGÉ */
     function openModalDownloadFilename() {
         var choice = document.getElementById('inMemberSelect').value;
         if (choice === 'custom') {
@@ -1102,16 +1098,21 @@
         });
 
         const newMember = {
+            id: 'temp_' + Date.now(),
             name: name,
             mail: mail || 'contact@la1337.com',
             phone: phone || '',
             roles: selectedRoles
         };
 
-        addCustomMember(newMember);
+        // Ajout dynamique en mémoire sans sauvegarde LocalStorage
+        TEAM_DATABASE.push(newMember);
+        initMemberSelector();
+
         forceInjectMemberData(newMember);
         document.getElementById('modalNewMember').classList.remove('active');
-        document.getElementById('inMemberSelect').value = 'custom';
+        document.getElementById('inMemberSelect').value = newMember.id;
+        handleMemberChange();
         updateSig();
     }
 
@@ -1157,11 +1158,9 @@
 
                 const renderChanges = (changes) => {
                     return changes.map(change => {
-                        // Format structuré avec catégorie
                         if (typeof change === 'object' && change.category) {
                             return `<li><span style="display:inline-block; font-size:10px; font-weight:bold; background:#222233; color:#ff3366; border:1px solid #ff3366; padding:2px 7px; border-radius:4px; margin-right:8px; letter-spacing:0.5px;">${change.category}</span> <span>${change.text}</span></li>`;
                         }
-                        // Fallback pour texte brut
                         return `<li>${change}</li>`;
                     }).join('');
                 };
