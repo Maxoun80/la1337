@@ -307,13 +307,13 @@
     <div class="subtitle">Générateur Signature Mail</div>
     
     <div class="form-container">
-        <!-- SÉLECTEUR DU TYPE DE SIGNATURE -->
+        <!-- SÉLECTEUR DU TYPE DE SIGNATURE (MIS À JOUR) -->
         <div class="input-group full-width">
             <label style="color: #33cc99;">🎨 Style de Signature</label>
             <select id="inSigStyle" onchange="updateSig()">
-                <option value="radio">🎧 Signature Officielle Graphique (Fond Visuel)</option>
-                <option value="baweb_line">📄 Signature Ligne Complète (Nom, Fonction, Tél, Mail, Web)</option>
-                <option value="baweb_minimal">✉️ Signature Courrier Officiel (Nom, Prénom, Fonction uniquement)</option>
+                <option value="radio">🎧 Signature Officielle Graphique</option>
+                <option value="baweb_line">📄 Signature Simple (Ligne complète : Nom, Fonction, Tél, Mail, Web)</option>
+                <option value="baweb_minimal">✉️ Signature Minimaliste (Courrier : Nom, Prénom, Fonction)</option>
             </select>
         </div>
 
@@ -699,8 +699,34 @@
         }
     }
 
+    // FONCTIONS NOM DE FICHIER ET TÉLÉCHARGEMENT
+    function cleanThemeName(themeKey) {
+        if (!THEME_IMAGES[themeKey]) return 'theme';
+        var rawName = THEME_IMAGES[themeKey].name;
+        return rawName
+            .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '')
+            .replace(/\(.*\)/g, '')
+            .trim()
+            .toLowerCase()
+            .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+            .replace(/[^a-z0-9]/g, '-');
+    }
+
+    function getSignatureTypeSuffix(sigStyle, themeKey) {
+        if (sigStyle === 'radio') {
+            var cleanTheme = cleanThemeName(themeKey);
+            return 'officielle-' + cleanTheme;
+        } else if (sigStyle === 'baweb_line') {
+            return 'simple';
+        } else if (sigStyle === 'baweb_minimal') {
+            return 'minimaliste';
+        }
+        return 'simple';
+    }
+
     function generateAndDownloadImage() {
         var sigStyle = document.getElementById('inSigStyle').value;
+        var themeKey = document.getElementById('inPresetTheme').value;
         var choice = document.getElementById('inMemberSelect').value;
         
         if (choice === 'custom') {
@@ -713,15 +739,33 @@
         
         var container = (sigStyle === 'radio') ? document.getElementById('sigPreview') : document.getElementById('sigBanalPreview');
         var logo = document.getElementById('logoPreview');
+        
         var name = 'signature';
-        if (choice === 'custom') { name = document.getElementById('inCustomName').value || 'signature'; } else { var data = TEAM_DATABASE.find(m => m.id === choice); if(data) name = data.name; }
+        if (choice === 'custom') { 
+            name = document.getElementById('inCustomName').value || 'signature'; 
+        } else { 
+            var data = TEAM_DATABASE.find(m => m.id === choice); 
+            if(data) name = data.name; 
+        }
+        
         var cleanName = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-');
+        var typeSuffix = getSignatureTypeSuffix(sigStyle, themeKey);
+        var fileName = `signature-${cleanName}-${typeSuffix}.png`;
         
-        if (sigStyle === 'radio' && !logo.complete) { setTimeout(generateAndDownloadImage, 100); return; }
+        if (sigStyle === 'radio' && !logo.complete) { 
+            setTimeout(generateAndDownloadImage, 100); 
+            return; 
+        }
         
-        html2canvas(container, { backgroundColor: (sigStyle === 'radio' ? null : '#1a1a22'), logging: false, scale: 2, useCORS: true, allowTaint: false }).then(function(canvas) {
+        html2canvas(container, { 
+            backgroundColor: (sigStyle === 'radio' ? null : '#1a1a22'), 
+            logging: false, 
+            scale: 2, 
+            useCORS: true, 
+            allowTaint: false 
+        }).then(function(canvas) {
             var link = document.createElement('a'); 
-            link.download = 'signature-' + cleanName + '.png';
+            link.download = fileName;
             link.href = canvas.toDataURL('image/png'); 
             link.click();
         });
@@ -734,6 +778,7 @@
         btn.innerText = "⏳ Génération en cours...";
 
         const sigStyle = document.getElementById('inSigStyle').value;
+        const themeKey = document.getElementById('inPresetTheme').value;
         const container = (sigStyle === 'radio') ? document.getElementById('sigPreview') : document.getElementById('sigBanalPreview');
         const zip = new JSZip();
         let index = 0;
@@ -744,9 +789,9 @@
             if (index >= TEAM_DATABASE.length) {
                 btn.innerText = "⚡ Création du ZIP...";
                 zip.generateAsync({ type: "blob" }).then(function(content) {
-                    var theme = document.getElementById('inPresetTheme').value;
+                    var typeSuffix = getSignatureTypeSuffix(sigStyle, themeKey);
                     var link = document.createElement('a');
-                    link.download = `signatures-la1337-${sigStyle}.zip`;
+                    link.download = `signatures-la1337-${typeSuffix}.zip`;
                     link.href = URL.createObjectURL(content);
                     link.click();
                     
@@ -770,12 +815,21 @@
             updateSig();
 
             setTimeout(function() {
-                html2canvas(container, { backgroundColor: (sigStyle === 'radio' ? null : '#1a1a22'), logging: false, scale: 2, useCORS: true, allowTaint: false }).then(function(canvas) {
+                html2canvas(container, { 
+                    backgroundColor: (sigStyle === 'radio' ? null : '#1a1a22'), 
+                    logging: false, 
+                    scale: 2, 
+                    useCORS: true, 
+                    allowTaint: false 
+                }).then(function(canvas) {
                     var cleanName = currentMember.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-');
+                    var typeSuffix = getSignatureTypeSuffix(sigStyle, themeKey);
+                    var fileName = `signature-${cleanName}-${typeSuffix}.png`;
+                    
                     var dataUrl = canvas.toDataURL('image/png');
                     var base64Data = dataUrl.split(',')[1];
                     
-                    zip.file(`signature-${cleanName}.png`, base64Data, { base64: true });
+                    zip.file(fileName, base64Data, { base64: true });
                     index++;
                     processNext();
                 });
