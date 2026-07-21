@@ -230,7 +230,7 @@
             box-shadow: 0 6px 20px rgba(19, 153, 117, 0.4);
         }
 
-        /* STYLES DU MODULE DE MISE À JOUR (CHANGELOG) */
+        /* STYLES DU MODULE DE MISE À JOUR (CHANGELOG DYNAMIQUE) */
         .changelog-container {
             text-align: left;
             display: flex;
@@ -575,78 +575,16 @@
         </div>
     </div>
 
-    <!-- ONGLET 2 : HISTORIQUE DES MISES À JOUR -->
+    <!-- ONGLET 2 : HISTORIQUE DES MISES À JOUR (DYNAMIQUE JSON) -->
     <div id="tab-changelog" class="tab-content">
-        <div class="changelog-container">
-            
-            <!-- 1. VERSION ACTUELLE -->
-            <div class="changelog-card latest">
-                <div class="changelog-header">
-                    <span class="version-badge">v1.7.3 (Actuelle)</span>
-                    <span class="version-date">22/07/2026 à 01:20</span>
-                </div>
-                <ul class="changelog-list">
-                    <li><strong>Affichage Récent & Accordéon :</strong> Optimisation de l'affichage du changelog (les 3 dernières versions restent visibles, les plus anciennes sont archivées dans un menu déroulant).</li>
-                </ul>
-            </div>
-
-            <!-- 2. RECENT 1 -->
-            <div class="changelog-card">
-                <div class="changelog-header">
-                    <span class="version-badge" style="background:#444455;">v1.7.2</span>
-                    <span class="version-date">22/07/2026 à 01:17</span>
-                </div>
-                <ul class="changelog-list">
-                    <li><strong>Nom de fichier épuré :</strong> Suppression complète de la date et de l'heure pour un nom ultra-court au format `sig-[nom]-[type].png`.</li>
-                </ul>
-            </div>
-
-            <!-- 3. RECENT 2 -->
-            <div class="changelog-card">
-                <div class="changelog-header">
-                    <span class="version-badge" style="background:#444455;">v1.7.1</span>
-                    <span class="version-date">22/07/2026 à 01:16</span>
-                </div>
-                <ul class="changelog-list">
-                    <li><strong>Raccourcissement du nom :</strong> Format compact `sig-[nom]-[type]-[AAMMJJ-HHMM].png`.</li>
-                </ul>
-            </div>
-
-            <!-- VOIR L'HISTORIQUE COMPLET (DÉROULANT) -->
-            <details class="changelog-archive">
-                <summary>📁 Voir les anciennes mises à jour...</summary>
-                <div class="archive-content">
-                    
-                    <div class="changelog-card">
-                        <div class="changelog-header">
-                            <span class="version-badge" style="background:#333344;">v1.7.0</span>
-                            <span class="version-date">22/07/2026 à 01:13</span>
-                        </div>
-                        <ul class="changelog-list">
-                            <li><strong>Horodatage Fichier :</strong> Ajout du timestamp dans le nom de fichier lors du téléchargement.</li>
-                        </ul>
-                    </div>
-
-                    <div class="changelog-card">
-                        <div class="changelog-header">
-                            <span class="version-badge" style="background:#333344;">v1.6.0</span>
-                            <span class="version-date">21/07/2026</span>
-                        </div>
-                        <ul class="changelog-list">
-                            <li><strong>Génération en masse (ZIP) :</strong> Possibilité de télécharger toutes les signatures de l'équipe en un clic.</li>
-                            <li><strong>Rôles multiples :</strong> Prise en compte du cumul des rôles et de la saisie personnalisée.</li>
-                        </ul>
-                    </div>
-
-                </div>
-            </details>
-
+        <div id="changelogContainer" class="changelog-container">
+            <p style="color: #888;">Chargement des mises à jour...</p>
         </div>
     </div>
 
     <!-- PIED DE PAGE AVEC VERSION -->
     <div class="version-tag">
-        Version <span>v1.7.3</span> — Mis à jour le 22/07/2026 à 01:20
+        Version <span id="footerVersion">v1.7.3</span> — Mis à jour le <span id="footerDate">22/07/2026</span>
     </div>
 </div>
 
@@ -825,6 +763,9 @@
         setSecureImage(THEME_IMAGES[firstThemeKey].url, 'sigPreview', true);
         setSecureImage(LOGO_IMAGES[firstLogoKey].url, 'logoPreview', false);
         applyPresetTheme();
+        
+        // Chargement du changelog JSON
+        loadChangelog();
     };
 
     function applyPresetLogo() { 
@@ -1196,6 +1137,77 @@
             confirmDownloadWithFilename();
         }
     });
+
+    /* CHARGEMENT DYNAMIQUE DU CHANGELOG DEPUIS JSON */
+    function loadChangelog() {
+        fetch('changelog.json')
+            .then(response => response.json())
+            .then(data => {
+                const container = document.getElementById('changelogContainer');
+                container.innerHTML = '';
+
+                if (data.length > 0) {
+                    // Met à jour la version dans le pied de page
+                    document.getElementById('footerVersion').innerText = data[0].version;
+                    document.getElementById('footerDate').innerText = data[0].date;
+                }
+
+                const recentLogs = data.slice(0, 3);
+                const archiveLogs = data.slice(3);
+
+                recentLogs.forEach((item, index) => {
+                    const isLatest = index === 0;
+                    const card = document.createElement('div');
+                    card.className = `changelog-card ${isLatest ? 'latest' : ''}`;
+                    
+                    const badgeText = item.badge ? `${item.version} (${item.badge})` : item.version;
+                    const badgeBg = isLatest ? '' : 'style="background:#444455;"';
+
+                    card.innerHTML = `
+                        <div class="changelog-header">
+                            <span class="version-badge" ${badgeBg}>${badgeText}</span>
+                            <span class="version-date">${item.date}</span>
+                        </div>
+                        <ul class="changelog-list">
+                            ${item.changes.map(change => `<li>${change}</li>`).join('')}
+                        </ul>
+                    `;
+                    container.appendChild(card);
+                });
+
+                if (archiveLogs.length > 0) {
+                    const details = document.createElement('details');
+                    details.className = 'changelog-archive';
+                    
+                    let archiveHTML = `
+                        <summary>📁 Voir les anciennes mises à jour...</summary>
+                        <div class="archive-content">
+                    `;
+
+                    archiveLogs.forEach(item => {
+                        archiveHTML += `
+                            <div class="changelog-card">
+                                <div class="changelog-header">
+                                    <span class="version-badge" style="background:#333344;">${item.version}</span>
+                                    <span class="version-date">${item.date}</span>
+                                </div>
+                                <ul class="changelog-list">
+                                    ${item.changes.map(change => `<li>${change}</li>`).join('')}
+                                </ul>
+                            </div>
+                        `;
+                    });
+
+                    archiveHTML += `</div>`;
+                    details.innerHTML = archiveHTML;
+                    container.appendChild(details);
+                }
+            })
+            .catch(err => {
+                console.error("Erreur chargement changelog:", err);
+                document.getElementById('changelogContainer').innerHTML = "<p style='color:#ff6666;'>Impossible de charger le changelog JSON.</p>";
+            });
+    }
 </script>
 
 </body>
