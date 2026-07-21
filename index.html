@@ -273,13 +273,17 @@
         }
         .changelog-list {
             margin: 0;
-            padding-left: 20px;
+            padding: 0;
+            list-style: none;
             color: #d1d1e0;
             font-size: 13px;
-            line-height: 1.7;
+            line-height: 1.8;
         }
-        .changelog-list li::marker {
-            color: #ff3366;
+        .changelog-list li {
+            margin-bottom: 6px;
+            display: flex;
+            align-items: baseline;
+            flex-wrap: wrap;
         }
 
         /* MENU DÉROULANT ANCIENNES VERSIONS */
@@ -764,7 +768,7 @@
         setSecureImage(LOGO_IMAGES[firstLogoKey].url, 'logoPreview', false);
         applyPresetTheme();
         
-        // Chargement du changelog JSON
+        // Chargement du changelog JSON avec catégories
         loadChangelog();
     };
 
@@ -1138,7 +1142,7 @@
         }
     });
 
-    /* CHARGEMENT DYNAMIQUE DU CHANGELOG DEPUIS JSON */
+    /* CHARGEMENT DYNAMIQUE DU CHANGELOG AVEC CATÉGORIES / SIGLES */
     function loadChangelog() {
         fetch('changelog.json')
             .then(response => response.json())
@@ -1147,10 +1151,20 @@
                 container.innerHTML = '';
 
                 if (data.length > 0) {
-                    // Met à jour la version dans le pied de page
                     document.getElementById('footerVersion').innerText = data[0].version;
                     document.getElementById('footerDate').innerText = data[0].date;
                 }
+
+                const renderChanges = (changes) => {
+                    return changes.map(change => {
+                        // Format structuré avec catégorie
+                        if (typeof change === 'object' && change.category) {
+                            return `<li><span style="display:inline-block; font-size:10px; font-weight:bold; background:#222233; color:#ff3366; border:1px solid #ff3366; padding:2px 7px; border-radius:4px; margin-right:8px; letter-spacing:0.5px;">${change.category}</span> <span>${change.text}</span></li>`;
+                        }
+                        // Fallback pour texte brut
+                        return `<li>${change}</li>`;
+                    }).join('');
+                };
 
                 const recentLogs = data.slice(0, 3);
                 const archiveLogs = data.slice(3);
@@ -1169,7 +1183,7 @@
                             <span class="version-date">${item.date}</span>
                         </div>
                         <ul class="changelog-list">
-                            ${item.changes.map(change => `<li>${change}</li>`).join('')}
+                            ${renderChanges(item.changes)}
                         </ul>
                     `;
                     container.appendChild(card);
@@ -1192,7 +1206,7 @@
                                     <span class="version-date">${item.date}</span>
                                 </div>
                                 <ul class="changelog-list">
-                                    ${item.changes.map(change => `<li>${change}</li>`).join('')}
+                                    ${renderChanges(item.changes)}
                                 </ul>
                             </div>
                         `;
