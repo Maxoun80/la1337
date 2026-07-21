@@ -19,9 +19,10 @@
             margin: 0 auto;
             background: #1a1a22;
             padding: 40px;
-            border-radius: 16px; /* Arrondi moderne du conteneur principal */
+            border-radius: 16px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.6);
             border: 1px solid #2a2a35;
+            position: relative;
         }
         h1 {
             color: #ff3366;
@@ -64,7 +65,7 @@
             border: 1px solid #333344;
             color: #fff;
             padding: 14px;
-            border-radius: 8px; /* Arrondi des champs de saisie */
+            border-radius: 8px;
             font-size: 14px;
             transition: all 0.2s;
         }
@@ -154,6 +155,7 @@
         .actions-container {
             display: flex;
             gap: 15px;
+            margin-bottom: 25px;
         }
         .btn-download {
             background: linear-gradient(135deg, #ff3366, #ff66cc);
@@ -180,6 +182,21 @@
         }
         .btn-bulk:hover {
             box-shadow: 0 6px 20px rgba(19, 153, 117, 0.4);
+        }
+
+        /* BADGE VERSION */
+        .version-tag {
+            font-size: 11px;
+            color: #666677;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            margin-top: 15px;
+            border-top: 1px solid #2a2a35;
+            padding-top: 15px;
+        }
+        .version-tag span {
+            color: #ff3366;
         }
 
         /* MODAL STYLES */
@@ -391,7 +408,6 @@
                         </div>
                     </td>
                     <td style="vertical-align: middle; width: 180px; text-align: right;">
-                        <!-- BADGE "LIVE ON" AVEC UN ARRONDI SOFT DE 6PX -->
                         <div id="liveBadge" style="display: inline-block; background: #ff3366; color: #ffffff; font-size: 9px; font-weight: 900; padding: 4px 10px; border-radius: 6px; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.5);">🎙️ LIVE ON</div>
                         <div id="outUrlText" style="font-size: 14px; font-weight: 900; color: #ff3366; margin-bottom: 15px; letter-spacing: 0.5px; text-shadow: 2px 2px 4px rgba(0,0,0,0.9);">WWW.LA1337.COM</div>
                         <div style="display: block; text-align: right;">
@@ -416,6 +432,11 @@
     <div class="actions-container">
         <button class="btn-download" onclick="generateAndDownloadImage()">📸 Télécharger la Signature (PNG)</button>
         <button class="btn-download btn-bulk" id="bulkBtn" onclick="generateAllSignaturesZip()">⚡ Générer TOUTES les signatures de l'équipe (ZIP)</button>
+    </div>
+
+    <!-- PIIED DE PAGE AVEC VERSION & HORODATAGE -->
+    <div class="version-tag">
+        Version <span>v1.4.0</span> — Mis à jour le 22/07/2026 à 00:29
     </div>
 </div>
 
@@ -759,7 +780,7 @@
         }
         
         html2canvas(container, { 
-            backgroundColor: null, // Transparence garantie dans les coins arrondis
+            backgroundColor: null,
             logging: false, 
             scale: 2, 
             useCORS: true, 
