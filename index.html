@@ -332,6 +332,7 @@
         }
         .modal-field {
             margin-bottom: 20px;
+            text-align: left;
         }
         .modal-field label {
             display: block;
@@ -540,19 +541,30 @@
         </div>
 
         <div class="actions-container">
-            <button class="btn-download" onclick="generateAndDownloadImage()">📸 Télécharger la Signature (PNG)</button>
+            <button class="btn-download" onclick="openModalDownloadFilename()">📸 Télécharger la Signature (PNG)</button>
             <button class="btn-download btn-bulk" id="bulkBtn" onclick="generateAllSignaturesZip()">⚡ Générer TOUTES les signatures de l'équipe (ZIP)</button>
         </div>
     </div>
 
-    <!-- ONGLET 2 : HISTORIQUE DES MISES À JOUR (CHANGELOG) -->
+    <!-- ONGLET 2 : HISTORIQUE DES MISES À JOUR (CHANGELOG EN DUR EN HTML) -->
     <div id="tab-changelog" class="tab-content">
         <div class="changelog-container">
             
             <!-- VERSION ACTUELLE -->
             <div class="changelog-card latest">
                 <div class="changelog-header">
-                    <span class="version-badge">v1.5.0 (Actuelle)</span>
+                    <span class="version-badge">v1.6.0 (Actuelle)</span>
+                    <span class="version-date">22/07/2026 à 01:12</span>
+                </div>
+                <ul class="changelog-list">
+                    <li><strong>Pop-up de téléchargement :</strong> Ouverture d'une fenêtre modale avant le téléchargement pour afficher et personnaliser le nom du fichier PNG.</li>
+                </ul>
+            </div>
+
+            <!-- VERSION 1.5.0 -->
+            <div class="changelog-card">
+                <div class="changelog-header">
+                    <span class="version-badge" style="background:#444455;">v1.5.0</span>
                     <span class="version-date">22/07/2026 à 00:31</span>
                 </div>
                 <ul class="changelog-list">
@@ -592,7 +604,7 @@
 
     <!-- PIED DE PAGE AVEC VERSION -->
     <div class="version-tag">
-        Version <span>v1.5.0</span> — Mis à jour le 22/07/2026 à 00:31
+        Version <span>v1.6.0</span> — Mis à jour le 22/07/2026 à 01:12
     </div>
 </div>
 
@@ -627,6 +639,23 @@
         <div class="modal-actions">
             <button class="modal-btn modal-btn-confirm" onclick="confirmNewMember()">✓ Valider</button>
             <button class="modal-btn modal-btn-cancel" onclick="closeModalNewMember()">✕ Annuler</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL NOM DU FICHIER DOWNLOAD -->
+<div id="modalDownloadFilename" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">💾 Nom du Fichier</div>
+        
+        <div class="modal-field">
+            <label>Nom de l'image qui sera téléchargée :</label>
+            <input type="text" id="modalFilenameInput" placeholder="signature-nom.png">
+        </div>
+        
+        <div class="modal-actions">
+            <button class="modal-btn modal-btn-confirm" onclick="confirmDownloadWithFilename()">📥 Télécharger</button>
+            <button class="modal-btn modal-btn-cancel" onclick="closeModalDownloadFilename()">✕ Annuler</button>
         </div>
     </div>
 </div>
@@ -910,11 +939,9 @@
         return 'simple';
     }
 
-    function generateAndDownloadImage() {
-        var sigStyle = document.getElementById('inSigStyle').value;
-        var themeKey = document.getElementById('inPresetTheme').value;
+    /* MODAL DE NOM DE FICHIER TÉLÉCHARGÉ */
+    function openModalDownloadFilename() {
         var choice = document.getElementById('inMemberSelect').value;
-        
         if (choice === 'custom') {
             var mail = document.getElementById('inCustomMail').value;
             if (mail && mail !== 'contact@la1337.com' && !isValidEmail(mail)) {
@@ -922,9 +949,9 @@
                 return;
             }
         }
-        
-        var container = (sigStyle === 'radio') ? document.getElementById('sigPreview') : document.getElementById('sigBanalPreview');
-        var logo = document.getElementById('logoPreview');
+
+        var sigStyle = document.getElementById('inSigStyle').value;
+        var themeKey = document.getElementById('inPresetTheme').value;
         
         var name = 'signature';
         if (choice === 'custom') { 
@@ -936,10 +963,32 @@
         
         var cleanName = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-');
         var typeSuffix = getSignatureTypeSuffix(sigStyle, themeKey);
-        var fileName = `signature-${cleanName}-${typeSuffix}.png`;
-        
+        var defaultFileName = `signature-${cleanName}-${typeSuffix}.png`;
+
+        document.getElementById('modalFilenameInput').value = defaultFileName;
+        document.getElementById('modalDownloadFilename').classList.add('active');
+    }
+
+    function closeModalDownloadFilename() {
+        document.getElementById('modalDownloadFilename').classList.remove('active');
+    }
+
+    function confirmDownloadWithFilename() {
+        var fileName = document.getElementById('modalFilenameInput').value.trim();
+        if(!fileName) fileName = 'signature.png';
+        if(!fileName.endsWith('.png')) fileName += '.png';
+
+        closeModalDownloadFilename();
+        executeImageDownload(fileName);
+    }
+
+    function executeImageDownload(fileName) {
+        var sigStyle = document.getElementById('inSigStyle').value;
+        var container = (sigStyle === 'radio') ? document.getElementById('sigPreview') : document.getElementById('sigBanalPreview');
+        var logo = document.getElementById('logoPreview');
+
         if (sigStyle === 'radio' && !logo.complete) { 
-            setTimeout(generateAndDownloadImage, 100); 
+            setTimeout(function() { executeImageDownload(fileName); }, 100); 
             return; 
         }
         
@@ -1106,10 +1155,20 @@
         }
     });
 
+    document.getElementById('modalDownloadFilename').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeModalDownloadFilename();
+        }
+    });
+
     document.addEventListener('keydown', function(e) {
-        const modal = document.getElementById('modalNewMember');
-        if (modal.classList.contains('active') && e.key === 'Enter') {
+        const modalMember = document.getElementById('modalNewMember');
+        const modalDownload = document.getElementById('modalDownloadFilename');
+
+        if (modalMember.classList.contains('active') && e.key === 'Enter') {
             confirmNewMember();
+        } else if (modalDownload.classList.contains('active') && e.key === 'Enter') {
+            confirmDownloadWithFilename();
         }
     });
 </script>
