@@ -121,13 +121,14 @@ const TEAM_DATABASE = [
     { id: "wagne",      name: "WAGNE Coumba",        mail: "coumba.w@la1337.com",     phone: "03 65 17 00 63", roles: [8, 12] }
 ];
 
-// 6. GÉNÉRATEURS DE SIGNATURES BANALES (Texte pur sans référence au logiciel)
+// 6. GÉNÉRATEURS DE SIGNATURES BANALES / COURRIER
 function generateBanalSignature(name, roles, mail, phone, style) {
     const rolesStr = roles || "Membre";
     const phoneStr = phone ? phone : "03 65 17 00 63";
     const mailStr = mail || "contact@la1337.com";
 
     if (style === 'baweb_line') {
+        // Style Ligne complet avec coordonnées
         return `
 <table cellpadding="0" cellspacing="0" border="0" style="font-family: Arial, sans-serif; font-size: 13px; color: #ffffff; line-height: 1.4; text-align: left; background: transparent;">
   <tr>
@@ -144,16 +145,11 @@ function generateBanalSignature(name, roles, mail, phone, style) {
   </tr>
 </table>`;
     } else {
+        // Style Ultra-Minimaliste (Courriers officiels) : Nom, Prénom & Fonction uniquement
         return `
-<div style="font-family: Arial, sans-serif; font-size: 13px; color: #ffffff; line-height: 1.5; text-align: left; background: transparent;">
-  <div style="font-weight: bold; font-size: 15px; color: #ff3366;">${name}</div>
-  <div style="color: #e1e1e6; font-size: 13px;">${rolesStr} &bull; <strong style="color: #fff;">LA 1337 RADIO</strong></div>
-  <hr style="border: none; border-top: 1px solid #ff3366; margin: 8px 0; width: 100%;" />
-  <div style="font-size: 12px; color: #ccc;">
-    📞 Tél : ${phoneStr} &nbsp;|&nbsp; 
-    ✉️ Email : <a href="mailto:${mailStr}" style="color: #ff3366; text-decoration: none;">${mailStr}</a> &nbsp;|&nbsp; 
-    🌐 Web : <a href="https://www.la1337.com" style="color: #ff3366; text-decoration: none;">www.la1337.com</a>
-  </div>
+<div style="font-family: Arial, sans-serif; font-size: 14px; color: #ffffff; line-height: 1.4; text-align: left; background: transparent;">
+  <div style="font-weight: bold; font-size: 16px; color: #ff3366;">${name}</div>
+  <div style="color: #e1e1e6; font-size: 13px; margin-top: 2px;">${rolesStr}</div>
 </div>`;
     }
 }
