@@ -553,7 +553,18 @@
             <!-- VERSION ACTUELLE -->
             <div class="changelog-card latest">
                 <div class="changelog-header">
-                    <span class="version-badge">v1.6.0 (Actuelle)</span>
+                    <span class="version-badge">v1.7.0 (Actuelle)</span>
+                    <span class="version-date">22/07/2026 à 01:13</span>
+                </div>
+                <ul class="changelog-list">
+                    <li><strong>Horodatage du Fichier :</strong> Inclusion automatique de la date du jour et de l'heure dans le nom par défaut du fichier PNG (format `AAAA-MM-JJ_HHhMM`).</li>
+                </ul>
+            </div>
+
+            <!-- VERSION 1.6.0 -->
+            <div class="changelog-card">
+                <div class="changelog-header">
+                    <span class="version-badge" style="background:#444455;">v1.6.0</span>
                     <span class="version-date">22/07/2026 à 01:12</span>
                 </div>
                 <ul class="changelog-list">
@@ -604,7 +615,7 @@
 
     <!-- PIED DE PAGE AVEC VERSION -->
     <div class="version-tag">
-        Version <span>v1.6.0</span> — Mis à jour le 22/07/2026 à 01:12
+        Version <span>v1.7.0</span> — Mis à jour le 22/07/2026 à 01:13
     </div>
 </div>
 
@@ -939,6 +950,18 @@
         return 'simple';
     }
 
+    /* OBTENIR UN HORODATAGE PROPRE (AAAA-MM-JJ_HHhMM) */
+    function getFormattedTimestamp() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+
+        return `${year}-${month}-${day}_${hours}h${minutes}`;
+    }
+
     /* MODAL DE NOM DE FICHIER TÉLÉCHARGÉ */
     function openModalDownloadFilename() {
         var choice = document.getElementById('inMemberSelect').value;
@@ -963,7 +986,9 @@
         
         var cleanName = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-');
         var typeSuffix = getSignatureTypeSuffix(sigStyle, themeKey);
-        var defaultFileName = `signature-${cleanName}-${typeSuffix}.png`;
+        var timestamp = getFormattedTimestamp();
+        
+        var defaultFileName = `signature-${cleanName}-${typeSuffix}-${timestamp}.png`;
 
         document.getElementById('modalFilenameInput').value = defaultFileName;
         document.getElementById('modalDownloadFilename').classList.add('active');
@@ -1019,6 +1044,7 @@
         let index = 0;
 
         const previousChoice = document.getElementById('inMemberSelect').value;
+        const timestamp = getFormattedTimestamp();
 
         function processNext() {
             if (index >= TEAM_DATABASE.length) {
@@ -1026,7 +1052,7 @@
                 zip.generateAsync({ type: "blob" }).then(function(content) {
                     var typeSuffix = getSignatureTypeSuffix(sigStyle, themeKey);
                     var link = document.createElement('a');
-                    link.download = `signatures-la1337-${typeSuffix}.zip`;
+                    link.download = `signatures-la1337-${typeSuffix}-${timestamp}.zip`;
                     link.href = URL.createObjectURL(content);
                     link.click();
                     
@@ -1059,7 +1085,7 @@
                 }).then(function(canvas) {
                     var cleanName = currentMember.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-');
                     var typeSuffix = getSignatureTypeSuffix(sigStyle, themeKey);
-                    var fileName = `signature-${cleanName}-${typeSuffix}.png`;
+                    var fileName = `signature-${cleanName}-${typeSuffix}-${timestamp}.png`;
                     
                     var dataUrl = canvas.toDataURL('image/png');
                     var base64Data = dataUrl.split(',')[1];
