@@ -6,11 +6,15 @@
     "changes": [
       {
         "category": "⚙️ TECHNIQUE",
-        "text": "Déportation du changelog dans un fichier JSON externe et gestion dynamique des versions."
+        "text": "Déportation du changelog dans un fichier JSON externe avec gestion dynamique des catégories et sigles colorés."
       },
       {
         "category": "🎨 UI/UX",
-        "text": "Affichage auto-adaptatif des 3 dernières versions et rangement en archive du reste."
+        "text": "Intégration de badges thématiques par catégorie pour une lisibilité accrue des mises à jour."
+      },
+      {
+        "category": "📁 ARCHIVES",
+        "text": "Système d'archivage automatique en accordéon dès que l'historique dépasse 3 versions."
       }
     ]
   },
@@ -20,21 +24,63 @@
     "changes": [
       {
         "category": "📄 SIGNATURES",
-        "text": "Nom de fichier épuré : Suppression de la date pour un nom ultra-court <code>sig-[nom]-[type].png</code>."
+        "text": "Nommage automatique épuré et court pour l'export PNG (ex: <code>sig-nom-type.png</code>)."
+      },
+      {
+        "category": "⚡ FONCTIONNALITÉ",
+        "text": "Intégration de la pop-in personnalisable de saisie du nom de fichier avant téléchargement."
+      }
+    ]
+  },
+  {
+    "version": "v1.7.0",
+    "date": "21/07/2026 à 22:45",
+    "changes": [
+      {
+        "category": "👤 MEMBRES",
+        "text": "Nouveau module modal de création rapide de membres avec enregistrement dans le LocalStorage."
+      },
+      {
+        "category": "🔒 SÉCURITÉ",
+        "text": "Validation en temps réel du format des adresses e-mail avec alerte visuelle."
       }
     ]
   },
   {
     "version": "v1.6.0",
-    "date": "21/07/2026",
+    "date": "20/07/2026",
     "changes": [
       {
-        "category": "🚀 FONCTIONNALITÉ",
-        "text": "Génération en masse (ZIP) pour télécharger toutes les signatures d'un coup."
+        "category": "📦 BULK EXPORT",
+        "text": "Génération et exportation globale de l'ensemble des signatures de l'équipe au format archive ZIP."
       },
       {
-        "category": "👤 MEMBRES",
-        "text": "Prise en compte du cumul des rôles et de la saisie personnalisée."
+        "category": "⚙️ TECHNIQUE",
+        "text": "Support multi-rôles simultanés via cases à cocher et rôle personnalisé en saisie libre."
+      }
+    ]
+  },
+  {
+    "version": "v1.5.0",
+    "date": "18/07/2026",
+    "changes": [
+      {
+        "category": "🎨 TEMPLATES",
+        "text": "Ajout des styles de signatures alternatives (Version Ligne complète & Version Minimaliste / Courrier)."
+      },
+      {
+        "category": "🖼️ DESIGN",
+        "text": "Gestion dynamique des bannières thématiques et personnalisation du logo Studio Radio."
+      }
+    ]
+  },
+  {
+    "version": "v1.0.0",
+    "date": "10/07/2026",
+    "changes": [
+      {
+        "category": "🚀 LANCEMENT",
+        "text": "Version initiale du Studio Signature Mail LA 1337 RADIO."
       }
     ]
   }
