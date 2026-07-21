@@ -9,9 +9,9 @@ const ROLE_MAP = {
     5:  "Secrétaire",
     6:  "Trésorière",
     7:  "Animateur",
-    8: "Animatrice",
+    8:  "Animatrice",
     9:  "Programmation",
-    10:  "Technique",
+    10: "Technique",
     11: "RH",
     12: "Événementiel",
     13: "Communication",
@@ -24,15 +24,15 @@ const THEME_IMAGES = {
     cyber: {
         name: "🎧 Mode Radio Cyber (Par défaut - Officiel)",
         url: "https://i.postimg.cc/63Y5PbDR/LA1337-Signatures-de-mail.png",
-        textColor: "#ff3366",       // Rose/Rouge cyber d'origine
-        roleColor: "#e1e1e6",       // Gris clair
-        liveBgColor: "#ff3366",     // Fond du Live On
-        liveTxtColor: "#ffffff"     // Texte du Live On
+        textColor: "#ff3366",       
+        roleColor: "#e1e1e6",       
+        liveBgColor: "#ff3366",     
+        liveTxtColor: "#ffffff"     
     },
     ete: {
         name: "☀️ Mode Été (Fond Officiel)",
         url: "https://i.postimg.cc/7YyJTjw9/LA1337-Signatures-de-mail(1).png",
-        textColor: "#ff3366",       // À ajuster si besoin
+        textColor: "#ff3366",       
         roleColor: "#e1e1e6",
         liveBgColor: "#ff3366",
         liveTxtColor: "#ffffff"
@@ -40,18 +40,18 @@ const THEME_IMAGES = {
     noel: {
         name: "🎄 Mode Noël (Fond Officiel)",
         url: "https://i.postimg.cc/XqWNpSdT/LA1337-Signatures-de-mail(2).png",
-        textColor: "#ffffff",       // Blanc pour que ça ressorte sur le fond Noël
-        roleColor: "#f0a5a5",       // Rose/Rouge très clair pour le rôle
-        liveBgColor: "#ffffff",     // Badge blanc
-        liveTxtColor: "#b71c1c"     // Écrit en rouge foncé à l'intérieur
+        textColor: "#ffffff",       
+        roleColor: "#f0a5a5",       
+        liveBgColor: "#ffffff",     
+        liveTxtColor: "#b71c1c"     
     },
     nouvelan: {
         name: "🥂 Nouvel An (Fond Officiel)",
         url: "https://i.postimg.cc/4x0Jphpd/LA1337-Signatures-de-mail(3).png",
-        textColor: "#dfb76c",       // Doré pour le Nouvel An !
-        roleColor: "#ffffff",       // Blanc pour le rôle
-        liveBgColor: "#dfb76c",     // Badge doré
-        liveTxtColor: "#000000"     // Écrit en noir à l'intérieur
+        textColor: "#dfb76c",       
+        roleColor: "#ffffff",       
+        liveBgColor: "#dfb76c",     
+        liveTxtColor: "#000000"     
     }
 };
 
@@ -67,7 +67,7 @@ const LOGO_IMAGES = {
     }
 };
 
-// 5. FONCTIONS DE STOCKAGE LOCALSTORAGE POUR LES BÉNÉVOLES PERSONNALISÉS
+// 4. FONCTIONS LOCALSTORAGE
 function getCustomMembers() {
     const stored = localStorage.getItem('customMembers');
     return stored ? JSON.parse(stored) : [];
@@ -75,7 +75,6 @@ function getCustomMembers() {
 
 function addCustomMember(member) {
     const customMembers = getCustomMembers();
-    // Vérifier si le bénévole existe déjà
     const exists = customMembers.some(m => m.mail === member.mail);
     if (!exists) {
         customMembers.push(member);
@@ -87,11 +86,9 @@ function clearCustomMembers() {
     localStorage.removeItem('customMembers');
 }
 
-// Intégrer les bénévoles personnalisés à la base de données au chargement
 function loadCustomMembers() {
     const customMembers = getCustomMembers();
     customMembers.forEach(member => {
-        // Éviter les doublons
         if (!TEAM_DATABASE.find(m => m.mail === member.mail)) {
             TEAM_DATABASE.push(member);
         }
@@ -123,3 +120,40 @@ const TEAM_DATABASE = [
     { id: "vernet",     name: "VERNET Jeremy",       mail: "jeremy.v@la1337.com",     phone: "03 65 17 00 63", roles: [7] },
     { id: "wagne",      name: "WAGNE Coumba",        mail: "coumba.w@la1337.com",     phone: "03 65 17 00 63", roles: [8, 12] }
 ];
+
+// 6. GÉNÉRATEURS DE SIGNATURES BANALES (Texte sans fond)
+function generateBanalSignature(name, roles, mail, phone, style) {
+    const rolesStr = roles || "Membre";
+    const phoneStr = phone ? phone : "03 65 17 00 63";
+    const mailStr = mail || "contact@la1337.com";
+
+    if (style === 'baweb_line') {
+        return `
+<table cellpadding="0" cellspacing="0" border="0" style="font-family: Arial, sans-serif; font-size: 13px; color: #ffffff; line-height: 1.4; text-align: left; background: transparent;">
+  <tr>
+    <td style="padding-right: 15px; border-right: 3px solid #ff3366; vertical-align: top;">
+      <div style="font-size: 16px; font-weight: bold; color: #ff3366;">${name}</div>
+      <div style="font-size: 13px; color: #e1e1e6; font-weight: 600; margin-top: 2px;">${rolesStr}</div>
+      <div style="font-size: 11px; color: #aaa; font-weight: bold; margin-top: 4px;">BAWEB — LA 1337 RADIO</div>
+    </td>
+    <td style="padding-left: 15px; vertical-align: top; color: #ddd;">
+      <div>📞 <strong>Tél :</strong> ${phoneStr}</div>
+      <div>✉️ <strong>Email :</strong> <a href="mailto:${mailStr}" style="color: #ff3366; text-decoration: none;">${mailStr}</a></div>
+      <div>🌐 <strong>Web :</strong> <a href="https://www.la1337.com" style="color: #ff3366; text-decoration: none;">www.la1337.com</a></div>
+    </td>
+  </tr>
+</table>`;
+    } else {
+        return `
+<div style="font-family: Arial, sans-serif; font-size: 13px; color: #ffffff; line-height: 1.5; text-align: left; background: transparent;">
+  <div style="font-weight: bold; font-size: 15px; color: #ff3366;">${name}</div>
+  <div style="color: #e1e1e6; font-size: 13px;">${rolesStr} &bull; <strong style="color: #fff;">LA 1337 RADIO</strong></div>
+  <hr style="border: none; border-top: 1px solid #ff3366; margin: 8px 0; width: 100%;" />
+  <div style="font-size: 12px; color: #ccc;">
+    📞 Tél : ${phoneStr} &nbsp;|&nbsp; 
+    ✉️ Email : <a href="mailto:${mailStr}" style="color: #ff3366; text-decoration: none;">${mailStr}</a> &nbsp;|&nbsp; 
+    🌐 Web : <a href="https://www.la1337.com" style="color: #ff3366; text-decoration: none;">www.la1337.com</a>
+  </div>
+</div>`;
+    }
+}
