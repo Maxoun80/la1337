@@ -1,6 +1,12 @@
-// team.js - Base de données & Configurations officielles de LA 1337 RADIO
+// =============================================================================
+// 1. CONFIGURATION & MAPPING
+// =============================================================================
 
-// 1. CARTOGRAPHIE DES RÔLES
+// Remplace cette URL par le lien de publication CSV de ton Google Sheet
+// (Fichier > Partager > Publier sur le web > Format CSV)
+const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS0a8y_ZHF2WsnBHMbrUKL8p-CH1SJI_6US5bc2Iv-IZRWWo8NiGJEtRjNZfwWSctJBjokRKZruvexz/pub?gid=1526030464&single=true&output=csv";
+
+// Configuration des rôles officielle (1 à 15)
 const ROLE_MAP = {
     1:  "Directeur",
     2:  "Directeur Adjoint",
@@ -19,137 +25,165 @@ const ROLE_MAP = {
     15: "Membre extérieur"
 };
 
-// 2. BANNIÈRES THÉMATIQUES AVEC COULEURS ADAPTÉES
-const THEME_IMAGES = {
-    cyber: {
-        name: "🎧 Mode Radio Cyber (Par défaut - Officiel)",
-        url: "https://i.postimg.cc/63Y5PbDR/LA1337-Signatures-de-mail.png",
-        textColor: "#ff3366",       
-        roleColor: "#e1e1e6",       
-        liveBgColor: "#ff3366",     
-        liveTxtColor: "#ffffff"     
-    },
-    ete: {
-        name: "☀️ Mode Été (Fond Officiel)",
-        url: "https://i.postimg.cc/7YyJTjw9/LA1337-Signatures-de-mail(1).png",
-        textColor: "#ff3366",       
-        roleColor: "#e1e1e6",
-        liveBgColor: "#ff3366",
-        liveTxtColor: "#ffffff"
-    },
-    noel: {
-        name: "🎄 Mode Noël (Fond Officiel)",
-        url: "https://i.postimg.cc/XqWNpSdT/LA1337-Signatures-de-mail(2).png",
-        textColor: "#ffffff",       
-        roleColor: "#f0a5a5",       
-        liveBgColor: "#ffffff",     
-        liveTxtColor: "#b71c1c"     
-    },
-    nouvelan: {
-        name: "🥂 Nouvel An (Fond Officiel)",
-        url: "https://i.postimg.cc/4x0Jphpd/LA1337-Signatures-de-mail(3).png",
-        textColor: "#dfb76c",       
-        roleColor: "#ffffff",       
-        liveBgColor: "#dfb76c",     
-        liveTxtColor: "#000000"     
-    }
-};
+// Base de données chargée dynamiquement en mémoire
+let TEAM_DATABASE = [];
 
-// 3. LOGOS DE LA RADIO
-const LOGO_IMAGES = { 
-    blanc: {
-        name: "⚪ Logo Blanc Officiel",
-        url: "https://i.postimg.cc/4x659pDr/logo-small.png"
-    },
-    noel: {
-        name: "🎄 Logo Noël Officiel",
-        url: "https://i.postimg.cc/50Ty8Btq/Capture-d-ecran-2026-07-18-002918.png"
-    }
-};
+// =============================================================================
+// 2. CHARGEMENT DE L'ÉQUIPE (GOOGLE SHEETS)
+// =============================================================================
 
-// 4. FONCTIONS LOCALSTORAGE
-function getCustomMembers() {
-    const stored = localStorage.getItem('customMembers');
-    return stored ? JSON.parse(stored) : [];
-}
-
-function addCustomMember(member) {
-    const customMembers = getCustomMembers();
-    const exists = customMembers.some(m => m.mail === member.mail);
-    if (!exists) {
-        customMembers.push(member);
-        localStorage.setItem('customMembers', JSON.stringify(customMembers));
-    }
-}
-
-function clearCustomMembers() {
-    localStorage.removeItem('customMembers');
-}
-
-function loadCustomMembers() {
-    const customMembers = getCustomMembers();
-    customMembers.forEach(member => {
-        if (!TEAM_DATABASE.find(m => m.mail === member.mail)) {
-            TEAM_DATABASE.push(member);
+/**
+ * Charge les données de l'équipe depuis le CSV Google Sheets
+ */
+async function loadTeamFromGoogleSheet() {
+    try {
+        const response = await fetch(GOOGLE_SHEET_CSV_URL);
+        if (!response.ok) {
+            throw new Error(`Erreur HTTP: ${response.status}`);
         }
+
+        const data = await response.text();
+
+        // Découpage du CSV par lignes
+        const rows = data.split('\n').map(row => row.trim()).filter(row => row.length > 0);
+        if (rows.length === 0) return;
+
+        // Lecture des en-têtes (ligne 0) pour repérer dynamiquement l'index des colonnes
+        const headers = parseCSVRow(rows[0]);
+        const nameIdx = headers.indexOf("Nom");
+        const mailIdx = headers.indexOf("Email");
+        const phoneIdx = headers.indexOf("Telephone");
+        const rolesIdx = headers.indexOf("Roles");
+
+        TEAM_DATABASE = [];
+
+        // Parcours de chaque membre (à partir de la ligne 1)
+        for (let i = 1; i < rows.length; i++) {
+            const cols = parseCSVRow(rows[i]);
+            if (!cols[nameIdx]) continue; // Saute les lignes sans nom
+
+            // Découpage et conversion des rôles calculés ("1, 7" => [1, 7])
+            const rawRoles = cols[rolesIdx] || "";
+            const rolesArray = rawRoles
+                .split(',')
+                .map(r => parseInt(r.trim(), 10))
+                .filter(r => !isNaN(r));
+
+            // Génération d'un ID unique à partir du nom
+            const memberId = cols[nameIdx]
+                .toLowerCase()
+                .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                .replace(/[^a-z0-9]/g, "_");
+
+            TEAM_DATABASE.push({
+                id: memberId,
+                name: cols[nameIdx],
+                mail: cols[mailIdx] || "",
+                phone: cols[phoneIdx] || "",
+                roles: rolesArray
+            });
+        }
+
+        console.log("Équipe chargée avec succès depuis Google Sheets :", TEAM_DATABASE);
+
+        // Mise à jour de la liste déroulante dans l'interface
+        populateTeamSelect();
+
+    } catch (error) {
+        console.error("Impossible de charger l'équipe depuis Google Sheets :", error);
+    }
+}
+
+/**
+ * Découpe proprement une ligne CSV en gérant les guillemets et virgules internes
+ */
+function parseCSVRow(row) {
+    const result = [];
+    let current = '';
+    let inQuotes = false;
+
+    for (let i = 0; i < row.length; i++) {
+        const char = row[i];
+        if (char === '"') {
+            inQuotes = !inQuotes;
+        } else if (char === ',' && !inQuotes) {
+            result.push(current.trim().replace(/^"|"$/g, ''));
+            current = '';
+        } else {
+            current += char;
+        }
+    }
+    result.push(current.trim().replace(/^"|"$/g, ''));
+    return result;
+}
+
+// =============================================================================
+// 3. INTERFACE UTILISATEUR & ÉVÉNEMENTS
+// =============================================================================
+
+/**
+ * Remplit le sélecteur d'équipe (<select id="teamSelect">) avec les membres chargés
+ */
+function populateTeamSelect() {
+    const select = document.getElementById("teamSelect");
+    if (!select) return;
+
+    // Réinitialisation du sélecteur
+    select.innerHTML = '<option value="">-- Sélectionnez un membre --</option>';
+
+    TEAM_DATABASE.forEach(member => {
+        const option = document.createElement("option");
+        option.value = member.id;
+        option.textContent = member.name;
+        select.appendChild(option);
     });
 }
 
-// 5. BASE DE DONNÉES DE L'ÉQUIPE
-const TEAM_DATABASE = [
-    { id: "archer",     name: "ARCHER Vincent",      mail: "vincent.a@la1337.com",      phone: "03 65 17 00 63", roles: [7] },
-    { id: "bernard",    name: "BERNARD Elise",       mail: "elise.b@la1337.com",        phone: "03 65 17 00 63", roles: [8, 12, 14] },
-    { id: "dafflon",    name: "DAFFLON Anais",       mail: "anais.d@la1337.com",        phone: "03 65 17 00 63", roles: [8] },
-    { id: "dherbomez",  name: "DHERBOMEZ Margaux",   mail: "margaux.d@la1337.com",    phone: "03 65 17 00 63", roles: [12] },
-    { id: "dossantos",  name: "DOS SANTOS Cindy",    mail: "cindy.d@la1337.com",      phone: "03 65 17 00 63", roles: [8] },
-    { id: "fonvielle",  name: "FONVIELLE Magali",    mail: "magali.f@la1337.com",     phone: "03 65 17 00 63", roles: [8] },
-    { id: "haliti",     name: "HALITI Merema",       mail: "merema.h@la1337.com",     phone: "03 65 17 00 63", roles: [8] },
-    { id: "jaffrezic",  name: "JAFFREZIC Solenn",    mail: "solenn.j@la1337.com",     phone: "03 65 17 00 63", roles: [11] },
-    { id: "kirsz",      name: "KIRSZ Rafael",        mail: "rafael.k@la1337.com",     phone: "03 65 17 00 63", roles: [7, 9, 11] },
-    { id: "marechal",   name: "MARECHAL Laurence",   mail: "laurence.m@la1337.com",   phone: "03 65 17 00 63", roles: [8] },
-    { id: "morel",      name: "MOREL Enzo",          mail: "enzo.m@la1337.com",       phone: "03 65 17 00 63", roles: [3] },
-    { id: "noel",       name: "NOEL Axel",           mail: "axel.n@la1337.com",        phone: "03 65 17 00 63", roles: [4, 7] },
-    { id: "philippon",  name: "PHILIPPON Pierre",    mail: "pierre.p@la1337.com",     phone: "03 65 17 00 63", roles: [7] },
-    { id: "porino",     name: "PORINO Laeticia",     mail: "laeticia.p@la1337.com",   phone: "03 65 17 00 63", roles: [8] },
-    { id: "rocquemont", name: "ROCQUEMONT Maxence",  mail: "maxence.r@la1337.com",    phone: "03 65 17 00 63", roles: [2, 5, 7, 10, 11] },
-    { id: "samson",     name: "SAMSON Solyvan",      mail: "solyvan.s@la1337.com",    phone: "03 65 17 00 63", roles: [15] },
-    { id: "schilling",  name: "SCHILLING Ingrid",    mail: "ingrid.s@la1337.com",     phone: "03 65 17 00 63", roles: [6] },
-    { id: "schneider",  name: "SCHNEIDER Thibault",  mail: "thibault.s@la1337.com",   phone: "03 65 17 00 63", roles: [10] },
-    { id: "stef",       name: "STEF Laura",          mail: "laura.s@la1337.com",      phone: "03 65 17 00 63", roles: [13] },
-    { id: "vankets",    name: "VAN KETS Guillaume",  mail: "guillaume.v@la1337.com",  phone: "03 65 17 00 63", roles: [1, 7] },
-    { id: "vernet",     name: "VERNET Jeremy",       mail: "jeremy.v@la1337.com",     phone: "03 65 17 00 63", roles: [7] },
-    { id: "wagne",      name: "WAGNE Coumba",        mail: "coumba.w@la1337.com",     phone: "03 65 17 00 63", roles: [8, 12] }
-];
+/**
+ * Gère la sélection d'un membre pour pré-remplir les champs du formulaire
+ */
+function onTeamMemberSelect(memberId) {
+    const member = TEAM_DATABASE.find(m => m.id === memberId);
+    if (!member) return;
 
-// 6. GÉNÉRATEURS DE SIGNATURES TEXTE (SIMPLE & MINIMALISTE)
-function generateBanalSignature(name, roles, mail, phone, style) {
-    const rolesStr = roles || "Membre";
-    const phoneStr = phone ? phone : "03 65 17 00 63";
-    const mailStr = mail || "contact@la1337.com";
+    // Mise à jour des champs texte (adapter selon les IDs de tes inputs HTML)
+    const nameInput = document.getElementById("nameInput");
+    const mailInput = document.getElementById("mailInput");
+    const phoneInput = document.getElementById("phoneInput");
 
-    if (style === 'baweb_line') {
-        // Style Simple (Ligne complète)
-        return `
-<table cellpadding="0" cellspacing="0" border="0" style="font-family: Arial, sans-serif; font-size: 13px; color: #ffffff; line-height: 1.4; text-align: left; background: transparent;">
-  <tr>
-    <td style="padding-right: 15px; border-right: 3px solid #ff3366; vertical-align: top;">
-      <div style="font-size: 16px; font-weight: bold; color: #ff3366;">${name}</div>
-      <div style="font-size: 13px; color: #e1e1e6; font-weight: 600; margin-top: 2px;">${rolesStr}</div>
-      <div style="font-size: 11px; color: #aaa; font-weight: bold; margin-top: 4px;">LA 1337 RADIO</div>
-    </td>
-    <td style="padding-left: 15px; vertical-align: top; color: #ddd;">
-      <div>📞 <strong>Tél :</strong> ${phoneStr}</div>
-      <div>✉️ <strong>Email :</strong> <a href="mailto:${mailStr}" style="color: #ff3366; text-decoration: none;">${mailStr}</a></div>
-      <div>🌐 <strong>Web :</strong> <a href="https://www.la1337.com" style="color: #ff3366; text-decoration: none;">www.la1337.com</a></div>
-    </td>
-  </tr>
-</table>`;
-    } else {
-        // Style Minimaliste (Courrier officiel) : Nom, Prénom & Fonction uniquement
-        return `
-<div style="font-family: Arial, sans-serif; font-size: 14px; color: #ffffff; line-height: 1.4; text-align: left; background: transparent;">
-  <div style="font-weight: bold; font-size: 16px; color: #ff3366;">${name}</div>
-  <div style="color: #e1e1e6; font-size: 13px; margin-top: 2px;">${rolesStr}</div>
-</div>`;
+    if (nameInput) nameInput.value = member.name;
+    if (mailInput) mailInput.value = member.mail;
+    if (phoneInput) phoneInput.value = member.phone;
+
+    // Décodage des libellés de rôles via le ROLE_MAP
+    const roleLabels = member.roles
+        .map(roleId => ROLE_MAP[roleId])
+        .filter(Boolean);
+
+    const rolesInput = document.getElementById("rolesInput");
+    if (rolesInput) {
+        rolesInput.value = roleLabels.join(" - ");
+    }
+
+    // Déclenche la mise à jour du rendu du badge / de la signature s'il existe une fonction
+    if (typeof updateSignature === "function") {
+        updateSignature();
     }
 }
+
+// =============================================================================
+// 4. INITIALISATION AU CHARGEMENT DE LA PAGE
+// =============================================================================
+
+document.addEventListener("DOMContentLoaded", () => {
+    // 1. Lancement du chargement dynamique
+    loadTeamFromGoogleSheet();
+
+    // 2. Écoute du changement de sélection du membre
+    const select = document.getElementById("teamSelect");
+    if (select) {
+        select.addEventListener("change", (e) => {
+            onTeamMemberSelect(e.target.value);
+        });
+    }
+});
