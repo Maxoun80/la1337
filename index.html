@@ -39,7 +39,7 @@
             letter-spacing: 1px;
         }
 
-        /* NAVIGATION MENU */
+        /* BARRE DE NAVIGATION (MENU) */
         .nav-tabs {
             display: flex;
             justify-content: center;
@@ -64,7 +64,10 @@
             align-items: center;
             gap: 8px;
         }
-        .tab-btn:hover { color: #fff; border-color: #ff3366; }
+        .tab-btn:hover {
+            color: #fff;
+            border-color: #ff3366;
+        }
         .tab-btn.active {
             background: linear-gradient(135deg, #ff3366, #ff66cc);
             color: #fff;
@@ -72,11 +75,15 @@
             box-shadow: 0 4px 15px rgba(255, 51, 102, 0.3);
         }
 
-        /* SECTIONS */
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
+        /* SECTIONS DES ONGLETS */
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
 
-        /* FORMULAIRE & APERÇU */
+        /* STYLES DU FORMULAIRE ET GÉNÉRATEUR */
         .form-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -84,8 +91,13 @@
             margin-bottom: 25px;
             text-align: left;
         }
-        .input-group { display: flex; flex-direction: column; }
-        .full-width { grid-column: span 2; }
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .full-width {
+            grid-column: span 2;
+        }
         label {
             font-size: 11px;
             color: #ff3366;
@@ -107,6 +119,16 @@
             border-color: #ff3366;
             outline: none;
             box-shadow: 0 0 8px rgba(255, 51, 102, 0.2);
+        }
+        input.invalid-email {
+            border-color: #ff6666;
+            box-shadow: 0 0 8px rgba(255, 102, 102, 0.3);
+        }
+        .email-error {
+            color: #ff6666;
+            font-size: 11px;
+            margin-top: 5px;
+            display: none;
         }
         
         .custom-member-zone {
@@ -136,8 +158,26 @@
             color: #e1e1e6;
             font-size: 13px;
             cursor: pointer;
+            user-select: none;
         }
-        .checkbox-item input { accent-color: #ff3366; width: 16px; height: 16px; }
+        .checkbox-item input {
+            cursor: pointer;
+            accent-color: #ff3366;
+            width: 16px;
+            height: 16px;
+        }
+        .checkbox-item:hover {
+            color: #fff;
+        }
+
+        .custom-role-input-zone {
+            display: none;
+            margin-top: 12px;
+            padding: 12px;
+            background: #20202b;
+            border-radius: 8px;
+            border: 1px dashed #ff3366;
+        }
 
         .preview-header {
             text-align: left;
@@ -158,7 +198,11 @@
             justify-content: center;
             align-items: center;
         }
-        .actions-container { display: flex; gap: 15px; margin-bottom: 25px; }
+        .actions-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
         .btn-download {
             background: linear-gradient(135deg, #ff3366, #ff66cc);
             color: #fff;
@@ -174,21 +218,71 @@
             transition: all 0.2s;
             flex: 1;
         }
-        .btn-download:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255, 51, 102, 0.4); }
-        .btn-bulk { background: linear-gradient(135deg, #33cc99, #139975); box-shadow: 0 4px 15px rgba(19, 153, 117, 0.3); }
+        .btn-download:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 51, 102, 0.4);
+        }
+        .btn-bulk {
+            background: linear-gradient(135deg, #33cc99, #139975);
+            box-shadow: 0 4px 15px rgba(19, 153, 117, 0.3);
+        }
+        .btn-bulk:hover {
+            box-shadow: 0 6px 20px rgba(19, 153, 117, 0.4);
+        }
 
-        /* CHANGELOG MODULE */
-        .changelog-container { text-align: left; display: flex; flex-direction: column; gap: 20px; }
-        .changelog-card { background: #0d0d12; border: 1px solid #2a2a35; border-radius: 12px; padding: 20px 25px; }
-        .changelog-card.latest { border-color: #ff3366; box-shadow: 0 0 15px rgba(255, 51, 102, 0.15); }
-        .changelog-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #1a1a22; padding-bottom: 10px; }
-        .version-badge { background: #ff3366; color: #fff; font-weight: bold; font-size: 12px; padding: 4px 10px; border-radius: 6px; text-transform: uppercase; }
-        .version-badge.old { background: #444455; }
-        .version-date { color: #888899; font-size: 12px; font-weight: 600; }
-        .changelog-list { margin: 0; padding-left: 20px; color: #d1d1e0; font-size: 13px; line-height: 1.7; }
-        .changelog-list li::marker { color: #ff3366; }
+        /* STYLES DU MODULE DE MISE À JOUR (CHANGELOG) */
+        .changelog-container {
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .changelog-card {
+            background: #0d0d12;
+            border: 1px solid #2a2a35;
+            border-radius: 12px;
+            padding: 20px 25px;
+            position: relative;
+        }
+        .changelog-card.latest {
+            border-color: #ff3366;
+            box-shadow: 0 0 15px rgba(255, 51, 102, 0.15);
+        }
+        .changelog-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            border-bottom: 1px solid #1a1a22;
+            padding-bottom: 10px;
+        }
+        .version-badge {
+            background: #ff3366;
+            color: #fff;
+            font-weight: bold;
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .version-date {
+            color: #888899;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .changelog-list {
+            margin: 0;
+            padding-left: 20px;
+            color: #d1d1e0;
+            font-size: 13px;
+            line-height: 1.7;
+        }
+        .changelog-list li::marker {
+            color: #ff3366;
+        }
 
-        /* FOOTER BADGE */
+        /* BADGE FOOTER */
         .version-tag {
             font-size: 11px;
             color: #666677;
@@ -199,7 +293,126 @@
             border-top: 1px solid #2a2a35;
             padding-top: 15px;
         }
-        .version-tag span { color: #ff3366; }
+        .version-tag span {
+            color: #ff3366;
+        }
+
+        /* MODAL STYLES */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal-content {
+            background: #1a1a22;
+            border: 2px solid #ff3366;
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(255, 51, 102, 0.3);
+        }
+        .modal-header {
+            color: #ff3366;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .modal-field {
+            margin-bottom: 20px;
+        }
+        .modal-field label {
+            display: block;
+            margin-bottom: 8px;
+            color: #ff3366;
+            font-size: 11px;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        .modal-field input {
+            width: 100%;
+            box-sizing: border-box;
+            background: #0d0d12;
+            border: 1px solid #333344;
+            color: #fff;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .modal-field input:focus {
+            border-color: #ff3366;
+            outline: none;
+            box-shadow: 0 0 8px rgba(255, 51, 102, 0.2);
+        }
+        .modal-roles {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            background: #0d0d12;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #333344;
+            margin-bottom: 20px;
+        }
+        .modal-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #e1e1e6;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .modal-checkbox input {
+            width: auto;
+            accent-color: #ff3366;
+            cursor: pointer;
+        }
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+        }
+        .modal-btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-size: 13px;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+        }
+        .modal-btn-confirm {
+            background: linear-gradient(135deg, #ff3366, #ff66cc);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(255, 51, 102, 0.3);
+        }
+        .modal-btn-confirm:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 51, 102, 0.4);
+        }
+        .modal-btn-cancel {
+            background: #333344;
+            color: #aaa;
+        }
+        .modal-btn-cancel:hover {
+            background: #444455;
+            color: #ddd;
+        }
     </style>
 </head>
 <body>
@@ -208,183 +421,282 @@
     <h1>🎙️ LA 1337 RADIO 🎙️</h1>
     <div class="subtitle">Studio de Création de Signatures Mail</div>
     
-    <!-- NAVIGATION -->
+    <!-- MENU DE NAVIGATION -->
     <div class="nav-tabs">
-        <button class="tab-btn active" onclick="switchTab('tab-generator', this)">🎨 Générateur</button>
-        <button class="tab-btn" onclick="switchTab('tab-changelog', this)">📜 Mises à jour & Nouveautés</button>
+        <button class="tab-btn active" onclick="switchTab('tab-generator', this)">
+            🎨 Générateur
+        </button>
+        <button class="tab-btn" onclick="switchTab('tab-changelog', this)">
+            📜 Mises à jour & Nouveautés
+        </button>
     </div>
 
     <!-- ONGLET 1 : GÉNÉRATEUR -->
     <div id="tab-generator" class="tab-content active">
         <div class="form-container">
+            <!-- SÉLECTEUR DU TYPE DE SIGNATURE -->
             <div class="input-group full-width">
                 <label style="color: #33cc99;">🎨 Style de Signature</label>
                 <select id="inSigStyle" onchange="updateSig()">
                     <option value="radio">🎧 Signature Officielle Graphique</option>
-                    <option value="baweb_line">📄 Signature Simple (Ligne complète)</option>
-                    <option value="baweb_minimal">✉️ Signature Minimaliste</option>
+                    <option value="baweb_line">📄 Signature Simple (Ligne complète : Nom, Fonction, Tél, Mail, Web)</option>
+                    <option value="baweb_minimal">✉️ Signature Minimaliste (Courrier : Nom, Prénom, Fonction)</option>
                 </select>
             </div>
 
+            <!-- SÉLECTEUR DE MEMBRES -->
             <div class="input-group">
-                <label>👤 Membre de l'équipe</label>
-                <select id="inMemberSelect" onchange="handleMemberChange()"></select>
+                <label>👤 Sélectionner le Membre de l'équipe</label>
+                <select id="inMemberSelect" onchange="handleMemberChange()">
+                    <!-- Rempli automatiquement -->
+                </select>
             </div>
             
+            <!-- SÉLECTEUR DE BANNIÈRE -->
             <div class="input-group" id="groupPresetTheme">
-                <label>🎭 Bannière Thématique</label>
-                <select id="inPresetTheme" onchange="applyPresetTheme()"></select>
+                <label>🎭 Sélectionner la Bannière Thématique</label>
+                <select id="inPresetTheme" onchange="applyPresetTheme()">
+                    <!-- Rempli automatiquement -->
+                </select>
             </div>
 
-            <div class="input-group full-width" id="groupPresetLogo">
-                <label>💿 Logo</label>
-                <select id="inPresetLogo" onchange="applyPresetLogo()"></select>
-            </div>
-
-            <div class="input-group full-width">
-                <label>💼 Rôles</label>
-                <div id="rolesContainer" class="roles-checkbox-container"></div>
-            </div>
-
-            <div class="full-width custom-member-zone" id="customZone">
-                <div class="input-group">
-                    <label>Prénom & Nom</label>
-                    <input type="text" id="inCustomName" placeholder="Ex: Jean DUPONT" oninput="updateSig()">
+            <!-- ZONE DE SAISIE LIBRE -->
+            <div id="customMemberZone" class="input-group full-width custom-member-zone">
+                <div>
+                    <label style="color: #fff;">Nom Prénom du nouveau</label>
+                    <input type="text" id="inCustomName" placeholder="Ex: MARTIN Lucas" style="width:100%; box-sizing:border-box;" oninput="updateSig()">
                 </div>
-                <div class="input-group">
-                    <label>Email</label>
-                    <input type="text" id="inCustomMail" placeholder="Ex: j.dupont@la1337.com" oninput="updateSig()">
+                <div>
+                    <label style="color: #fff;">Email Radio</label>
+                    <input type="email" id="inCustomMail" placeholder="lucas@la1337.com" style="width:100%; box-sizing:border-box;" oninput="updateSig()">
+                    <div class="email-error" id="emailError">⚠️ Email invalide</div>
+                </div>
+                <div style="grid-column: span 2;">
+                    <label style="color: #fff;">Numéro de Téléphone</label>
+                    <input type="text" id="inCustomPhone" placeholder="06 00 00 00 00" style="width:100%; box-sizing:border-box;" oninput="updateSig()">
+                </div>
+            </div>
+
+            <!-- SÉLECTEUR DE LOGO -->
+            <div class="input-group full-width" id="groupPresetLogo">
+                <label>💿 Sélectionner le Logo</label>
+                <select id="inPresetLogo" onchange="applyPresetLogo()">
+                    <!-- Rempli automatiquement -->
+                </select>
+            </div>
+
+            <!-- CASES À COCHER DES RÔLES -->
+            <div class="input-group full-width">
+                <label>💼 Choisir ton ou tes rôles (Plusieurs choix possibles)</label>
+                <div id="rolesContainer" class="roles-checkbox-container">
+                    <!-- Rempli automatiquement -->
+                </div>
+                
+                <div id="customRoleInputZone" class="custom-role-input-zone">
+                    <label style="color: #fff; margin-bottom: 5px; display: block;">Saisir le rôle personnalisé :</label>
+                    <input type="text" id="inCustomRoleText" placeholder="Ex: Grand Maître des Platines / Stagiaire" style="width: 100%; box-sizing: border-box;" oninput="updateSig()">
                 </div>
             </div>
         </div>
 
-        <div class="preview-header">Aperçu :</div>
+        <div class="preview-header">Aperçu de la signature :</div>
+        
         <div class="preview-area">
-            <!-- APERÇU OFFICIEL (GRAPHIQUE) -->
-            <div id="sigPreview" style="width: 650px; height: 135px; background-size: cover; border-radius: 12px; padding: 20px 25px; box-sizing: border-box; position: relative;">
-                <table cellpadding="0" cellspacing="0" style="width: 100%; height: 100%; border-collapse: collapse; text-align: left; font-family: 'Segoe UI', Arial, sans-serif; color: #ffffff;">
+            <!-- APERÇU SIG RADIO -->
+            <div id="sigPreview" style="width: 650px; height: 135px; background-size: cover; background-position: center; border: 1px solid #22222b; border-radius: 12px; overflow: hidden; padding: 20px 25px; box-sizing: border-box; position: relative;">
+                <table cellpadding="0" cellspacing="0" style="width: 100%; height: 100%; border-collapse: collapse; text-align: left; font-family: 'Segoe UI', Arial, sans-serif; color: #ffffff; position: relative; z-index: 2;">
                     <tr>
                         <td id="borderContainer" style="width: 110px; vertical-align: middle; padding-right: 15px; border-right: 3px solid #ff3366;">
-                            <img id="logoPreview" crossorigin="anonymous" src="" alt="LA 1337" style="width: 95px; height: auto; display: block;">
+                            <img id="logoPreview" crossorigin="anonymous" src="" alt="LA 1337" style="width: 95px; height: auto; display: block; filter: drop-shadow(0px 2px 5px rgba(0,0,0,0.5));">
                         </td>
                         <td style="vertical-align: middle; padding-left: 20px;">
-                            <div id="outName" style="font-size: 21px; font-weight: bold; color: #ff3366;">Prénom NOM</div>
-                            <div id="outRole" style="font-size: 13px; font-weight: bold; color: #e1e1e6; font-style: italic; margin-bottom: 15px;">Votre Rôle / Poste</div>
-                            <div style="font-size: 11px; color: #ffffff; display: flex; gap: 15px;">
-                                <span><strong id="iconMail" style="color: #ff3366;">📧</strong> <span id="outMail">contact@la1337.com</span></span>
-                                <span id="outPhoneContainer"><strong id="iconPhone" style="color: #ff3366;">📞</strong> <span id="outPhone">03 65 17 00 63</span></span>
+                            <div id="outName" style="font-size: 21px; font-weight: bold; color: #ff3366; margin-bottom: 1px; letter-spacing: 0.5px; text-shadow: 2px 2px 4px rgba(0,0,0,0.9);">Prénom NOM</div>
+                            <div id="outRole" style="font-size: 13px; font-weight: bold; color: #e1e1e6; font-style: italic; margin-bottom: 15px; text-shadow: 2px 2px 5px rgba(0,0,0,1), -1px -1px 2px rgba(0,0,0,1);">Votre Rôle / Poste</div>
+                            <div style="font-size: 11px; color: #ffffff; text-shadow: 2px 2px 4px rgba(0,0,0,1), -1px -1px 2px rgba(0,0,0,1); display: flex; gap: 15px;">
+                                <span><strong id="iconMail" style="color: #ff3366; text-shadow: none;">📧</strong> <span id="outMail">contact@la1337.com</span></span>
+                                <span id="outPhoneContainer"><strong id="iconPhone" style="color: #ff3366; text-shadow: none;">📞</strong> <span id="outPhone">03 65 17 00 63</span></span>
                             </div>
                         </td>
                         <td style="vertical-align: middle; width: 180px; text-align: right;">
-                            <div id="liveBadge" style="display: inline-block; background: #ff3366; color: #ffffff; font-size: 9px; font-weight: 900; padding: 4px 10px; border-radius: 6px; text-transform: uppercase; margin-bottom: 8px;">🎙️ LIVE ON</div>
-                            <div id="outUrlText" style="font-size: 14px; font-weight: 900; color: #ff3366;">WWW.LA1337.COM</div>
+                            <div id="liveBadge" style="display: inline-block; background: #ff3366; color: #ffffff; font-size: 9px; font-weight: 900; padding: 4px 10px; border-radius: 6px; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.5);">🎙️ LIVE ON</div>
+                            <div id="outUrlText" style="font-size: 14px; font-weight: 900; color: #ff3366; margin-bottom: 15px; letter-spacing: 0.5px; text-shadow: 2px 2px 4px rgba(0,0,0,0.9);">WWW.LA1337.COM</div>
+                            <div style="display: block; text-align: right;">
+                                <div style="display: inline-flex; align-items: center; margin-left: 10px; font-size: 10px; font-weight: bold; color: #ffffff; text-shadow: 2px 2px 4px rgba(0,0,0,1);">
+                                    <svg style="width: 11px; height: 11px; fill: #ffffff; margin-right: 4px;" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.051.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                                    <span>@LA1337RADIO</span>
+                                </div>
+                                <div style="display: inline-flex; align-items: center; margin-left: 10px; font-size: 10px; font-weight: bold; color: #ffffff; text-shadow: 2px 2px 4px rgba(0,0,0,1);">
+                                    <svg style="width: 11px; height: 11px; fill: #ffffff; margin-right: 4px;" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                                    <span>@LA1337RADIO</span>
+                                </div>
+                            </div>
                         </td>
                     </tr>
                 </table>
             </div>
 
-            <!-- APERÇU DE SÉCURITÉ / SIMPLES (BAWEB LINE & MINIMAL) -->
-            <div id="sigBanalPreview" style="display: none; background: #ffffff; color: #333333; padding: 20px; border-radius: 8px; text-align: left; width: 100%; box-sizing: border-box; font-family: Arial, sans-serif;">
-                <div id="banalContent"></div>
-            </div>
+            <!-- APERÇU SIG SIMPLE / MINIMALISTE -->
+            <div id="sigBanalPreview" style="display: none; padding: 10px;"></div>
         </div>
 
         <div class="actions-container">
             <button class="btn-download" onclick="generateAndDownloadImage()">📸 Télécharger la Signature (PNG)</button>
-            <button class="btn-download btn-bulk" id="bulkBtn" onclick="generateAllSignaturesZip()">⚡ Générer TOUT le ZIP</button>
+            <button class="btn-download btn-bulk" id="bulkBtn" onclick="generateAllSignaturesZip()">⚡ Générer TOUTES les signatures de l'équipe (ZIP)</button>
         </div>
     </div>
 
-    <!-- ONGLET 2 : HISTORIQUE DES MISES À JOUR -->
+    <!-- ONGLET 2 : HISTORIQUE DES MISES À JOUR (CHANGELOG) -->
     <div id="tab-changelog" class="tab-content">
         <div class="changelog-container">
             
-            <!-- VERSION 1.8.0 -->
+            <!-- VERSION ACTUELLE -->
             <div class="changelog-card latest">
                 <div class="changelog-header">
-                    <span class="version-badge">v1.8.0 (Actuelle)</span>
-                    <span class="version-date">22/07/2026 à 00:37</span>
-                </div>
-                <ul class="changelog-list">
-                    <li><strong>Restauration Complète :</strong> Retour à la version fonctionnelle d'origine intégrant tous les styles de signatures (Officielle Graphique, Baweb Line, Baweb Minimal) et le générateur ZIP.</li>
-                    <li><strong>Gestion centralisée :</strong> Conservation du module de mise à jour au sein du projet principal pour éviter les erreurs de dépendance.</li>
-                </ul>
-            </div>
-
-            <!-- VERSION 1.5.0 -->
-            <div class="changelog-card">
-                <div class="changelog-header">
-                    <span class="version-badge old">v1.5.0</span>
+                    <span class="version-badge">v1.5.0 (Actuelle)</span>
                     <span class="version-date">22/07/2026 à 00:31</span>
                 </div>
                 <ul class="changelog-list">
-                    <li><strong>Navigation par Menu :</strong> Ajout du système d'onglets pour switcher dynamiquement entre le studio et les mises à jour.</li>
-                    <li><strong>Module Changelog :</strong> Intégration de l'historique complet pour un meilleur suivi des versions.</li>
+                    <li><strong>Navigation par Menu :</strong> Ajout du système d'onglets pour passer du générateur à l'historique des mises à jour.</li>
+                    <li><strong>Module Changelog :</strong> Intégration du journal des modifications pour suivre les évolutions du code.</li>
+                </ul>
+            </div>
+
+            <!-- VERSION 1.4.0 -->
+            <div class="changelog-card">
+                <div class="changelog-header">
+                    <span class="version-badge" style="background:#444455;">v1.4.0</span>
+                    <span class="version-date">22/07/2026 à 00:29</span>
+                </div>
+                <ul class="changelog-list">
+                    <li><strong>Arrondis Modernes :</strong> Application de `border-radius` (12px) sur la carte de signature et le badge "LIVE ON" (6px).</li>
+                    <li><strong>Transparence PNG :</strong> Conservation de la découpe arrondie lors du téléchargement de l'image.</li>
+                    <li><strong>Badge Versioning :</strong> Ajout du pied de page indiquant le numéro de version et l'horodatage.</li>
+                </ul>
+            </div>
+
+            <!-- VERSION 1.3.0 -->
+            <div class="changelog-card">
+                <div class="changelog-header">
+                    <span class="version-badge" style="background:#444455;">v1.3.0</span>
+                    <span class="version-date">21/07/2026 à 23:45</span>
+                </div>
+                <ul class="changelog-list">
+                    <li><strong>Modal Nouveau Membre :</strong> Ajout d'une fenêtre pop-up élégante pour enregistrer rapidement les nouveaux arrivants.</li>
+                    <li><strong>Export ZIP global :</strong> Fonctionnalité permettant d'exporter les signatures de toute l'équipe en un clic.</li>
+                    <li><strong>Multi-Rôles :</strong> Possibilité de cocher plusieurs casquettes par membre.</li>
                 </ul>
             </div>
 
         </div>
     </div>
 
-    <!-- FOOTER -->
+    <!-- PIED DE PAGE AVEC VERSION -->
     <div class="version-tag">
-        Version <span>v1.8.0</span> — Mis à jour le 22/07/2026 à 00:37
+        Version <span>v1.5.0</span> — Mis à jour le 22/07/2026 à 00:31
     </div>
 </div>
 
-<!-- INCLUSION DU FICHIER DES MEMBRES -->
+<!-- MODAL NOUVEAU MEMBRE -->
+<div id="modalNewMember" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">✍️ Nouveau Membre</div>
+        
+        <div class="modal-field">
+            <label>Nom Prénom</label>
+            <input type="text" id="modalName" placeholder="Ex: MARTIN Lucas">
+        </div>
+        
+        <div class="modal-field">
+            <label>Email Radio</label>
+            <input type="email" id="modalMail" placeholder="lucas@la1337.com">
+            <div class="email-error" id="modalEmailError">⚠️ Email invalide</div>
+        </div>
+        
+        <div class="modal-field">
+            <label>Numéro de Téléphone</label>
+            <input type="text" id="modalPhone" placeholder="06 00 00 00 00">
+        </div>
+        
+        <div class="modal-field">
+            <label>Rôles (plusieurs choix possibles)</label>
+            <div class="modal-roles" id="modalRolesContainer">
+                <!-- Rempli automatiquement par JS -->
+            </div>
+        </div>
+        
+        <div class="modal-actions">
+            <button class="modal-btn modal-btn-confirm" onclick="confirmNewMember()">✓ Valider</button>
+            <button class="modal-btn modal-btn-cancel" onclick="closeModalNewMember()">✕ Annuler</button>
+        </div>
+    </div>
+</div>
+
 <script src="team.js"></script>
 
 <script>
-    // IMAGES & THÈMES D'ORIGINE INTACTS
-    const THEME_IMAGES = {
-        "default": {
-            name: "🔥 Cyberpunk / Radio Red",
-            url: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=1000&q=80",
-            textColor: "#ff3366",
-            roleColor: "#e1e1e6",
-            liveBgColor: "#ff3366",
-            liveTxtColor: "#ffffff"
-        },
-        "neon_blue": {
-            name: "⚡ Neon Blue / Electro",
-            url: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1000&q=80",
-            textColor: "#00d2ff",
-            roleColor: "#b3f0ff",
-            liveBgColor: "#00d2ff",
-            liveTxtColor: "#000000"
-        },
-        "gold_vip": {
-            name: "✨ Premium Gold / VIP",
-            url: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&w=1000&q=80",
-            textColor: "#ffcc00",
-            roleColor: "#fff0b3",
-            liveBgColor: "#ffcc00",
-            liveTxtColor: "#000000"
-        }
-    };
+    const base64Cache = {};
 
-    const LOGO_IMAGES = {
-        "official": {
-            name: "📻 Logo Radio Blanc",
-            url: "https://via.placeholder.com/150x50/ffffff/000000?text=LA+1337"
-        },
-        "dark": {
-            name: "🎧 Logo Radio Sombre",
-            url: "https://via.placeholder.com/150x50/1a1a22/ffffff?text=LA+1337"
-        }
-    };
-
-    const AVAILABLE_ROLES = [
-        "Président", "Animateur", "Technicien", "Régisseur", 
-        "Rédacteur", "Community Manager", "Développeur", "Partenaire"
-    ];
-
+    /* GESTION DU MENU ET ONGLETS */
     function switchTab(tabId, btnElement) {
         document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        
         document.getElementById(tabId).classList.add('active');
         btnElement.classList.add('active');
+    }
+
+    function initRolesCheckboxes() {
+        const container = document.getElementById('rolesContainer');
+        container.innerHTML = '';
+        for (const [code, name] of Object.entries(ROLE_MAP)) {
+            const label = document.createElement('label');
+            label.className = 'checkbox-item';
+            label.innerHTML = `<input type="checkbox" name="roleCheck" value="${code}" onchange="updateSig()"> ${name}`;
+            container.appendChild(label);
+        }
+        
+        const customLabel = document.createElement('label');
+        customLabel.className = 'checkbox-item';
+        customLabel.style.color = '#ff3366';
+        customLabel.style.fontWeight = 'bold';
+        customLabel.innerHTML = `<input type="checkbox" id="chkCustomRole" onchange="toggleCustomRoleInput()"> ✍️ [Rôle personnalisé]`;
+        container.appendChild(customLabel);
+    }
+
+    function toggleCustomRoleInput() {
+        var chk = document.getElementById('chkCustomRole');
+        var zone = document.getElementById('customRoleInputZone');
+        if (chk.checked) {
+            zone.style.display = 'block';
+        } else {
+            zone.style.display = 'none';
+            document.getElementById('inCustomRoleText').value = '';
+        }
+        updateSig();
+    }
+
+    function initMemberSelector() {
+        var select = document.getElementById('inMemberSelect');
+        select.innerHTML = '';
+        
+        var optPlaceholder = document.createElement('option');
+        optPlaceholder.value = '';
+        optPlaceholder.innerText = '👥 Choisissez un membre';
+        optPlaceholder.selected = true;
+        optPlaceholder.disabled = true;
+        select.appendChild(optPlaceholder);
+        
+        var optCustom = document.createElement('option');
+        optCustom.value = 'custom';
+        optCustom.innerText = '✍️ [NOUVEAU MEMBRE - Saisie libre]';
+        select.appendChild(optCustom);
+        
+        TEAM_DATABASE.forEach(function(member) {
+            var opt = document.createElement('option');
+            opt.value = member.id;
+            opt.innerText = member.name;
+            select.appendChild(opt);
+        });
     }
 
     function initThemeSelector() {
@@ -409,164 +721,397 @@
         }
     }
 
-    function initTeamSelector() {
-        var select = document.getElementById('inMemberSelect');
-        select.innerHTML = '';
-        if (typeof TEAM_MEMBERS !== 'undefined') {
-            TEAM_MEMBERS.forEach((m, idx) => {
-                var opt = document.createElement('option');
-                opt.value = idx;
-                opt.innerText = m.name;
-                select.appendChild(opt);
-            });
+    function setSecureImage(url, targetId, isBackground, callback) {
+        if (base64Cache[url]) { 
+            applyImageToTarget(base64Cache[url], targetId, isBackground); 
+            if(callback) callback();
+            return; 
         }
-        var optCustom = document.createElement('option');
-        optCustom.value = "custom";
-        optCustom.innerText = "➕ Ajouter un Membre Personnalisé";
-        select.appendChild(optCustom);
+        const img = new Image(); img.crossOrigin = "Anonymous";
+        img.onload = function() {
+            const canvas = document.createElement("canvas"); canvas.width = img.width; canvas.height = img.height;
+            canvas.getContext("2d").drawImage(img, 0, 0); base64Cache[url] = canvas.toDataURL("image/png");
+            applyImageToTarget(base64Cache[url], targetId, isBackground);
+            if(callback) callback();
+        }; img.src = url;
     }
 
-    function initRolesCheckboxes() {
-        var container = document.getElementById('rolesContainer');
-        container.innerHTML = '';
-        AVAILABLE_ROLES.forEach(r => {
-            var label = document.createElement('label');
-            label.className = 'checkbox-item';
-            label.innerHTML = `<input type="checkbox" value="${r}" onchange="updateSig()"> ${r}`;
-            container.appendChild(label);
-        });
+    function applyImageToTarget(dataUrl, targetId, isBackground) {
+        const element = document.getElementById(targetId);
+        if (isBackground) { element.style.background = `url('${dataUrl}') center/cover`; } else { element.src = dataUrl; }
     }
 
     window.onload = function() {
+        loadCustomMembers();
+        initRolesCheckboxes(); 
+        initMemberSelector();
         initThemeSelector(); 
-        initLogoSelector();
-        initTeamSelector();
-        initRolesCheckboxes();
-        handleMemberChange();
+        initLogoSelector();  
+        
+        const firstThemeKey = Object.keys(THEME_IMAGES)[0];
+        const firstLogoKey = Object.keys(LOGO_IMAGES)[0];
+
+        setSecureImage(THEME_IMAGES[firstThemeKey].url, 'sigPreview', true);
+        setSecureImage(LOGO_IMAGES[firstLogoKey].url, 'logoPreview', false);
+        applyPresetTheme();
     };
 
+    function applyPresetLogo() { 
+        var logoKey = document.getElementById('inPresetLogo').value;
+        if (LOGO_IMAGES[logoKey]) setSecureImage(LOGO_IMAGES[logoKey].url, 'logoPreview', false); 
+        updateSig(); 
+    }
+    
+    function applyPresetTheme() { 
+        var themeKey = document.getElementById('inPresetTheme').value; 
+        var themeData = THEME_IMAGES[themeKey];
+        if (themeData) {
+            setSecureImage(themeData.url, 'sigPreview', true);
+            
+            document.getElementById('outName').style.color = themeData.textColor;
+            document.getElementById('outUrlText').style.color = themeData.textColor;
+            document.getElementById('borderContainer').style.borderRightColor = themeData.textColor;
+            document.getElementById('iconMail').style.color = themeData.textColor;
+            document.getElementById('iconPhone').style.color = themeData.textColor;
+            
+            document.getElementById('outRole').style.color = themeData.roleColor;
+            
+            document.getElementById('liveBadge').style.backgroundColor = themeData.liveBgColor;
+            document.getElementById('liveBadge').style.color = themeData.liveTxtColor;
+        }
+        updateSig(); 
+    }
+
     function handleMemberChange() {
-        var val = document.getElementById('inMemberSelect').value;
-        var customZone = document.getElementById('customZone');
+        var choice = document.getElementById('inMemberSelect').value;
+        var customZone = document.getElementById('customMemberZone');
+        var checkboxes = document.getElementsByName('roleCheck');
         
-        if (val === "custom") {
-            customZone.style.display = "grid";
+        if (choice === '') {
+            return;
+        } else if (choice === 'custom') {
+            openModalNewMember();
         } else {
-            customZone.style.display = "none";
-            if (typeof TEAM_MEMBERS !== 'undefined' && TEAM_MEMBERS[val]) {
-                var member = TEAM_MEMBERS[val];
-                // Cocher les rôles
-                var checkboxes = document.querySelectorAll('#rolesContainer input');
-                checkboxes.forEach(cb => {
-                    cb.checked = member.roles ? member.roles.includes(cb.value) : false;
-                });
+            customZone.style.display = 'none';
+            var data = TEAM_DATABASE.find(m => m.id === choice);
+            if (data && data.roles) {
+                for (var i = 0; i < checkboxes.length; i++) {
+                    checkboxes[i].checked = data.roles.includes(parseInt(checkboxes[i].value));
+                }
             }
         }
         updateSig();
     }
 
-    function applyPresetTheme() {
-        var themeKey = document.getElementById('inPresetTheme').value; 
-        var themeData = THEME_IMAGES[themeKey];
-        if (themeData) {
-            document.getElementById('sigPreview').style.backgroundImage = `url('${themeData.url}')`;
-            document.getElementById('outName').style.color = themeData.textColor;
-            document.getElementById('outUrlText').style.color = themeData.textColor;
-            document.getElementById('borderContainer').style.borderRightColor = themeData.textColor;
-            document.getElementById('liveBadge').style.background = themeData.liveBgColor;
-            document.getElementById('liveBadge').style.color = themeData.liveTxtColor;
-            document.getElementById('iconMail').style.color = themeData.textColor;
-            document.getElementById('iconPhone').style.color = themeData.textColor;
+    function forceInjectMemberData(memberObj) {
+        document.getElementById('outName').innerText = memberObj.name; 
+        document.getElementById('outMail').innerText = memberObj.mail;
+        if(memberObj.phone && memberObj.phone.trim() !== "") { 
+            document.getElementById('outPhoneContainer').style.display = 'inline'; 
+            document.getElementById('outPhone').innerText = memberObj.phone; 
+        } else { 
+            document.getElementById('outPhoneContainer').style.display = 'none'; 
         }
     }
 
-    function applyPresetLogo() {
-        var logoKey = document.getElementById('inPresetLogo').value;
-        if (LOGO_IMAGES[logoKey]) {
-            document.getElementById('logoPreview').src = LOGO_IMAGES[logoKey].url;
-        }
+    function isValidEmail(email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
     }
 
     function updateSig() {
-        var style = document.getElementById('inSigStyle').value;
-        var memberVal = document.getElementById('inMemberSelect').value;
-        
-        var name = "", mail = "", phone = "03 65 17 00 63";
+        var sigStyle = document.getElementById('inSigStyle').value;
+        var groupTheme = document.getElementById('groupPresetTheme');
+        var groupLogo = document.getElementById('groupPresetLogo');
+        var radioPreview = document.getElementById('sigPreview');
+        var banalPreview = document.getElementById('sigBanalPreview');
 
-        if (memberVal === "custom") {
-            name = document.getElementById('inCustomName').value || "Prénom NOM";
-            mail = document.getElementById('inCustomMail').value || "contact@la1337.com";
-        } else if (typeof TEAM_MEMBERS !== 'undefined' && TEAM_MEMBERS[memberVal]) {
-            name = TEAM_MEMBERS[memberVal].name;
-            mail = TEAM_MEMBERS[memberVal].mail;
-            phone = TEAM_MEMBERS[memberVal].phone || phone;
+        var choice = document.getElementById('inMemberSelect').value;
+        var name = 'Prénom NOM';
+        var mail = 'contact@la1337.com';
+        var phone = '03 65 17 00 63';
+
+        if (choice === 'custom') {
+            name = document.getElementById('inCustomName').value || 'Prénom NOM';
+            mail = document.getElementById('inCustomMail').value || 'contact@la1337.com';
+            phone = document.getElementById('inCustomPhone').value || '03 65 17 00 63';
+            
+            const mailInput = document.getElementById('inCustomMail');
+            const emailError = document.getElementById('emailError');
+            if (mail && mail !== 'contact@la1337.com' && !isValidEmail(mail)) {
+                mailInput.classList.add('invalid-email');
+                emailError.style.display = 'block';
+            } else {
+                mailInput.classList.remove('invalid-email');
+                emailError.style.display = 'none';
+            }
+        } else if (choice !== '') {
+            var data = TEAM_DATABASE.find(m => m.id === choice);
+            if (data) {
+                name = data.name;
+                mail = data.mail;
+                phone = data.phone || '03 65 17 00 63';
+                forceInjectMemberData(data);
+            }
         }
 
-        // Récupération des rôles cochés
-        var selectedRoles = [];
-        document.querySelectorAll('#rolesContainer input:checked').forEach(cb => {
-            selectedRoles.push(cb.value);
-        });
-        var roleText = selectedRoles.length > 0 ? selectedRoles.join(' / ') : 'Membre de l\'équipe';
+        var checkboxes = document.getElementsByName('roleCheck');
+        var selectedRolesNames = [];
+        for (var i = 0; i < checkboxes.length; i++) {
+            if (checkboxes[i].checked) {
+                var codeCoche = parseInt(checkboxes[i].value);
+                selectedRolesNames.push(ROLE_MAP[codeCoche]);
+            }
+        }
+        var chkCustom = document.getElementById('chkCustomRole');
+        var customTxt = document.getElementById('inCustomRoleText').value.trim();
+        if (chkCustom && chkCustom.checked && customTxt !== "") {
+            selectedRolesNames.push(customTxt);
+        }
 
-        var sigPreview = document.getElementById('sigPreview');
-        var sigBanalPreview = document.getElementById('sigBanalPreview');
-        var banalContent = document.getElementById('banalContent');
+        var rolesString = selectedRolesNames.join(' / ');
 
-        if (style === 'radio') {
-            sigPreview.style.display = 'block';
-            sigBanalPreview.style.display = 'none';
-
-            document.getElementById('outName').innerText = name;
-            document.getElementById('outRole').innerText = roleText;
-            document.getElementById('outMail').innerText = mail;
-            document.getElementById('outPhone').innerText = phone;
-
-            applyPresetTheme();
-            applyPresetLogo();
-        } 
-        else if (style === 'baweb_line') {
-            sigPreview.style.display = 'none';
-            sigBanalPreview.style.display = 'block';
-
-            banalContent.innerHTML = `
-                <div style="font-size: 15px; font-weight: bold; color: #1a1a22;">${name}</div>
-                <div style="font-size: 13px; color: #ff3366; font-weight: 600; margin-bottom: 8px;">${roleText}</div>
-                <div style="height: 2px; background: #ff3366; width: 100%; margin-bottom: 8px;"></div>
-                <div style="font-size: 12px; color: #555;">
-                    📧 ${mail} &nbsp;|&nbsp; 📞 ${phone} &nbsp;|&nbsp; 🌐 <a href="https://www.la1337.com" style="color: #ff3366; text-decoration: none; font-weight: bold;">www.la1337.com</a>
-                </div>
-            `;
-        } 
-        else if (style === 'baweb_minimal') {
-            sigPreview.style.display = 'none';
-            sigBanalPreview.style.display = 'block';
-
-            banalContent.innerHTML = `
-                <div style="font-size: 14px; font-weight: bold; color: #1a1a22;">${name}</div>
-                <div style="font-size: 12px; color: #666; margin-bottom: 4px;">${roleText} — <strong>LA 1337 RADIO</strong></div>
-                <div style="font-size: 11px; color: #888;">
-                    E: ${mail} | T: ${phone}
-                </div>
-            `;
+        if (sigStyle === 'radio') {
+            groupTheme.style.display = 'flex';
+            groupLogo.style.display = 'flex';
+            radioPreview.style.display = 'block';
+            banalPreview.style.display = 'none';
+            document.getElementById('outRole').innerText = rolesString || 'Votre Rôle / Poste';
+        } else {
+            groupTheme.style.display = 'none';
+            groupLogo.style.display = 'none';
+            radioPreview.style.display = 'none';
+            banalPreview.style.display = 'block';
+            banalPreview.innerHTML = generateBanalSignature(name, rolesString, mail, phone, sigStyle);
         }
     }
 
-    function generateAndDownloadImage() {
-        var style = document.getElementById('inSigStyle').value;
-        var targetNode = (style === 'radio') ? document.getElementById('sigPreview') : document.getElementById('sigBanalPreview');
+    function cleanThemeName(themeKey) {
+        if (!THEME_IMAGES[themeKey]) return 'theme';
+        var rawName = THEME_IMAGES[themeKey].name;
+        return rawName
+            .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, '')
+            .replace(/\(.*\)/g, '')
+            .trim()
+            .toLowerCase()
+            .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+            .replace(/[^a-z0-9]/g, '-');
+    }
 
-        html2canvas(targetNode, { useCORS: true, scale: 2 }).then(canvas => {
-            var link = document.createElement('a');
-            link.download = `signature_la1337.png`;
-            link.href = canvas.toDataURL('image/png');
+    function getSignatureTypeSuffix(sigStyle, themeKey) {
+        if (sigStyle === 'radio') {
+            var cleanTheme = cleanThemeName(themeKey);
+            return 'officielle-' + cleanTheme;
+        } else if (sigStyle === 'baweb_line') {
+            return 'simple';
+        } else if (sigStyle === 'baweb_minimal') {
+            return 'minimaliste';
+        }
+        return 'simple';
+    }
+
+    function generateAndDownloadImage() {
+        var sigStyle = document.getElementById('inSigStyle').value;
+        var themeKey = document.getElementById('inPresetTheme').value;
+        var choice = document.getElementById('inMemberSelect').value;
+        
+        if (choice === 'custom') {
+            var mail = document.getElementById('inCustomMail').value;
+            if (mail && mail !== 'contact@la1337.com' && !isValidEmail(mail)) {
+                alert('❌ Veuillez entrer un email valide (ex: nom@domaine.com)');
+                return;
+            }
+        }
+        
+        var container = (sigStyle === 'radio') ? document.getElementById('sigPreview') : document.getElementById('sigBanalPreview');
+        var logo = document.getElementById('logoPreview');
+        
+        var name = 'signature';
+        if (choice === 'custom') { 
+            name = document.getElementById('inCustomName').value || 'signature'; 
+        } else { 
+            var data = TEAM_DATABASE.find(m => m.id === choice); 
+            if(data) name = data.name; 
+        }
+        
+        var cleanName = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-');
+        var typeSuffix = getSignatureTypeSuffix(sigStyle, themeKey);
+        var fileName = `signature-${cleanName}-${typeSuffix}.png`;
+        
+        if (sigStyle === 'radio' && !logo.complete) { 
+            setTimeout(generateAndDownloadImage, 100); 
+            return; 
+        }
+        
+        html2canvas(container, { 
+            backgroundColor: null,
+            logging: false, 
+            scale: 2, 
+            useCORS: true, 
+            allowTaint: false 
+        }).then(function(canvas) {
+            var link = document.createElement('a'); 
+            link.download = fileName;
+            link.href = canvas.toDataURL('image/png'); 
             link.click();
         });
     }
 
     function generateAllSignaturesZip() {
-        alert("Génération du package de signatures en cours...");
+        const btn = document.getElementById('bulkBtn');
+        const originalText = btn.innerText;
+        btn.disabled = true;
+        btn.innerText = "⏳ Génération en cours...";
+
+        const sigStyle = document.getElementById('inSigStyle').value;
+        const themeKey = document.getElementById('inPresetTheme').value;
+        const container = (sigStyle === 'radio') ? document.getElementById('sigPreview') : document.getElementById('sigBanalPreview');
+        const zip = new JSZip();
+        let index = 0;
+
+        const previousChoice = document.getElementById('inMemberSelect').value;
+
+        function processNext() {
+            if (index >= TEAM_DATABASE.length) {
+                btn.innerText = "⚡ Création du ZIP...";
+                zip.generateAsync({ type: "blob" }).then(function(content) {
+                    var typeSuffix = getSignatureTypeSuffix(sigStyle, themeKey);
+                    var link = document.createElement('a');
+                    link.download = `signatures-la1337-${typeSuffix}.zip`;
+                    link.href = URL.createObjectURL(content);
+                    link.click();
+                    
+                    document.getElementById('inMemberSelect').value = previousChoice;
+                    updateSig();
+                    btn.disabled = false;
+                    btn.innerText = originalText;
+                });
+                return;
+            }
+
+            const currentMember = TEAM_DATABASE[index];
+            btn.innerText = `⏳ (${index + 1}/${TEAM_DATABASE.length}) ${currentMember.name}`;
+            
+            document.getElementById('inMemberSelect').value = currentMember.id;
+            var checkboxes = document.getElementsByName('roleCheck');
+            for (var i = 0; i < checkboxes.length; i++) {
+                var val = parseInt(checkboxes[i].value);
+                checkboxes[i].checked = (currentMember.roles && currentMember.roles.includes(val));
+            }
+            updateSig();
+
+            setTimeout(function() {
+                html2canvas(container, { 
+                    backgroundColor: null,
+                    logging: false, 
+                    scale: 2, 
+                    useCORS: true, 
+                    allowTaint: false 
+                }).then(function(canvas) {
+                    var cleanName = currentMember.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-');
+                    var typeSuffix = getSignatureTypeSuffix(sigStyle, themeKey);
+                    var fileName = `signature-${cleanName}-${typeSuffix}.png`;
+                    
+                    var dataUrl = canvas.toDataURL('image/png');
+                    var base64Data = dataUrl.split(',')[1];
+                    
+                    zip.file(fileName, base64Data, { base64: true });
+                    index++;
+                    processNext();
+                });
+            }, 60);
+        }
+
+        processNext();
     }
+
+    // ===== FONCTIONS MODAL NOUVEAU MEMBRE =====
+    function initModalRoles() {
+        const container = document.getElementById('modalRolesContainer');
+        container.innerHTML = '';
+        for (const [code, name] of Object.entries(ROLE_MAP)) {
+            const label = document.createElement('label');
+            label.className = 'modal-checkbox';
+            label.innerHTML = `<input type="checkbox" name="modalRole" value="${code}"> ${name}`;
+            container.appendChild(label);
+        }
+    }
+
+    function openModalNewMember() {
+        initModalRoles();
+        document.getElementById('modalName').value = '';
+        document.getElementById('modalMail').value = '';
+        document.getElementById('modalPhone').value = '';
+        document.getElementById('modalEmailError').style.display = 'none';
+        const checkboxes = document.querySelectorAll('input[name="modalRole"]');
+        checkboxes.forEach(cb => cb.checked = false);
+        document.getElementById('modalNewMember').classList.add('active');
+    }
+
+    function closeModalNewMember() {
+        document.getElementById('modalNewMember').classList.remove('active');
+        document.getElementById('inMemberSelect').value = '';
+        handleMemberChange();
+    }
+
+    function confirmNewMember() {
+        const name = document.getElementById('modalName').value.trim();
+        const mail = document.getElementById('modalMail').value.trim();
+        const phone = document.getElementById('modalPhone').value.trim();
+        const emailError = document.getElementById('modalEmailError');
+        const mailInput = document.getElementById('modalMail');
+
+        if (mail && !isValidEmail(mail)) {
+            emailError.style.display = 'block';
+            mailInput.classList.add('invalid-email');
+            return;
+        }
+        emailError.style.display = 'none';
+        mailInput.classList.remove('invalid-email');
+
+        if (!name) {
+            alert('❌ Veuillez entrer un nom');
+            return;
+        }
+
+        const checkboxes = document.querySelectorAll('input[name="modalRole"]');
+        const selectedRoles = [];
+        checkboxes.forEach(cb => {
+            if (cb.checked) {
+                selectedRoles.push(parseInt(cb.value));
+            }
+        });
+
+        const newMember = {
+            name: name,
+            mail: mail || 'contact@la1337.com',
+            phone: phone || '',
+            roles: selectedRoles
+        };
+
+        addCustomMember(newMember);
+        forceInjectMemberData(newMember);
+        document.getElementById('modalNewMember').classList.remove('active');
+        document.getElementById('inMemberSelect').value = 'custom';
+        updateSig();
+    }
+
+    window.addEventListener('DOMContentLoaded', function() {
+        initModalRoles();
+    });
+
+    document.getElementById('modalNewMember').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeModalNewMember();
+        }
+    });
+
+    document.addEventListener('keydown', function(e) {
+        const modal = document.getElementById('modalNewMember');
+        if (modal.classList.contains('active') && e.key === 'Enter') {
+            confirmNewMember();
+        }
+    });
 </script>
 
 </body>
