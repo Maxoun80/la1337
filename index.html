@@ -311,9 +311,9 @@
         <div class="input-group full-width">
             <label style="color: #33cc99;">🎨 Style de Signature</label>
             <select id="inSigStyle" onchange="updateSig()">
-                <option value="radio">🎧 Signature Radio Graphique (Officielle)</option>
-                <option value="baweb_line">📄 Signature Banale - Style Ligne (Nom, Prénom, Fonction)</option>
-                <option value="baweb_minimal">✉️ Signature Banale - Style Texte (Minimaliste)</option>
+                <option value="radio">🎧 Signature Officielle Graphique (Fond Visuel)</option>
+                <option value="baweb_line">📄 Signature Banale (Style Ligne / Nom, Prénom, Fonction)</option>
+                <option value="baweb_minimal">✉️ Signature Banale (Style Minimaliste)</option>
             </select>
         </div>
 
@@ -668,7 +668,6 @@
             }
         }
 
-        // Récupérer les rôles cochés
         var checkboxes = document.getElementsByName('roleCheck');
         var selectedRolesNames = [];
         for (var i = 0; i < checkboxes.length; i++) {
@@ -686,14 +685,12 @@
         var rolesString = selectedRolesNames.join(' / ');
 
         if (sigStyle === 'radio') {
-            // Mode Graphique Radio
             groupTheme.style.display = 'flex';
             groupLogo.style.display = 'flex';
             radioPreview.style.display = 'block';
             banalPreview.style.display = 'none';
             document.getElementById('outRole').innerText = rolesString || 'Votre Rôle / Poste';
         } else {
-            // Mode Banal / Texte
             groupTheme.style.display = 'none';
             groupLogo.style.display = 'none';
             radioPreview.style.display = 'none';
@@ -764,7 +761,6 @@
             const currentMember = TEAM_DATABASE[index];
             btn.innerText = `⏳ (${index + 1}/${TEAM_DATABASE.length}) ${currentMember.name}`;
             
-            // Simuler le choix du membre
             document.getElementById('inMemberSelect').value = currentMember.id;
             var checkboxes = document.getElementsByName('roleCheck');
             for (var i = 0; i < checkboxes.length; i++) {
