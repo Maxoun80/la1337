@@ -121,7 +121,7 @@ const TEAM_DATABASE = [
     { id: "wagne",      name: "WAGNE Coumba",        mail: "coumba.w@la1337.com",     phone: "03 65 17 00 63", roles: [8, 12] }
 ];
 
-// 6. GÉNÉRATEURS DE SIGNATURES BANALES (Texte sans fond)
+// 6. GÉNÉRATEURS DE SIGNATURES BANALES (Texte pur sans référence au logiciel)
 function generateBanalSignature(name, roles, mail, phone, style) {
     const rolesStr = roles || "Membre";
     const phoneStr = phone ? phone : "03 65 17 00 63";
@@ -134,7 +134,7 @@ function generateBanalSignature(name, roles, mail, phone, style) {
     <td style="padding-right: 15px; border-right: 3px solid #ff3366; vertical-align: top;">
       <div style="font-size: 16px; font-weight: bold; color: #ff3366;">${name}</div>
       <div style="font-size: 13px; color: #e1e1e6; font-weight: 600; margin-top: 2px;">${rolesStr}</div>
-      <div style="font-size: 11px; color: #aaa; font-weight: bold; margin-top: 4px;">BAWEB — LA 1337 RADIO</div>
+      <div style="font-size: 11px; color: #aaa; font-weight: bold; margin-top: 4px;">LA 1337 RADIO</div>
     </td>
     <td style="padding-left: 15px; vertical-align: top; color: #ddd;">
       <div>📞 <strong>Tél :</strong> ${phoneStr}</div>
