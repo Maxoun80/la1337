@@ -149,6 +149,7 @@
             border: 1px dashed #444455;
             display: flex;
             justify-content: center;
+            align-items: center;
         }
         .actions-container {
             display: flex;
@@ -306,6 +307,16 @@
     <div class="subtitle">Générateur Signature Mail</div>
     
     <div class="form-container">
+        <!-- SÉLECTEUR DU TYPE DE SIGNATURE -->
+        <div class="input-group full-width">
+            <label style="color: #33cc99;">🎨 Style de Signature</label>
+            <select id="inSigStyle" onchange="updateSig()">
+                <option value="radio">🎧 Signature Radio Graphique (Officielle)</option>
+                <option value="baweb_line">📄 Signature Banale - Style Ligne (Nom, Prénom, Fonction)</option>
+                <option value="baweb_minimal">✉️ Signature Banale - Style Texte (Minimaliste)</option>
+            </select>
+        </div>
+
         <!-- SÉLECTEUR DE MEMBRES -->
         <div class="input-group">
             <label>👤 Sélectionner le Membre de l'équipe</label>
@@ -315,7 +326,7 @@
         </div>
         
         <!-- SÉLECTEUR DE BANNIÈRE -->
-        <div class="input-group">
+        <div class="input-group" id="groupPresetTheme">
             <label>🎭 Sélectionner la Bannière Thématique</label>
             <select id="inPresetTheme" onchange="applyPresetTheme()">
                 <!-- Rempli automatiquement -->
@@ -340,7 +351,7 @@
         </div>
 
         <!-- SÉLECTEUR DE LOGO -->
-        <div class="input-group full-width">
+        <div class="input-group full-width" id="groupPresetLogo">
             <label>💿 Sélectionner le Logo</label>
             <select id="inPresetLogo" onchange="applyPresetLogo()">
                 <!-- Rempli automatiquement -->
@@ -364,6 +375,7 @@
     <div class="preview-header">Aperçu de la signature :</div>
     
     <div class="preview-area">
+        <!-- APERÇU SIG RADIO (GRAPHIQUE) -->
         <div id="sigPreview" style="width: 650px; height: 135px; background-size: cover; background-position: center; border: 1px solid #22222b; border-radius: 8px; overflow: hidden; padding: 20px 25px; box-sizing: border-box; position: relative;">
             <table cellpadding="0" cellspacing="0" style="width: 100%; height: 100%; border-collapse: collapse; text-align: left; font-family: 'Segoe UI', Arial, sans-serif; color: #ffffff; position: relative; z-index: 2;">
                 <tr>
@@ -395,6 +407,9 @@
                 </tr>
             </table>
         </div>
+
+        <!-- APERÇU SIG BANALE (TEXTE BRUT) -->
+        <div id="sigBanalPreview" style="display: none; padding: 10px;"></div>
     </div>
 
     <div class="actions-container">
@@ -586,7 +601,6 @@
         var checkboxes = document.getElementsByName('roleCheck');
         
         if (choice === '') {
-            // Placeholder sélectionné - ne rien faire
             return;
         } else if (choice === 'custom') {
             openModalNewMember();
@@ -618,18 +632,23 @@
         return emailRegex.test(email);
     }
 
-    // CORRIGÉ : Met à jour dynamiquement les rôles en scannant TOUTES les cases cochées à l'instant T
     function updateSig() {
+        var sigStyle = document.getElementById('inSigStyle').value;
+        var groupTheme = document.getElementById('groupPresetTheme');
+        var groupLogo = document.getElementById('groupPresetLogo');
+        var radioPreview = document.getElementById('sigPreview');
+        var banalPreview = document.getElementById('sigBanalPreview');
+
         var choice = document.getElementById('inMemberSelect').value;
-        
+        var name = 'Prénom NOM';
+        var mail = 'contact@la1337.com';
+        var phone = '03 65 17 00 63';
+
         if (choice === 'custom') {
-            var name = document.getElementById('inCustomName').value || 'Prénom NOM';
-            var mail = document.getElementById('inCustomMail').value || 'contact@la1337.com';
-            var phone = document.getElementById('inCustomPhone').value || '';
-            document.getElementById('outName').innerText = name; 
-            document.getElementById('outMail').innerText = mail;
+            name = document.getElementById('inCustomName').value || 'Prénom NOM';
+            mail = document.getElementById('inCustomMail').value || 'contact@la1337.com';
+            phone = document.getElementById('inCustomPhone').value || '03 65 17 00 63';
             
-            // Validation d'email en temps réel
             const mailInput = document.getElementById('inCustomMail');
             const emailError = document.getElementById('emailError');
             if (mail && mail !== 'contact@la1337.com' && !isValidEmail(mail)) {
@@ -639,19 +658,17 @@
                 mailInput.classList.remove('invalid-email');
                 emailError.style.display = 'none';
             }
-            
-            if(phone.trim() !== "") { 
-                document.getElementById('outPhoneContainer').style.display = 'inline'; 
-                document.getElementById('outPhone').innerText = phone; 
-            } else { 
-                document.getElementById('outPhoneContainer').style.display = 'none'; 
-            }
-        } else {
+        } else if (choice !== '') {
             var data = TEAM_DATABASE.find(m => m.id === choice);
-            if(data) { forceInjectMemberData(data); }
+            if (data) {
+                name = data.name;
+                mail = data.mail;
+                phone = data.phone || '03 65 17 00 63';
+                forceInjectMemberData(data);
+            }
         }
 
-        // On construit le texte des rôles à partir des cases cochées
+        // Récupérer les rôles cochés
         var checkboxes = document.getElementsByName('roleCheck');
         var selectedRolesNames = [];
         for (var i = 0; i < checkboxes.length; i++) {
@@ -660,20 +677,35 @@
                 selectedRolesNames.push(ROLE_MAP[codeCoche]);
             }
         }
-        
-        // Ajout du rôle personnalisé si présent
         var chkCustom = document.getElementById('chkCustomRole');
         var customTxt = document.getElementById('inCustomRoleText').value.trim();
         if (chkCustom && chkCustom.checked && customTxt !== "") {
             selectedRolesNames.push(customTxt);
         }
 
-        document.getElementById('outRole').innerText = selectedRolesNames.join(' / ') || 'Votre Rôle / Poste';
+        var rolesString = selectedRolesNames.join(' / ');
+
+        if (sigStyle === 'radio') {
+            // Mode Graphique Radio
+            groupTheme.style.display = 'flex';
+            groupLogo.style.display = 'flex';
+            radioPreview.style.display = 'block';
+            banalPreview.style.display = 'none';
+            document.getElementById('outRole').innerText = rolesString || 'Votre Rôle / Poste';
+        } else {
+            // Mode Banal / Texte
+            groupTheme.style.display = 'none';
+            groupLogo.style.display = 'none';
+            radioPreview.style.display = 'none';
+            banalPreview.style.display = 'block';
+            banalPreview.innerHTML = generateBanalSignature(name, rolesString, mail, phone, sigStyle);
+        }
     }
 
     function generateAndDownloadImage() {
+        var sigStyle = document.getElementById('inSigStyle').value;
         var choice = document.getElementById('inMemberSelect').value;
-        // Vérification d'email si custom
+        
         if (choice === 'custom') {
             var mail = document.getElementById('inCustomMail').value;
             if (mail && mail !== 'contact@la1337.com' && !isValidEmail(mail)) {
@@ -682,14 +714,19 @@
             }
         }
         
-        var container = document.getElementById('sigPreview'); var logo = document.getElementById('logoPreview');
+        var container = (sigStyle === 'radio') ? document.getElementById('sigPreview') : document.getElementById('sigBanalPreview');
+        var logo = document.getElementById('logoPreview');
         var name = 'signature';
         if (choice === 'custom') { name = document.getElementById('inCustomName').value || 'signature'; } else { var data = TEAM_DATABASE.find(m => m.id === choice); if(data) name = data.name; }
         var cleanName = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-');
-        if (!logo.complete) { setTimeout(generateAndDownloadImage, 100); return; }
-        html2canvas(container, { backgroundColor: null, logging: false, scale: 2, useCORS: true, allowTaint: false }).then(function(canvas) {
-            var link = document.createElement('a'); link.download = 'signature-' + cleanName + '.png';
-            link.href = canvas.toDataURL('image/png'); link.click();
+        
+        if (sigStyle === 'radio' && !logo.complete) { setTimeout(generateAndDownloadImage, 100); return; }
+        
+        html2canvas(container, { backgroundColor: (sigStyle === 'radio' ? null : '#1a1a22'), logging: false, scale: 2, useCORS: true, allowTaint: false }).then(function(canvas) {
+            var link = document.createElement('a'); 
+            link.download = 'signature-' + cleanName + '.png';
+            link.href = canvas.toDataURL('image/png'); 
+            link.click();
         });
     }
 
@@ -699,7 +736,8 @@
         btn.disabled = true;
         btn.innerText = "⏳ Génération en cours...";
 
-        const container = document.getElementById('sigPreview');
+        const sigStyle = document.getElementById('inSigStyle').value;
+        const container = (sigStyle === 'radio') ? document.getElementById('sigPreview') : document.getElementById('sigBanalPreview');
         const zip = new JSZip();
         let index = 0;
 
@@ -711,12 +749,12 @@
                 zip.generateAsync({ type: "blob" }).then(function(content) {
                     var theme = document.getElementById('inPresetTheme').value;
                     var link = document.createElement('a');
-                    link.download = `signatures-la1337-${theme}.zip`;
+                    link.download = `signatures-la1337-${sigStyle}.zip`;
                     link.href = URL.createObjectURL(content);
                     link.click();
                     
                     document.getElementById('inMemberSelect').value = previousChoice;
-                    applyPresetTheme();
+                    updateSig();
                     btn.disabled = false;
                     btn.innerText = originalText;
                 });
@@ -726,21 +764,17 @@
             const currentMember = TEAM_DATABASE[index];
             btn.innerText = `⏳ (${index + 1}/${TEAM_DATABASE.length}) ${currentMember.name}`;
             
-            forceInjectMemberData(currentMember);
-            
-            // Pour l'export de masse, on simule le cochage de ses rôles propres
+            // Simuler le choix du membre
+            document.getElementById('inMemberSelect').value = currentMember.id;
             var checkboxes = document.getElementsByName('roleCheck');
-            var selectedRolesNames = [];
             for (var i = 0; i < checkboxes.length; i++) {
                 var val = parseInt(checkboxes[i].value);
-                if (currentMember.roles && currentMember.roles.includes(val)) {
-                    selectedRolesNames.push(ROLE_MAP[val]);
-                }
+                checkboxes[i].checked = (currentMember.roles && currentMember.roles.includes(val));
             }
-            document.getElementById('outRole').innerText = selectedRolesNames.join(' / ') || 'Membre';
+            updateSig();
 
             setTimeout(function() {
-                html2canvas(container, { backgroundColor: null, logging: false, scale: 2, useCORS: true, allowTaint: false }).then(function(canvas) {
+                html2canvas(container, { backgroundColor: (sigStyle === 'radio' ? null : '#1a1a22'), logging: false, scale: 2, useCORS: true, allowTaint: false }).then(function(canvas) {
                     var cleanName = currentMember.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-');
                     var dataUrl = canvas.toDataURL('image/png');
                     var base64Data = dataUrl.split(',')[1];
@@ -780,7 +814,6 @@
 
     function closeModalNewMember() {
         document.getElementById('modalNewMember').classList.remove('active');
-        // Revenir au placeholder
         document.getElementById('inMemberSelect').value = '';
         handleMemberChange();
     }
@@ -792,7 +825,6 @@
         const emailError = document.getElementById('modalEmailError');
         const mailInput = document.getElementById('modalMail');
 
-        // Validation d'email
         if (mail && !isValidEmail(mail)) {
             emailError.style.display = 'block';
             mailInput.classList.add('invalid-email');
@@ -801,13 +833,11 @@
         emailError.style.display = 'none';
         mailInput.classList.remove('invalid-email');
 
-        // Validation du nom
         if (!name) {
             alert('❌ Veuillez entrer un nom');
             return;
         }
 
-        // Récupérer les rôles sélectionnés
         const checkboxes = document.querySelectorAll('input[name="modalRole"]');
         const selectedRoles = [];
         checkboxes.forEach(cb => {
@@ -816,7 +846,6 @@
             }
         });
 
-        // Créer l'objet membre
         const newMember = {
             name: name,
             mail: mail || 'contact@la1337.com',
@@ -824,32 +853,23 @@
             roles: selectedRoles
         };
 
-        // Sauvegarder le bénévole en LocalStorage
         addCustomMember(newMember);
-
-        // Injecter les données dans la signature
         forceInjectMemberData(newMember);
-
-        // Fermer la modal
         document.getElementById('modalNewMember').classList.remove('active');
-        
-        // Mettre à jour la sélection du formulaire
         document.getElementById('inMemberSelect').value = 'custom';
+        updateSig();
     }
 
-    // Initialiser les rôles de la modal au chargement
     window.addEventListener('DOMContentLoaded', function() {
         initModalRoles();
     });
 
-    // Fermer la modal en cliquant en dehors
     document.getElementById('modalNewMember').addEventListener('click', function(e) {
         if (e.target === this) {
             closeModalNewMember();
         }
     });
 
-    // Valider avec Entrée
     document.addEventListener('keydown', function(e) {
         const modal = document.getElementById('modalNewMember');
         if (modal.classList.contains('active') && e.key === 'Enter') {
