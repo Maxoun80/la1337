@@ -19,7 +19,7 @@
             margin: 0 auto;
             background: #1a1a22;
             padding: 40px;
-            border-radius: 16px;
+            border-radius: 16px; /* Arrondi moderne du conteneur principal */
             box-shadow: 0 10px 40px rgba(0,0,0,0.6);
             border: 1px solid #2a2a35;
         }
@@ -64,7 +64,7 @@
             border: 1px solid #333344;
             color: #fff;
             padding: 14px;
-            border-radius: 8px;
+            border-radius: 8px; /* Arrondi des champs de saisie */
             font-size: 14px;
             transition: all 0.2s;
         }
@@ -307,7 +307,7 @@
     <div class="subtitle">Générateur Signature Mail</div>
     
     <div class="form-container">
-        <!-- SÉLECTEUR DU TYPE DE SIGNATURE (MIS À JOUR) -->
+        <!-- SÉLECTEUR DU TYPE DE SIGNATURE -->
         <div class="input-group full-width">
             <label style="color: #33cc99;">🎨 Style de Signature</label>
             <select id="inSigStyle" onchange="updateSig()">
@@ -375,8 +375,8 @@
     <div class="preview-header">Aperçu de la signature :</div>
     
     <div class="preview-area">
-        <!-- APERÇU SIG RADIO (GRAPHIQUE) -->
-        <div id="sigPreview" style="width: 650px; height: 135px; background-size: cover; background-position: center; border: 1px solid #22222b; border-radius: 8px; overflow: hidden; padding: 20px 25px; box-sizing: border-box; position: relative;">
+        <!-- APERÇU SIG RADIO (GRAPHIQUE AVEC ARRONDI 12PX) -->
+        <div id="sigPreview" style="width: 650px; height: 135px; background-size: cover; background-position: center; border: 1px solid #22222b; border-radius: 12px; overflow: hidden; padding: 20px 25px; box-sizing: border-box; position: relative;">
             <table cellpadding="0" cellspacing="0" style="width: 100%; height: 100%; border-collapse: collapse; text-align: left; font-family: 'Segoe UI', Arial, sans-serif; color: #ffffff; position: relative; z-index: 2;">
                 <tr>
                     <td id="borderContainer" style="width: 110px; vertical-align: middle; padding-right: 15px; border-right: 3px solid #ff3366;">
@@ -391,7 +391,8 @@
                         </div>
                     </td>
                     <td style="vertical-align: middle; width: 180px; text-align: right;">
-                        <div id="liveBadge" style="display: inline-block; background: #ff3366; color: #ffffff; font-size: 9px; font-weight: 900; padding: 4px 10px; border-radius: 4px; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.5);">🎙️ LIVE ON</div>
+                        <!-- BADGE "LIVE ON" AVEC UN ARRONDI SOFT DE 6PX -->
+                        <div id="liveBadge" style="display: inline-block; background: #ff3366; color: #ffffff; font-size: 9px; font-weight: 900; padding: 4px 10px; border-radius: 6px; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.5);">🎙️ LIVE ON</div>
                         <div id="outUrlText" style="font-size: 14px; font-weight: 900; color: #ff3366; margin-bottom: 15px; letter-spacing: 0.5px; text-shadow: 2px 2px 4px rgba(0,0,0,0.9);">WWW.LA1337.COM</div>
                         <div style="display: block; text-align: right;">
                             <div style="display: inline-flex; align-items: center; margin-left: 10px; font-size: 10px; font-weight: bold; color: #ffffff; text-shadow: 2px 2px 4px rgba(0,0,0,1);">
@@ -408,7 +409,7 @@
             </table>
         </div>
 
-        <!-- APERÇU SIG BANALE / COURRIER -->
+        <!-- APERÇU SIG SIMPLE / MINIMALISTE -->
         <div id="sigBanalPreview" style="display: none; padding: 10px;"></div>
     </div>
 
@@ -758,7 +759,7 @@
         }
         
         html2canvas(container, { 
-            backgroundColor: (sigStyle === 'radio' ? null : '#1a1a22'), 
+            backgroundColor: null, // Transparence garantie dans les coins arrondis
             logging: false, 
             scale: 2, 
             useCORS: true, 
@@ -816,7 +817,7 @@
 
             setTimeout(function() {
                 html2canvas(container, { 
-                    backgroundColor: (sigStyle === 'radio' ? null : '#1a1a22'), 
+                    backgroundColor: null,
                     logging: false, 
                     scale: 2, 
                     useCORS: true, 
