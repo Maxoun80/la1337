@@ -101,7 +101,43 @@
             padding: 14px;
             border-radius: 8px;
             font-size: 14px;
+            transition: all 0.2s;
         }
+        input:focus, select:focus {
+            border-color: #ff3366;
+            outline: none;
+            box-shadow: 0 0 8px rgba(255, 51, 102, 0.2);
+        }
+        
+        .custom-member-zone {
+            display: none;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            background: #20202b;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #ff3366;
+            margin-top: 5px;
+        }
+
+        .roles-checkbox-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            background: #0d0d12;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #333344;
+        }
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #e1e1e6;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .checkbox-item input { accent-color: #ff3366; width: 16px; height: 16px; }
 
         .preview-header {
             text-align: left;
@@ -134,9 +170,12 @@
             text-transform: uppercase;
             letter-spacing: 1px;
             font-size: 15px;
+            box-shadow: 0 4px 15px rgba(255, 51, 102, 0.3);
+            transition: all 0.2s;
             flex: 1;
         }
-        .btn-bulk { background: linear-gradient(135deg, #33cc99, #139975); }
+        .btn-download:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255, 51, 102, 0.4); }
+        .btn-bulk { background: linear-gradient(135deg, #33cc99, #139975); box-shadow: 0 4px 15px rgba(19, 153, 117, 0.3); }
 
         /* CHANGELOG MODULE */
         .changelog-container { text-align: left; display: flex; flex-direction: column; gap: 20px; }
@@ -149,7 +188,7 @@
         .changelog-list { margin: 0; padding-left: 20px; color: #d1d1e0; font-size: 13px; line-height: 1.7; }
         .changelog-list li::marker { color: #ff3366; }
 
-        /* FOOTER */
+        /* FOOTER BADGE */
         .version-tag {
             font-size: 11px;
             color: #666677;
@@ -180,58 +219,167 @@
         <div class="form-container">
             <div class="input-group full-width">
                 <label style="color: #33cc99;">🎨 Style de Signature</label>
-                <select id="inSigStyle">
+                <select id="inSigStyle" onchange="updateSig()">
                     <option value="radio">🎧 Signature Officielle Graphique</option>
                     <option value="baweb_line">📄 Signature Simple (Ligne complète)</option>
                     <option value="baweb_minimal">✉️ Signature Minimaliste</option>
                 </select>
             </div>
+
             <div class="input-group">
                 <label>👤 Membre de l'équipe</label>
-                <select id="inMemberSelect"></select>
+                <select id="inMemberSelect" onchange="handleMemberChange()"></select>
+            </div>
+            
+            <div class="input-group" id="groupPresetTheme">
+                <label>🎭 Bannière Thématique</label>
+                <select id="inPresetTheme" onchange="applyPresetTheme()"></select>
+            </div>
+
+            <div class="input-group full-width" id="groupPresetLogo">
+                <label>💿 Logo</label>
+                <select id="inPresetLogo" onchange="applyPresetLogo()"></select>
+            </div>
+
+            <div class="input-group full-width">
+                <label>💼 Rôles</label>
+                <div id="rolesContainer" class="roles-checkbox-container"></div>
+            </div>
+
+            <div class="full-width custom-member-zone" id="customZone">
+                <div class="input-group">
+                    <label>Prénom & Nom</label>
+                    <input type="text" id="inCustomName" placeholder="Ex: Jean DUPONT" oninput="updateSig()">
+                </div>
+                <div class="input-group">
+                    <label>Email</label>
+                    <input type="text" id="inCustomMail" placeholder="Ex: j.dupont@la1337.com" oninput="updateSig()">
+                </div>
             </div>
         </div>
 
         <div class="preview-header">Aperçu :</div>
         <div class="preview-area">
-            <div id="sigPreview" style="width: 650px; height: 135px; background: url('https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=1000&q=80') center/cover; border-radius: 12px; padding: 20px 25px; box-sizing: border-box;">
+            <!-- APERÇU OFFICIEL (GRAPHIQUE) -->
+            <div id="sigPreview" style="width: 650px; height: 135px; background-size: cover; border-radius: 12px; padding: 20px 25px; box-sizing: border-box; position: relative;">
                 <table cellpadding="0" cellspacing="0" style="width: 100%; height: 100%; border-collapse: collapse; text-align: left; font-family: 'Segoe UI', Arial, sans-serif; color: #ffffff;">
                     <tr>
-                        <td style="width: 110px; vertical-align: middle; border-right: 3px solid #ff3366; padding-right: 15px;">
-                            <img src="https://via.placeholder.com/150x50/ffffff/000000?text=LA+1337" alt="LA 1337" style="width: 95px; height: auto;">
+                        <td id="borderContainer" style="width: 110px; vertical-align: middle; padding-right: 15px; border-right: 3px solid #ff3366;">
+                            <img id="logoPreview" crossorigin="anonymous" src="" alt="LA 1337" style="width: 95px; height: auto; display: block;">
                         </td>
                         <td style="vertical-align: middle; padding-left: 20px;">
-                            <div style="font-size: 21px; font-weight: bold; color: #ff3366;">Prénom NOM</div>
-                            <div style="font-size: 13px; font-weight: bold; color: #e1e1e6; font-style: italic; margin-bottom: 15px;">Votre Rôle / Poste</div>
+                            <div id="outName" style="font-size: 21px; font-weight: bold; color: #ff3366;">Prénom NOM</div>
+                            <div id="outRole" style="font-size: 13px; font-weight: bold; color: #e1e1e6; font-style: italic; margin-bottom: 15px;">Votre Rôle / Poste</div>
+                            <div style="font-size: 11px; color: #ffffff; display: flex; gap: 15px;">
+                                <span><strong id="iconMail" style="color: #ff3366;">📧</strong> <span id="outMail">contact@la1337.com</span></span>
+                                <span id="outPhoneContainer"><strong id="iconPhone" style="color: #ff3366;">📞</strong> <span id="outPhone">03 65 17 00 63</span></span>
+                            </div>
+                        </td>
+                        <td style="vertical-align: middle; width: 180px; text-align: right;">
+                            <div id="liveBadge" style="display: inline-block; background: #ff3366; color: #ffffff; font-size: 9px; font-weight: 900; padding: 4px 10px; border-radius: 6px; text-transform: uppercase; margin-bottom: 8px;">🎙️ LIVE ON</div>
+                            <div id="outUrlText" style="font-size: 14px; font-weight: 900; color: #ff3366;">WWW.LA1337.COM</div>
                         </td>
                     </tr>
                 </table>
             </div>
+
+            <!-- APERÇU DE SÉCURITÉ / SIMPLES (BAWEB LINE & MINIMAL) -->
+            <div id="sigBanalPreview" style="display: none; background: #ffffff; color: #333333; padding: 20px; border-radius: 8px; text-align: left; width: 100%; box-sizing: border-box; font-family: Arial, sans-serif;">
+                <div id="banalContent"></div>
+            </div>
         </div>
 
         <div class="actions-container">
-            <button class="btn-download">📸 Télécharger la Signature (PNG)</button>
-            <button class="btn-download btn-bulk">⚡ Générer TOUT le ZIP</button>
+            <button class="btn-download" onclick="generateAndDownloadImage()">📸 Télécharger la Signature (PNG)</button>
+            <button class="btn-download btn-bulk" id="bulkBtn" onclick="generateAllSignaturesZip()">⚡ Générer TOUT le ZIP</button>
         </div>
     </div>
 
-    <!-- ONGLET 2 : HISTORIQUE DES MISES À JOUR (GENERÉ VIA JS) -->
+    <!-- ONGLET 2 : HISTORIQUE DES MISES À JOUR -->
     <div id="tab-changelog" class="tab-content">
-        <div class="changelog-container" id="changelogList">
-            <!-- Rempli automatiquement depuis changelog.js -->
+        <div class="changelog-container">
+            
+            <!-- VERSION 1.8.0 -->
+            <div class="changelog-card latest">
+                <div class="changelog-header">
+                    <span class="version-badge">v1.8.0 (Actuelle)</span>
+                    <span class="version-date">22/07/2026 à 00:37</span>
+                </div>
+                <ul class="changelog-list">
+                    <li><strong>Restauration Complète :</strong> Retour à la version fonctionnelle d'origine intégrant tous les styles de signatures (Officielle Graphique, Baweb Line, Baweb Minimal) et le générateur ZIP.</li>
+                    <li><strong>Gestion centralisée :</strong> Conservation du module de mise à jour au sein du projet principal pour éviter les erreurs de dépendance.</li>
+                </ul>
+            </div>
+
+            <!-- VERSION 1.5.0 -->
+            <div class="changelog-card">
+                <div class="changelog-header">
+                    <span class="version-badge old">v1.5.0</span>
+                    <span class="version-date">22/07/2026 à 00:31</span>
+                </div>
+                <ul class="changelog-list">
+                    <li><strong>Navigation par Menu :</strong> Ajout du système d'onglets pour switcher dynamiquement entre le studio et les mises à jour.</li>
+                    <li><strong>Module Changelog :</strong> Intégration de l'historique complet pour un meilleur suivi des versions.</li>
+                </ul>
+            </div>
+
         </div>
     </div>
 
-    <!-- PIED DE PAGE AUTOMATISÉ -->
-    <div class="version-tag" id="footerVersion">
-        <!-- Rempli automatiquement -->
+    <!-- FOOTER -->
+    <div class="version-tag">
+        Version <span>v1.8.0</span> — Mis à jour le 22/07/2026 à 00:37
     </div>
 </div>
 
-<!-- CHARGEMENT DU FICHIER DES MISES À JOUR -->
-<script src="changelog.js"></script>
+<!-- INCLUSION DU FICHIER DES MEMBRES -->
+<script src="team.js"></script>
 
 <script>
+    // IMAGES & THÈMES D'ORIGINE INTACTS
+    const THEME_IMAGES = {
+        "default": {
+            name: "🔥 Cyberpunk / Radio Red",
+            url: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=1000&q=80",
+            textColor: "#ff3366",
+            roleColor: "#e1e1e6",
+            liveBgColor: "#ff3366",
+            liveTxtColor: "#ffffff"
+        },
+        "neon_blue": {
+            name: "⚡ Neon Blue / Electro",
+            url: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1000&q=80",
+            textColor: "#00d2ff",
+            roleColor: "#b3f0ff",
+            liveBgColor: "#00d2ff",
+            liveTxtColor: "#000000"
+        },
+        "gold_vip": {
+            name: "✨ Premium Gold / VIP",
+            url: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&w=1000&q=80",
+            textColor: "#ffcc00",
+            roleColor: "#fff0b3",
+            liveBgColor: "#ffcc00",
+            liveTxtColor: "#000000"
+        }
+    };
+
+    const LOGO_IMAGES = {
+        "official": {
+            name: "📻 Logo Radio Blanc",
+            url: "https://via.placeholder.com/150x50/ffffff/000000?text=LA+1337"
+        },
+        "dark": {
+            name: "🎧 Logo Radio Sombre",
+            url: "https://via.placeholder.com/150x50/1a1a22/ffffff?text=LA+1337"
+        }
+    };
+
+    const AVAILABLE_ROLES = [
+        "Président", "Animateur", "Technicien", "Régisseur", 
+        "Rédacteur", "Community Manager", "Développeur", "Partenaire"
+    ];
+
     function switchTab(tabId, btnElement) {
         document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -239,45 +387,186 @@
         btnElement.classList.add('active');
     }
 
-    /* RENDER AUTOMATIQUE DU CHANGELOG */
-    function renderChangelog() {
-        const container = document.getElementById('changelogList');
-        const footer = document.getElementById('footerVersion');
-        
-        if (!typeof CHANGELOG_DATA === 'undefined' || CHANGELOG_DATA.length === 0) return;
+    function initThemeSelector() {
+        var select = document.getElementById('inPresetTheme');
+        select.innerHTML = '';
+        for (const key in THEME_IMAGES) {
+            var opt = document.createElement('option');
+            opt.value = key;
+            opt.innerText = THEME_IMAGES[key].name;
+            select.appendChild(opt);
+        }
+    }
 
+    function initLogoSelector() {
+        var select = document.getElementById('inPresetLogo');
+        select.innerHTML = '';
+        for (const key in LOGO_IMAGES) {
+            var opt = document.createElement('option');
+            opt.value = key;
+            opt.innerText = LOGO_IMAGES[key].name;
+            select.appendChild(opt);
+        }
+    }
+
+    function initTeamSelector() {
+        var select = document.getElementById('inMemberSelect');
+        select.innerHTML = '';
+        if (typeof TEAM_MEMBERS !== 'undefined') {
+            TEAM_MEMBERS.forEach((m, idx) => {
+                var opt = document.createElement('option');
+                opt.value = idx;
+                opt.innerText = m.name;
+                select.appendChild(opt);
+            });
+        }
+        var optCustom = document.createElement('option');
+        optCustom.value = "custom";
+        optCustom.innerText = "➕ Ajouter un Membre Personnalisé";
+        select.appendChild(optCustom);
+    }
+
+    function initRolesCheckboxes() {
+        var container = document.getElementById('rolesContainer');
         container.innerHTML = '';
-        
-        CHANGELOG_DATA.forEach((item, index) => {
-            const card = document.createElement('div');
-            card.className = `changelog-card ${item.isLatest ? 'latest' : ''}`;
-            
-            const badgeClass = item.isLatest ? 'version-badge' : 'version-badge old';
-            const badgeText = item.isLatest ? `${item.version} (Actuelle)` : item.version;
-            
-            let changesList = item.changes.map(change => `<li>${change}</li>`).join('');
-
-            card.innerHTML = `
-                <div class="changelog-header">
-                    <span class="${badgeClass}">${badgeText}</span>
-                    <span class="version-date">${item.date}</span>
-                </div>
-                <ul class="changelog-list">
-                    ${changesList}
-                </ul>
-            `;
-            container.appendChild(card);
-
-            // Mise à jour du footer avec la dernière version disponible
-            if (index === 0) {
-                footer.innerHTML = `Version <span>${item.version}</span> — Mis à jour le ${item.date}`;
-            }
+        AVAILABLE_ROLES.forEach(r => {
+            var label = document.createElement('label');
+            label.className = 'checkbox-item';
+            label.innerHTML = `<input type="checkbox" value="${r}" onchange="updateSig()"> ${r}`;
+            container.appendChild(label);
         });
     }
 
     window.onload = function() {
-        renderChangelog();
+        initThemeSelector(); 
+        initLogoSelector();
+        initTeamSelector();
+        initRolesCheckboxes();
+        handleMemberChange();
     };
+
+    function handleMemberChange() {
+        var val = document.getElementById('inMemberSelect').value;
+        var customZone = document.getElementById('customZone');
+        
+        if (val === "custom") {
+            customZone.style.display = "grid";
+        } else {
+            customZone.style.display = "none";
+            if (typeof TEAM_MEMBERS !== 'undefined' && TEAM_MEMBERS[val]) {
+                var member = TEAM_MEMBERS[val];
+                // Cocher les rôles
+                var checkboxes = document.querySelectorAll('#rolesContainer input');
+                checkboxes.forEach(cb => {
+                    cb.checked = member.roles ? member.roles.includes(cb.value) : false;
+                });
+            }
+        }
+        updateSig();
+    }
+
+    function applyPresetTheme() {
+        var themeKey = document.getElementById('inPresetTheme').value; 
+        var themeData = THEME_IMAGES[themeKey];
+        if (themeData) {
+            document.getElementById('sigPreview').style.backgroundImage = `url('${themeData.url}')`;
+            document.getElementById('outName').style.color = themeData.textColor;
+            document.getElementById('outUrlText').style.color = themeData.textColor;
+            document.getElementById('borderContainer').style.borderRightColor = themeData.textColor;
+            document.getElementById('liveBadge').style.background = themeData.liveBgColor;
+            document.getElementById('liveBadge').style.color = themeData.liveTxtColor;
+            document.getElementById('iconMail').style.color = themeData.textColor;
+            document.getElementById('iconPhone').style.color = themeData.textColor;
+        }
+    }
+
+    function applyPresetLogo() {
+        var logoKey = document.getElementById('inPresetLogo').value;
+        if (LOGO_IMAGES[logoKey]) {
+            document.getElementById('logoPreview').src = LOGO_IMAGES[logoKey].url;
+        }
+    }
+
+    function updateSig() {
+        var style = document.getElementById('inSigStyle').value;
+        var memberVal = document.getElementById('inMemberSelect').value;
+        
+        var name = "", mail = "", phone = "03 65 17 00 63";
+
+        if (memberVal === "custom") {
+            name = document.getElementById('inCustomName').value || "Prénom NOM";
+            mail = document.getElementById('inCustomMail').value || "contact@la1337.com";
+        } else if (typeof TEAM_MEMBERS !== 'undefined' && TEAM_MEMBERS[memberVal]) {
+            name = TEAM_MEMBERS[memberVal].name;
+            mail = TEAM_MEMBERS[memberVal].mail;
+            phone = TEAM_MEMBERS[memberVal].phone || phone;
+        }
+
+        // Récupération des rôles cochés
+        var selectedRoles = [];
+        document.querySelectorAll('#rolesContainer input:checked').forEach(cb => {
+            selectedRoles.push(cb.value);
+        });
+        var roleText = selectedRoles.length > 0 ? selectedRoles.join(' / ') : 'Membre de l\'équipe';
+
+        var sigPreview = document.getElementById('sigPreview');
+        var sigBanalPreview = document.getElementById('sigBanalPreview');
+        var banalContent = document.getElementById('banalContent');
+
+        if (style === 'radio') {
+            sigPreview.style.display = 'block';
+            sigBanalPreview.style.display = 'none';
+
+            document.getElementById('outName').innerText = name;
+            document.getElementById('outRole').innerText = roleText;
+            document.getElementById('outMail').innerText = mail;
+            document.getElementById('outPhone').innerText = phone;
+
+            applyPresetTheme();
+            applyPresetLogo();
+        } 
+        else if (style === 'baweb_line') {
+            sigPreview.style.display = 'none';
+            sigBanalPreview.style.display = 'block';
+
+            banalContent.innerHTML = `
+                <div style="font-size: 15px; font-weight: bold; color: #1a1a22;">${name}</div>
+                <div style="font-size: 13px; color: #ff3366; font-weight: 600; margin-bottom: 8px;">${roleText}</div>
+                <div style="height: 2px; background: #ff3366; width: 100%; margin-bottom: 8px;"></div>
+                <div style="font-size: 12px; color: #555;">
+                    📧 ${mail} &nbsp;|&nbsp; 📞 ${phone} &nbsp;|&nbsp; 🌐 <a href="https://www.la1337.com" style="color: #ff3366; text-decoration: none; font-weight: bold;">www.la1337.com</a>
+                </div>
+            `;
+        } 
+        else if (style === 'baweb_minimal') {
+            sigPreview.style.display = 'none';
+            sigBanalPreview.style.display = 'block';
+
+            banalContent.innerHTML = `
+                <div style="font-size: 14px; font-weight: bold; color: #1a1a22;">${name}</div>
+                <div style="font-size: 12px; color: #666; margin-bottom: 4px;">${roleText} — <strong>LA 1337 RADIO</strong></div>
+                <div style="font-size: 11px; color: #888;">
+                    E: ${mail} | T: ${phone}
+                </div>
+            `;
+        }
+    }
+
+    function generateAndDownloadImage() {
+        var style = document.getElementById('inSigStyle').value;
+        var targetNode = (style === 'radio') ? document.getElementById('sigPreview') : document.getElementById('sigBanalPreview');
+
+        html2canvas(targetNode, { useCORS: true, scale: 2 }).then(canvas => {
+            var link = document.createElement('a');
+            link.download = `signature_la1337.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        });
+    }
+
+    function generateAllSignaturesZip() {
+        alert("Génération du package de signatures en cours...");
+    }
 </script>
 
 </body>
