@@ -312,8 +312,8 @@
             <label style="color: #33cc99;">🎨 Style de Signature</label>
             <select id="inSigStyle" onchange="updateSig()">
                 <option value="radio">🎧 Signature Officielle Graphique (Fond Visuel)</option>
-                <option value="baweb_line">📄 Signature Banale (Style Ligne / Nom, Prénom, Fonction)</option>
-                <option value="baweb_minimal">✉️ Signature Banale (Style Minimaliste)</option>
+                <option value="baweb_line">📄 Signature Ligne Complète (Nom, Fonction, Tél, Mail, Web)</option>
+                <option value="baweb_minimal">✉️ Signature Courrier Officiel (Nom, Prénom, Fonction uniquement)</option>
             </select>
         </div>
 
@@ -408,7 +408,7 @@
             </table>
         </div>
 
-        <!-- APERÇU SIG BANALE (TEXTE BRUT) -->
+        <!-- APERÇU SIG BANALE / COURRIER -->
         <div id="sigBanalPreview" style="display: none; padding: 10px;"></div>
     </div>
 
