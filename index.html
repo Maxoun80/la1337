@@ -230,7 +230,7 @@
             box-shadow: 0 6px 20px rgba(19, 153, 117, 0.4);
         }
 
-        /* STYLES DU MODULE DE MISE À JOUR (CHANGELOG DYNAMIQUE) */
+        /* STYLES DU MODULE DE MISE À JOUR */
         .changelog-container {
             text-align: left;
             display: flex;
@@ -468,16 +468,6 @@
     <!-- ONGLET 1 : GÉNÉRATEUR -->
     <div id="tab-generator" class="tab-content active">
         <div class="form-container">
-            <!-- SÉLECTEUR DU TYPE DE SIGNATURE -->
-            <div class="input-group full-width">
-                <label style="color: #33cc99;">🎨 Style de Signature</label>
-                <select id="inSigStyle" onchange="updateSig()">
-                    <option value="radio">🎧 Signature Officielle Graphique</option>
-                    <option value="baweb_line">📄 Signature Simple (Ligne complète : Nom, Fonction, Tél, Mail, Web)</option>
-                    <option value="baweb_minimal">✉️ Signature Minimaliste (Courrier : Nom, Prénom, Fonction)</option>
-                </select>
-            </div>
-
             <!-- SÉLECTEUR DE MEMBRES -->
             <div class="input-group">
                 <label>👤 Sélectionner le Membre de l'équipe</label>
@@ -569,9 +559,6 @@
                     </tr>
                 </table>
             </div>
-
-            <!-- APERÇU SIG SIMPLE / MINIMALISTE -->
-            <div id="sigBanalPreview" style="display: none; padding: 10px;"></div>
         </div>
 
         <div class="actions-container">
@@ -857,12 +844,6 @@
     }
 
     function updateSig() {
-        var sigStyle = document.getElementById('inSigStyle').value;
-        var groupTheme = document.getElementById('groupPresetTheme');
-        var groupLogo = document.getElementById('groupPresetLogo');
-        var radioPreview = document.getElementById('sigPreview');
-        var banalPreview = document.getElementById('sigBanalPreview');
-
         var choice = document.getElementById('inMemberSelect').value;
         var name = 'Prénom NOM';
         var mail = 'contact@la1337.com';
@@ -909,29 +890,7 @@
         }
 
         var rolesString = selectedRolesNames.join(' / ');
-
-        if (sigStyle === 'radio') {
-            groupTheme.style.display = 'flex';
-            groupLogo.style.display = 'flex';
-            radioPreview.style.display = 'block';
-            banalPreview.style.display = 'none';
-            document.getElementById('outRole').innerText = rolesString || 'Votre Rôle / Poste';
-        } else {
-            groupTheme.style.display = 'none';
-            groupLogo.style.display = 'none';
-            radioPreview.style.display = 'none';
-            banalPreview.style.display = 'block';
-            if (typeof generateBanalSignature === 'function') {
-                banalPreview.innerHTML = generateBanalSignature(name, rolesString, mail, phone, sigStyle);
-            }
-        }
-    }
-
-    function getSignatureTypeSuffix(sigStyle) {
-        if (sigStyle === 'radio') return 'radio';
-        if (sigStyle === 'baweb_line') return 'line';
-        if (sigStyle === 'baweb_minimal') return 'min';
-        return 'sig';
+        document.getElementById('outRole').innerText = rolesString || 'Votre Rôle / Poste';
     }
 
     function openModalDownloadFilename() {
@@ -943,8 +902,6 @@
                 return;
             }
         }
-
-        var sigStyle = document.getElementById('inSigStyle').value;
         
         var name = 'membre';
         if (choice === 'custom') { 
@@ -955,9 +912,7 @@
         }
         
         var cleanName = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-');
-        var typeSuffix = getSignatureTypeSuffix(sigStyle);
-        
-        var defaultFileName = `sig-${cleanName}-${typeSuffix}.png`;
+        var defaultFileName = `sig-${cleanName}-radio.png`;
 
         document.getElementById('modalFilenameInput').value = defaultFileName;
         document.getElementById('modalDownloadFilename').classList.add('active');
@@ -977,11 +932,10 @@
     }
 
     function executeImageDownload(fileName) {
-        var sigStyle = document.getElementById('inSigStyle').value;
-        var container = (sigStyle === 'radio') ? document.getElementById('sigPreview') : document.getElementById('sigBanalPreview');
+        var container = document.getElementById('sigPreview');
         var logo = document.getElementById('logoPreview');
 
-        if (sigStyle === 'radio' && logo && !logo.complete) { 
+        if (logo && !logo.complete) { 
             setTimeout(function() { executeImageDownload(fileName); }, 100); 
             return; 
         }
@@ -1011,8 +965,7 @@
         btn.disabled = true;
         btn.innerText = "⏳ Génération en cours...";
 
-        const sigStyle = document.getElementById('inSigStyle').value;
-        const container = (sigStyle === 'radio') ? document.getElementById('sigPreview') : document.getElementById('sigBanalPreview');
+        const container = document.getElementById('sigPreview');
         const zip = new JSZip();
         let index = 0;
 
@@ -1022,9 +975,8 @@
             if (index >= TEAM_DATABASE.length) {
                 btn.innerText = "⚡ Création du ZIP...";
                 zip.generateAsync({ type: "blob" }).then(function(content) {
-                    var typeSuffix = getSignatureTypeSuffix(sigStyle);
                     var link = document.createElement('a');
-                    link.download = `signatures-la1337-${typeSuffix}.zip`;
+                    link.download = `signatures-la1337-radio.zip`;
                     link.href = URL.createObjectURL(content);
                     link.click();
                     
@@ -1056,8 +1008,7 @@
                     allowTaint: false 
                 }).then(function(canvas) {
                     var cleanName = currentMember.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-');
-                    var typeSuffix = getSignatureTypeSuffix(sigStyle);
-                    var fileName = `sig-${cleanName}-${typeSuffix}.png`;
+                    var fileName = `sig-${cleanName}-radio.png`;
                     
                     var dataUrl = canvas.toDataURL('image/png');
                     var base64Data = dataUrl.split(',')[1];
