@@ -1,5 +1,5 @@
 // =============================================================================
-// 1. CONFIGURATION, CARTOGRAPHIE & BANNIES / LOGOS (LA 1337 RADIO)
+// 1. CONFIGURATION, CARTOGRAPHIE & BANNIÈRES / LOGOS (LA 1337 RADIO)
 // =============================================================================
 
 // Lien de publication CSV officiel de ton Google Sheet
@@ -72,34 +72,11 @@ const LOGO_IMAGES = {
     }
 };
 
-// Base de données locale de fallback
-let TEAM_DATABASE = [
-    { id: "archer",    name: "ARCHER Vincent",      mail: "vincent.a@la1337.com",      phone: "03 65 17 00 63", roles: [7] },
-    { id: "bernard",   name: "BERNARD Elise",       mail: "elise.b@la1337.com",        phone: "03 65 17 00 63", roles: [8, 12, 14] },
-    { id: "dafflon",   name: "DAFFLON Anais",       mail: "anais.d@la1337.com",        phone: "03 65 17 00 63", roles: [8] },
-    { id: "dherbomez", name: "DHERBOMEZ Margaux",   mail: "margaux.d@la1337.com",    phone: "03 65 17 00 63", roles: [12] },
-    { id: "dossantos", name: "DOS SANTOS Cindy",    mail: "cindy.d@la1337.com",      phone: "03 65 17 00 63", roles: [8] },
-    { id: "fonvielle", name: "FONVIELLE Magali",    mail: "magali.f@la1337.com",     phone: "03 65 17 00 63", roles: [8] },
-    { id: "haliti",    name: "HALITI Merema",       mail: "merema.h@la1337.com",     phone: "03 65 17 00 63", roles: [8] },
-    { id: "jaffrezic", name: "JAFFREZIC Solenn",    mail: "solenn.j@la1337.com",     phone: "03 65 17 00 63", roles: [11] },
-    { id: "kirsz",     name: "KIRSZ Rafael",        mail: "rafael.k@la1337.com",     phone: "03 65 17 00 63", roles: [7, 9, 11] },
-    { id: "marechal",  name: "MARECHAL Laurence",   mail: "laurence.m@la1337.com",   phone: "03 65 17 00 63", roles: [8] },
-    { id: "morel",     name: "MOREL Enzo",          mail: "enzo.m@la1337.com",       phone: "03 65 17 00 63", roles: [3] },
-    { id: "noel",      name: "NOEL Axel",           mail: "axel.n@la1337.com",        phone: "03 65 17 00 63", roles: [4, 7] },
-    { id: "philippon", name: "PHILIPPON Pierre",    mail: "pierre.p@la1337.com",     phone: "03 65 17 00 63", roles: [7] },
-    { id: "porino",    name: "PORINO Laeticia",     mail: "laeticia.p@la1337.com",   phone: "03 65 17 00 63", roles: [8] },
-    { id: "rocquemont",name: "ROCQUEMONT Maxence",  mail: "maxence.r@la1337.com",    phone: "03 65 17 00 63", roles: [2, 5, 7, 10, 11] },
-    { id: "samson",    name: "SAMSON Solyvan",      mail: "solyvan.s@la1337.com",    phone: "03 65 17 00 63", roles: [15] },
-    { id: "schilling", name: "SCHILLING Ingrid",    mail: "ingrid.s@la1337.com",     phone: "03 65 17 00 63", roles: [6] },
-    { id: "schneider", name: "SCHNEIDER Thibault",  mail: "thibault.s@la1337.com",   phone: "03 65 17 00 63", roles: [10] },
-    { id: "stef",      name: "STEF Laura",          mail: "laura.s@la1337.com",      phone: "03 65 17 00 63", roles: [13] },
-    { id: "vankets",   name: "VAN KETS Guillaume",  mail: "guillaume.v@la1337.com",  phone: "03 65 17 00 63", roles: [1, 7] },
-    { id: "vernet",    name: "VERNET Jeremy",       mail: "jeremy.v@la1337.com",     phone: "03 65 17 00 63", roles: [7] },
-    { id: "wagne",     name: "WAGNE Coumba",        mail: "coumba.w@la1337.com",     phone: "03 65 17 00 63", roles: [8, 12] }
-];
+// Base de données de l'équipe (remplie dynamiquement par le Google Sheet)
+let TEAM_DATABASE = [];
 
 // =============================================================================
-// 2. FONCTIONS DE STOCKAGE ET SÉCURITÉ LOCALSTORAGE
+// 2. FONCTIONS DE STOCKAGE LOCALSTORAGE POUR BÉNÉVOLES PERSONNALISÉS
 // =============================================================================
 
 function getCustomMembers() {
@@ -214,28 +191,31 @@ async function loadTeamFromGoogleSheet() {
             TEAM_DATABASE = remoteTeam;
         }
 
-        // On réintègre les personnes ajoutées à la main si besoin
+        // Ajout des membres enregistrés localement
         loadCustomMembers();
 
-        // Met à jour l'affichage
+        // Met à jour l'affichage dans le sélecteur HTML
         populateTeamSelect();
 
     } catch (error) {
-        console.warn("⚠️ Utilisation de la base locale de secours :", error);
+        console.warn("⚠️ Impossible de charger Google Sheets, fallback sur localStorage :", error);
         loadCustomMembers();
         populateTeamSelect();
     }
 }
 
 // =============================================================================
-// 4. GESTION DE L'IHM ET SÉLECTION DES BÉNÉVOLES
+// 4. GESTION DE L'IHM, SÉLECTION ET MODAL
 // =============================================================================
 
 function populateTeamSelect() {
     const select = document.getElementById("inMemberSelect");
     if (!select) return;
 
-    select.innerHTML = '<option value="">-- Saisie manuelle / Sélectionner --</option>';
+    select.innerHTML = `
+        <option value="">-- Sélectionner un membre --</option>
+        <option value="manual">➕ Saisie manuelle / Ajouter un membre</option>
+    `;
 
     TEAM_DATABASE.forEach(member => {
         const option = document.createElement("option");
@@ -248,6 +228,20 @@ function populateTeamSelect() {
 function onTeamMemberSelect(memberId) {
     if (!memberId) return;
 
+    // 🎯 Déclenchement de la pop-up / modal lors de la Saisie Manuelle
+    if (memberId === "manual") {
+        if (typeof openAddMemberModal === "function") {
+            openAddMemberModal();
+        } else if (typeof openModal === "function") {
+            openModal();
+        } else {
+            const modalEl = document.getElementById("addMemberModal") || document.getElementById("memberModal");
+            if (modalEl) modalEl.classList.add("active");
+        }
+        return;
+    }
+
+    // --- Autoremplissage pour un membre sélectionné ---
     const member = TEAM_DATABASE.find(m => m.id === memberId);
     if (!member) return;
 
@@ -284,14 +278,14 @@ function onTeamMemberSelect(memberId) {
 // =============================================================================
 
 document.addEventListener("DOMContentLoaded", () => {
-    // 1. Charge d'abord les membres sauvegardés localement
+    // 1. Initialise les membres personnalisés
     loadCustomMembers();
     populateTeamSelect();
 
-    // 2. Tente la synchro live depuis le Google Sheet
+    // 2. Synchronise avec le Google Sheet en arrière-plan
     loadTeamFromGoogleSheet();
 
-    // 3. Écoute la sélection dans la liste
+    // 3. Écoute du sélecteur membre
     const select = document.getElementById("inMemberSelect");
     if (select) {
         select.addEventListener("change", (e) => {
