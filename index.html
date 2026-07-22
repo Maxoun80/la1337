@@ -478,11 +478,12 @@
                 </select>
             </div>
 
-            <!-- SÉLECTEUR DE MEMBRES -->
+            <!-- SÉLECTEUR DE MEMBRES (MODIFIÉ POUR SYNC GOOGLE SHEETS) -->
             <div class="input-group">
                 <label>👤 Sélectionner le Membre de l'équipe</label>
                 <select id="inMemberSelect" onchange="handleMemberChange()">
-                    <!-- Rempli automatiquement -->
+                    <option value="">👥 Choisissez un membre</option>
+                    <option value="custom">✍️ [NOUVEAU MEMBRE - Saisie libre]</option>
                 </select>
             </div>
             
@@ -688,8 +689,11 @@
         updateSig();
     }
 
+    /* REMPLISSAGE DU SÉLECTEUR DE BÉNÉVOLES DEPUIS LE SHEETS */
     function initMemberSelector() {
         var select = document.getElementById('inMemberSelect');
+        if(!select) return;
+        
         select.innerHTML = '';
         
         var optPlaceholder = document.createElement('option');
@@ -714,6 +718,7 @@
 
     function initThemeSelector() {
         var select = document.getElementById('inPresetTheme');
+        if(!select || typeof THEME_IMAGES === 'undefined') return;
         select.innerHTML = '';
         for (const key in THEME_IMAGES) {
             var opt = document.createElement('option');
@@ -725,6 +730,7 @@
 
     function initLogoSelector() {
         var select = document.getElementById('inPresetLogo');
+        if(!select || typeof LOGO_IMAGES === 'undefined') return;
         select.innerHTML = '';
         for (const key in LOGO_IMAGES) {
             var opt = document.createElement('option');
@@ -756,28 +762,30 @@
 
     window.onload = function() {
         initRolesCheckboxes(); 
-        initMemberSelector();
         initThemeSelector(); 
         initLogoSelector();  
         
-        const firstThemeKey = Object.keys(THEME_IMAGES)[0];
-        const firstLogoKey = Object.keys(LOGO_IMAGES)[0];
+        if (typeof THEME_IMAGES !== 'undefined' && typeof LOGO_IMAGES !== 'undefined') {
+            const firstThemeKey = Object.keys(THEME_IMAGES)[0];
+            const firstLogoKey = Object.keys(LOGO_IMAGES)[0];
 
-        setSecureImage(THEME_IMAGES[firstThemeKey].url, 'sigPreview', true);
-        setSecureImage(LOGO_IMAGES[firstLogoKey].url, 'logoPreview', false);
-        applyPresetTheme();
+            if(firstThemeKey) setSecureImage(THEME_IMAGES[firstThemeKey].url, 'sigPreview', true);
+            if(firstLogoKey) setSecureImage(LOGO_IMAGES[firstLogoKey].url, 'logoPreview', false);
+            applyPresetTheme();
+        }
         
         loadChangelog();
     };
 
     function applyPresetLogo() { 
         var logoKey = document.getElementById('inPresetLogo').value;
-        if (LOGO_IMAGES[logoKey]) setSecureImage(LOGO_IMAGES[logoKey].url, 'logoPreview', false); 
+        if (typeof LOGO_IMAGES !== 'undefined' && LOGO_IMAGES[logoKey]) setSecureImage(LOGO_IMAGES[logoKey].url, 'logoPreview', false); 
         updateSig(); 
     }
     
     function applyPresetTheme() { 
         var themeKey = document.getElementById('inPresetTheme').value; 
+        if (typeof THEME_IMAGES === 'undefined') return;
         var themeData = THEME_IMAGES[themeKey];
         if (themeData) {
             setSecureImage(themeData.url, 'sigPreview', true);
@@ -808,9 +816,10 @@
         } else {
             customZone.style.display = 'none';
             var data = TEAM_DATABASE.find(m => m.id === choice);
-            if (data && data.roles) {
+            if (data) {
+                // Remplissage auto des cases de rôles
                 for (var i = 0; i < checkboxes.length; i++) {
-                    checkboxes[i].checked = data.roles.includes(parseInt(checkboxes[i].value));
+                    checkboxes[i].checked = data.roles && data.roles.includes(parseInt(checkboxes[i].value));
                 }
             }
         }
@@ -896,7 +905,9 @@
             groupLogo.style.display = 'none';
             radioPreview.style.display = 'none';
             banalPreview.style.display = 'block';
-            banalPreview.innerHTML = generateBanalSignature(name, rolesString, mail, phone, sigStyle);
+            if (typeof generateBanalSignature === 'function') {
+                banalPreview.innerHTML = generateBanalSignature(name, rolesString, mail, phone, sigStyle);
+            }
         }
     }
 
@@ -1040,9 +1051,10 @@
         processNext();
     }
 
-    // ===== FONCTIONS MODAL NOUVEAU MEMBRE =====
+    /* MODAL NOUVEAU MEMBRE */
     function initModalRoles() {
         const container = document.getElementById('modalRolesContainer');
+        if(!container) return;
         container.innerHTML = '';
         for (const [code, name] of Object.entries(ROLE_MAP)) {
             const label = document.createElement('label');
@@ -1105,7 +1117,6 @@
             roles: selectedRoles
         };
 
-        // Ajout dynamique en mémoire sans sauvegarde LocalStorage
         TEAM_DATABASE.push(newMember);
         initMemberSelector();
 
