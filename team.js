@@ -1,9 +1,10 @@
 // =============================================================================
-// 1. CONFIGURATION, CARTOGRAPHIES & BINDING TEMPLATES
+// 1. CONFIGURATION, CARTOGRAPHIES, BANNIÈRES & LOGOS
 // =============================================================================
 
 const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS0a8y_ZHF2WsnBHMbrUKL8p-CH1SJI_6US5bc2Iv-IZRWWo8NiGJEtRjNZfwWSctJBjokRKZruvexz/pub?gid=1526030464&single=true&output=csv";
 
+// 1. CARTOGRAPHIE DES RÔLES
 const ROLE_MAP = {
     1:  "Directeur",
     2:  "Directeur Adjoint",
@@ -22,7 +23,7 @@ const ROLE_MAP = {
     15: "Membre extérieur"
 };
 
-// Configuration des options d'affichage selon le style sélectionné
+// 2. TEMPLATES / STYLES DE SIGNATURES
 const SIGNATURE_TEMPLATES = {
     officiel: {
         id: "officiel",
@@ -54,11 +55,61 @@ const SIGNATURE_TEMPLATES = {
     }
 };
 
+// 3. BANNIÈRES THÉMATIQUES OFFICIELLES
+const THEME_IMAGES = {
+    cyber: {
+        name: "🎧 Mode Radio Cyber (Par défaut - Officiel)",
+        url: "https://i.postimg.cc/63Y5PbDR/LA1337-Signatures-de-mail.png",
+        textColor: "#ff3366",
+        roleColor: "#e1e1e6",
+        liveBgColor: "#ff3366",
+        liveTxtColor: "#ffffff"
+    },
+    ete: {
+        name: "☀️ Mode Été (Fond Officiel)",
+        url: "https://i.postimg.cc/7YyJTjw9/LA1337-Signatures-de-mail(1).png",
+        textColor: "#ff3366",
+        roleColor: "#e1e1e6",
+        liveBgColor: "#ff3366",
+        liveTxtColor: "#ffffff"
+    },
+    noel: {
+        name: "🎄 Mode Noël (Fond Officiel)",
+        url: "https://i.postimg.cc/XqWNpSdT/LA1337-Signatures-de-mail(2).png",
+        textColor: "#ffffff",
+        roleColor: "#f0a5a5",
+        liveBgColor: "#ffffff",
+        liveTxtColor: "#b71c1c"
+    },
+    nouvelan: {
+        name: "🥂 Nouvel An (Fond Officiel)",
+        url: "https://i.postimg.cc/4x0Jphpd/LA1337-Signatures-de-mail(3).png",
+        textColor: "#dfb76c",
+        roleColor: "#ffffff",
+        liveBgColor: "#dfb76c",
+        liveTxtColor: "#000000"
+    }
+};
+
+// 4. LOGOS DE LA RADIO
+const LOGO_IMAGES = { 
+    blanc: {
+        name: "⚪ Logo Blanc Officiel",
+        url: "https://i.postimg.cc/4x659pDr/logo-small.png"
+    },
+    noel: {
+        name: "🎄 Logo Noël Officiel",
+        url: "https://i.postimg.cc/50Ty8Btq/Capture-d-ecran-2026-07-18-002918.png"
+    }
+};
+
 let TEAM_DATABASE = [];
-let currentTemplate = "officiel";
+let currentTemplateKey = "officiel";
+let currentThemeKey = "cyber";
+let currentLogoKey = "blanc";
 
 // =============================================================================
-// 2. SYNCHRONISATION LOCALSTORAGE ET PARSER GOOGLE SHEETS
+// 2. LOCALSTORAGE & CHARGEMENT CSV GOOGLE SHEETS
 // =============================================================================
 
 function getCustomMembers() {
@@ -166,7 +217,28 @@ async function loadTeamFromGoogleSheet() {
 }
 
 // =============================================================================
-// 3. EVENT HANDLERS & MISE À JOUR DE L'INTERFACE
+// 3. DECLENCHEMENT DU RENDU (TEMPLATES + BANNIÈRE + LOGO)
+// =============================================================================
+
+function triggerRender() {
+    const templateConfig = SIGNATURE_TEMPLATES[currentTemplateKey] || SIGNATURE_TEMPLATES.officiel;
+    const themeConfig    = THEME_IMAGES[currentThemeKey]         || THEME_IMAGES.cyber;
+    const logoConfig     = LOGO_IMAGES[currentLogoKey]           || LOGO_IMAGES.blanc;
+
+    // Appel sécurisé des fonctions de rendu avec l'ensemble des configurations visuelles
+    if (typeof updateSignature === "function") {
+        updateSignature(currentTemplateKey, templateConfig, themeConfig, logoConfig);
+    }
+    if (typeof render === "function") {
+        render(currentTemplateKey, templateConfig, themeConfig, logoConfig);
+    }
+    if (typeof draw === "function") {
+        draw(currentTemplateKey, templateConfig, themeConfig, logoConfig);
+    }
+}
+
+// =============================================================================
+// 4. SELECTION DU MEMBRE & GESTION DES EVENEMENTS
 // =============================================================================
 
 function populateTeamSelect() {
@@ -226,31 +298,30 @@ function onTeamMemberSelect(memberId) {
     triggerRender();
 }
 
-// Gestion de la sélection du Style de Signature (Minimaliste, Ligne, Courrier, etc.)
-function onTemplateSelect(templateKey) {
-    if (!templateKey) return;
-    
-    // Détecte la clef du template à partir de la valeur sélectionnée
-    if (templateKey.includes("minimaliste") || templateKey === "minimaliste") currentTemplate = "minimaliste";
-    else if (templateKey.includes("ligne") || templateKey === "ligne") currentTemplate = "ligne";
-    else if (templateKey.includes("courrier") || templateKey === "courrier") currentTemplate = "courrier";
-    else currentTemplate = "officiel";
+function onTemplateSelect(val) {
+    if (!val) return;
+    if (val.includes("minimaliste") || val === "minimaliste") currentTemplateKey = "minimaliste";
+    else if (val.includes("ligne") || val === "ligne") currentTemplateKey = "ligne";
+    else if (val.includes("courrier") || val === "courrier") currentTemplateKey = "courrier";
+    else currentTemplateKey = "officiel";
 
     triggerRender();
 }
 
-// Fonction centrale pour Notifier le moteur de rendu HTML / Canvas principal
-function triggerRender() {
-    const config = SIGNATURE_TEMPLATES[currentTemplate] || SIGNATURE_TEMPLATES.officiel;
+function onThemeSelect(val) {
+    if (!val) return;
+    currentThemeKey = THEME_IMAGES[val] ? val : "cyber";
+    triggerRender();
+}
 
-    // Transmet l'ID du template aux fonctions du script principal si présent
-    if (typeof updateSignature === "function") updateSignature(currentTemplate, config);
-    if (typeof render === "function") render(currentTemplate, config);
-    if (typeof draw === "function") draw(currentTemplate, config);
+function onLogoSelect(val) {
+    if (!val) return;
+    currentLogoKey = LOGO_IMAGES[val] ? val : "blanc";
+    triggerRender();
 }
 
 // =============================================================================
-// 4. INITIALISATION AU CHARGEMENT DU DOM
+// 5. INITIALISATION
 // =============================================================================
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -258,19 +329,27 @@ document.addEventListener("DOMContentLoaded", () => {
     populateTeamSelect();
     loadTeamFromGoogleSheet();
 
-    // 1. Écouteur pour la sélection d'un membre
+    // Écouteur Sélection Membre
     const selectMember = document.getElementById("inMemberSelect") || document.getElementById("memberSelect");
     if (selectMember) {
-        selectMember.addEventListener("change", (e) => {
-            onTeamMemberSelect(e.target.value);
-        });
+        selectMember.addEventListener("change", (e) => onTeamMemberSelect(e.target.value));
     }
 
-    // 2. Écouteur pour le changement de Style de Signature
-    const selectTemplate = document.getElementById("inTemplateSelect") || document.getElementById("templateSelect") || document.querySelector('select[name="template"]');
+    // Écouteur Style / Template
+    const selectTemplate = document.getElementById("inTemplateSelect") || document.getElementById("templateSelect");
     if (selectTemplate) {
-        selectTemplate.addEventListener("change", (e) => {
-            onTemplateSelect(e.target.value);
-        });
+        selectTemplate.addEventListener("change", (e) => onTemplateSelect(e.target.value));
+    }
+
+    // Écouteur Bannières / Thèmes
+    const selectTheme = document.getElementById("inThemeSelect") || document.getElementById("themeSelect");
+    if (selectTheme) {
+        selectTheme.addEventListener("change", (e) => onThemeSelect(e.target.value));
+    }
+
+    // Écouteur Logos
+    const selectLogo = document.getElementById("inLogoSelect") || document.getElementById("logoSelect");
+    if (selectLogo) {
+        selectLogo.addEventListener("change", (e) => onLogoSelect(e.target.value));
     }
 });
