@@ -54,7 +54,7 @@ window.TEAM_DATABASE = [];
 const imageCache = {};
 
 // =============================================================================
-// 2. PARSER CSV & CHARGEMENT DE L'ÉQUIPE
+// 2. PARSER CSV & CHARGEMENT DES MEMBRES
 // =============================================================================
 
 function parseCSVRow(row) {
@@ -81,22 +81,52 @@ async function loadTeamData() {
             const cols = parseCSVRow(lines[i]);
             if (!cols[0] && !cols[1]) continue;
             
-            // Nettoyage des chaînes
-            let rawFirstName = (cols[1] || '').trim();
             let rawLastName = (cols[0] || '').trim();
+            let rawFirstName = (cols[1] || '').trim();
             
-            // On retire les emails éventuels collés dans le nom/prénom
+            // Nettoyage des emails parasites
             rawFirstName = rawFirstName.replace(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\s*/, '');
             rawLastName = rawLastName.replace(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\s*/, '');
 
-            const fullName = `${rawFirstName} ${rawLastName}`.trim();
-            const roles = (cols[4] || '').split(',').map(r => parseInt(r.trim(), 10)).filter(r => !isNaN(r));
+            const fullName = `${rawFirstName} ${rawLastName.toUpperCase()}`.trim();
+            
+            let email = '';
+            let phone = '';
+            let rolesRaw = '';
+
+            // Détection automatique des colonnes
+            cols.forEach(col => {
+                const val = col.trim();
+                if (val.includes('@')) {
+                    email = val;
+                } else if (/^[0-9\s\.\-\+]{9,}$/.test(val) && !val.includes('0365170063')) {
+                    phone = val;
+                } else if (val.includes(',') || /^[0-9\s,]+$/.test(val)) {
+                    if (val.toUpperCase() !== 'FALSE' && val.toUpperCase() !== 'TRUE') {
+                        rolesRaw = val;
+                    }
+                }
+            });
+
+            // Sécurisations
+            if (!email) email = cols[2]?.includes('@') ? cols[2] : (cols[3]?.includes('@') ? cols[3] : 'contact@la1337.com');
+            if (!phone) {
+                const candidatePhone = cols[3] || cols[4] || '';
+                phone = (candidatePhone.toUpperCase() === 'FALSE' || candidatePhone.toUpperCase() === 'TRUE') ? '' : candidatePhone;
+            }
+            if (!rolesRaw) rolesRaw = cols[4] || cols[5] || '';
+
+            // Extraction des IDs des rôles
+            const roles = rolesRaw
+                .split(',')
+                .map(r => parseInt(r.trim(), 10))
+                .filter(r => !isNaN(r));
 
             members.push({
                 id: fullName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, '_'),
                 name: fullName,
-                mail: cols[2] || '',
-                phone: cols[3] || '',
+                mail: email,
+                phone: phone,
                 roles: roles
             });
         }
@@ -104,30 +134,29 @@ async function loadTeamData() {
         TEAM_DATA = members;
         window.TEAM_DATABASE = members;
         
-        // Initialiser le sélecteur du HTML s'il est prêt
         if (typeof initMemberSelector === "function") {
             initMemberSelector();
         }
     } catch (e) {
-        console.warn("⚠️ Impossible de charger le Sheet CSV :", e);
+        console.warn("⚠️ Sheet non disponible :", e);
     }
 }
 
 // =============================================================================
-// 3. SELECTION DU MEMBRE & COCHAGE AUTOMATIQUE DES RÔLES
+// 3. SÉLECTION ET MAJ DES RÔLES
 // =============================================================================
 
 function selectMember(memberId) {
     const member = window.TEAM_DATABASE.find(m => m.id === memberId);
     if (!member) return;
 
-    // 1. Décocher toutes les cases de rôles
+    // Décocher tout
     const checkboxes = document.getElementsByName('roleCheck');
     for (let i = 0; i < checkboxes.length; i++) {
         checkboxes[i].checked = false;
     }
 
-    // 2. Cocher les rôles attribués à ce membre
+    // Cocher les rôles du membre
     if (member.roles && Array.isArray(member.roles)) {
         for (let i = 0; i < checkboxes.length; i++) {
             const val = parseInt(checkboxes[i].value, 10);
@@ -137,17 +166,17 @@ function selectMember(memberId) {
         }
     }
 
-    // 3. Réinitialiser le rôle personnalisé
+    // Réinitialiser le rôle custom
     const chkCustom = document.getElementById('chkCustomRole');
     if (chkCustom) chkCustom.checked = false;
     const customZone = document.getElementById('customRoleInputZone');
     if (customZone) customZone.style.display = 'none';
 
-    // 4. Mettre à jour la signature HTML / Canvas
+    // Mettre à jour le visuel
     if (typeof updateSig === "function") updateSig();
 }
 
-// Intercepter et compléter la fonction du HTML
+// Interception de l'événement HTML
 const originalHandleMemberChange = window.handleMemberChange;
 window.handleMemberChange = function() {
     const choice = document.getElementById('inMemberSelect')?.value;
@@ -159,7 +188,7 @@ window.handleMemberChange = function() {
 };
 
 // =============================================================================
-// 4. INITIALISATION AU CHARGEMENT DE LA PAGE
+// 4. INITIALISATION
 // =============================================================================
 
 document.addEventListener("DOMContentLoaded", () => {
