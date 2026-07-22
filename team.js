@@ -114,10 +114,10 @@ async function loadTeamFromGoogleSheet() {
             const firstName = firstNameIdx !== -1 ? (cols[firstNameIdx] || "") : "";
             const lastName = lastNameIdx !== -1 ? (cols[lastNameIdx] || "") : "";
             
-            // Reconstitution du nom complet (ou juste le nom si le prénom n'est pas séparé)
+            // Reconstitution du nom complet
             const fullName = `${firstName} ${lastName}`.trim();
 
-            if (!fullName) continue; // Saute les lignes sans nom
+            if (!fullName) continue;
 
             // Extraction et conversion des rôles (ex: "1, 7" => [1, 7])
             const rawRoles = (rolesIdx !== -1 && cols[rolesIdx]) ? cols[rolesIdx] : "";
@@ -141,7 +141,7 @@ async function loadTeamFromGoogleSheet() {
             });
         }
 
-        console.log(`Équipe chargée avec succès (${TEAM_DATABASE.length} bénévoles) :`, TEAM_DATABASE);
+        console.log(`✅ Équipe chargée avec succès (${TEAM_DATABASE.length} bénévoles) :`, TEAM_DATABASE);
 
         // Mise à jour du menu déroulant
         populateTeamSelect();
@@ -156,12 +156,13 @@ async function loadTeamFromGoogleSheet() {
 // =============================================================================
 
 /**
- * Remplit le sélecteur d'équipe (<select id="teamSelect">)
+ * Remplit le sélecteur d'équipe (<select id="inMemberSelect">)
  */
 function populateTeamSelect() {
-    const select = document.getElementById("teamSelect");
+    // Utilisation du BON ID HTML : inMemberSelect
+    const select = document.getElementById("inMemberSelect");
     if (!select) {
-        console.warn("Élément HTML #teamSelect introuvable.");
+        console.warn("⚠️ Élément HTML #inMemberSelect introuvable.");
         return;
     }
 
@@ -183,10 +184,10 @@ function onTeamMemberSelect(memberId) {
     if (!member) return;
 
     // Remplissage des inputs HTML
-    const nameInput = document.getElementById("nameInput");
-    const mailInput = document.getElementById("mailInput");
-    const phoneInput = document.getElementById("phoneInput");
-    const rolesInput = document.getElementById("rolesInput");
+    const nameInput = document.getElementById("nameInput") || document.getElementById("inName");
+    const mailInput = document.getElementById("mailInput") || document.getElementById("inMail");
+    const phoneInput = document.getElementById("phoneInput") || document.getElementById("inPhone");
+    const rolesInput = document.getElementById("rolesInput") || document.getElementById("inRole");
 
     if (nameInput) nameInput.value = member.name;
     if (mailInput) mailInput.value = member.mail;
@@ -201,7 +202,7 @@ function onTeamMemberSelect(memberId) {
         rolesInput.value = roleLabels.join(" - ");
     }
 
-    // Déclenche la fonction de mise à jour de la signature si elle existe
+    // Déclenche la fonction de mise à jour si elle existe dans ton projet
     if (typeof updateSignature === "function") {
         updateSignature();
     }
@@ -214,7 +215,8 @@ function onTeamMemberSelect(memberId) {
 document.addEventListener("DOMContentLoaded", () => {
     loadTeamFromGoogleSheet();
 
-    const select = document.getElementById("teamSelect");
+    // Écouteur placé sur inMemberSelect
+    const select = document.getElementById("inMemberSelect");
     if (select) {
         select.addEventListener("change", (e) => {
             onTeamMemberSelect(e.target.value);
