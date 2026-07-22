@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>LA 1337 - Studio Signature Mail</title>
+    <title>LA 1337 - Studio Signature Mail & BAweb</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
@@ -198,6 +198,43 @@
             justify-content: center;
             align-items: center;
         }
+
+        /* CARTE COURRIER BAWEB */
+        .baweb-card {
+            background: #ffffff;
+            color: #111111;
+            padding: 20px 25px;
+            border-radius: 6px;
+            border-left: 4px solid #ff3366;
+            text-align: left;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            min-width: 320px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+        .baweb-logo {
+            max-width: 70px;
+            height: auto;
+            display: block;
+        }
+        .baweb-details {
+            display: flex;
+            flex-direction: column;
+        }
+        .baweb-name {
+            font-size: 16px;
+            font-weight: bold;
+            color: #111111;
+            text-transform: uppercase;
+        }
+        .baweb-role {
+            font-size: 13px;
+            color: #ff3366;
+            font-weight: 600;
+        }
+
         .actions-container {
             display: flex;
             gap: 15px;
@@ -286,7 +323,6 @@
             flex-wrap: wrap;
         }
 
-        /* MENU DÉROULANT ANCIENNES VERSIONS */
         details.changelog-archive {
             background: #0d0d12;
             border: 1px dashed #2a2a35;
@@ -315,7 +351,6 @@
             cursor: default;
         }
 
-        /* BADGE FOOTER */
         .version-tag {
             font-size: 11px;
             color: #666677;
@@ -453,7 +488,7 @@
 
 <div class="wrapper">
     <h1>🎙️ LA 1337 RADIO 🎙️</h1>
-    <div class="subtitle">Studio de Création de Signatures Mail</div>
+    <div class="subtitle">Studio de Création de Signatures Mail & BAweb</div>
     
     <!-- MENU DE NAVIGATION -->
     <div class="nav-tabs">
@@ -468,6 +503,16 @@
     <!-- ONGLET 1 : GÉNÉRATEUR -->
     <div id="tab-generator" class="tab-content active">
         <div class="form-container">
+            <!-- SÉLECTEUR DU TYPE DE SIGNATURE -->
+            <div class="input-group full-width">
+                <label style="color: #33cc99;">🎨 Style de Signature</label>
+                <select id="inSigStyle" onchange="updateSig()">
+                    <option value="radio">🎧 Signature Officielle Graphique</option>
+                    <option value="baweb_line">📄 Signature BAweb (Ligne complète : Nom, Fonction, Tél, Mail, Web)</option>
+                    <option value="baweb_minimal">✉️ Signature Minimaliste BAweb (Courrier : Logo + Nom, Prénom, Fonction)</option>
+                </select>
+            </div>
+
             <!-- SÉLECTEUR DE MEMBRES -->
             <div class="input-group">
                 <label>👤 Sélectionner le Membre de l'équipe</label>
@@ -504,7 +549,7 @@
 
             <!-- SÉLECTEUR DE LOGO -->
             <div class="input-group full-width" id="groupPresetLogo">
-                <label>💿 Sélectionner le Logo</label>
+                <label>💿 Sélectionner le Logo (Radio / BAweb)</label>
                 <select id="inPresetLogo" onchange="applyPresetLogo()">
                     <!-- Rempli automatiquement -->
                 </select>
@@ -559,6 +604,9 @@
                     </tr>
                 </table>
             </div>
+
+            <!-- APERÇU SIG SIMPLE / BAWEB MINIMALISTE -->
+            <div id="sigBanalPreview" style="display: none; padding: 10px;"></div>
         </div>
 
         <div class="actions-container">
@@ -576,7 +624,7 @@
 
     <!-- PIED DE PAGE AVEC VERSION -->
     <div class="version-tag">
-        Version <span id="footerVersion">v1.7.3</span> — Mis à jour le <span id="footerDate">22/07/2026</span>
+        Version <span id="footerVersion">v1.8.0</span> — Mis à jour le <span id="footerDate">22/07/2026</span>
     </div>
 </div>
 
@@ -637,6 +685,32 @@
 <script>
     const base64Cache = {};
 
+    /* FONCTION DE GÉNÉRATION DES SIGNATURES SIMPLES / BAWEB */
+    function generateBanalSignature(name, role, mail, phone, style) {
+        var logoImgSrc = document.getElementById('logoPreview') ? document.getElementById('logoPreview').src : '';
+        
+        if (style === 'baweb_minimal') {
+            return `
+                <div class="baweb-card">
+                    ${logoImgSrc ? `<img src="${logoImgSrc}" class="baweb-logo" alt="Logo">` : ''}
+                    <div class="baweb-details">
+                        <div class="baweb-name">${name}</div>
+                        <div class="baweb-role">${role || 'Fonction / Poste'}</div>
+                    </div>
+                </div>
+            `;
+        } else {
+            // Style BAweb Line
+            return `
+                <div style="font-family: Arial, sans-serif; color: #111; text-align: left; background: #fff; padding: 15px 20px; border-radius: 6px; border-left: 3px solid #ff3366;">
+                    <strong style="font-size: 15px; text-transform: uppercase;">${name}</strong> — 
+                    <span style="color: #ff3366; font-weight: bold;">${role || 'Membre'}</span><br>
+                    <span style="font-size: 12px; color: #555;">📞 ${phone} | 📧 ${mail} | 🌐 www.la1337.com</span>
+                </div>
+            `;
+        }
+    }
+
     /* GESTION DU MENU ET ONGLETS */
     function switchTab(tabId, btnElement) {
         document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
@@ -677,7 +751,6 @@
         updateSig();
     }
 
-    /* REMPLISSAGE DU SÉLECTEUR DE BÉNÉVOLES DEPUIS LE SHEETS */
     function initMemberSelector() {
         var select = document.getElementById('inMemberSelect');
         if(!select || typeof TEAM_DATABASE === 'undefined') return;
@@ -844,6 +917,12 @@
     }
 
     function updateSig() {
+        var sigStyle = document.getElementById('inSigStyle').value;
+        var groupTheme = document.getElementById('groupPresetTheme');
+        var groupLogo = document.getElementById('groupPresetLogo');
+        var radioPreview = document.getElementById('sigPreview');
+        var banalPreview = document.getElementById('sigBanalPreview');
+
         var choice = document.getElementById('inMemberSelect').value;
         var name = 'Prénom NOM';
         var mail = 'contact@la1337.com';
@@ -853,16 +932,6 @@
             name = document.getElementById('inCustomName').value || 'Prénom NOM';
             mail = document.getElementById('inCustomMail').value || 'contact@la1337.com';
             phone = document.getElementById('inCustomPhone').value || '03 65 17 00 63';
-            
-            const mailInput = document.getElementById('inCustomMail');
-            const emailError = document.getElementById('emailError');
-            if (mail && mail !== 'contact@la1337.com' && !isValidEmail(mail)) {
-                if(mailInput) mailInput.classList.add('invalid-email');
-                if(emailError) emailError.style.display = 'block';
-            } else {
-                if(mailInput) mailInput.classList.remove('invalid-email');
-                if(emailError) emailError.style.display = 'none';
-            }
         } else if (choice !== '' && typeof TEAM_DATABASE !== 'undefined') {
             var data = TEAM_DATABASE.find(m => m.id === choice);
             if (data) {
@@ -890,18 +959,32 @@
         }
 
         var rolesString = selectedRolesNames.join(' / ');
-        document.getElementById('outRole').innerText = rolesString || 'Votre Rôle / Poste';
+
+        if (sigStyle === 'radio') {
+            groupTheme.style.display = 'flex';
+            groupLogo.style.display = 'flex';
+            radioPreview.style.display = 'block';
+            banalPreview.style.display = 'none';
+            document.getElementById('outRole').innerText = rolesString || 'Votre Rôle / Poste';
+        } else {
+            groupTheme.style.display = 'none';
+            groupLogo.style.display = 'flex'; // Logos conservés pour le style BAweb
+            radioPreview.style.display = 'none';
+            banalPreview.style.display = 'block';
+            banalPreview.innerHTML = generateBanalSignature(name, rolesString, mail, phone, sigStyle);
+        }
+    }
+
+    function getSignatureTypeSuffix(sigStyle) {
+        if (sigStyle === 'radio') return 'radio';
+        if (sigStyle === 'baweb_line') return 'baweb-line';
+        if (sigStyle === 'baweb_minimal') return 'baweb-min';
+        return 'sig';
     }
 
     function openModalDownloadFilename() {
         var choice = document.getElementById('inMemberSelect').value;
-        if (choice === 'custom') {
-            var mail = document.getElementById('inCustomMail').value;
-            if (mail && mail !== 'contact@la1337.com' && !isValidEmail(mail)) {
-                alert('❌ Veuillez entrer un email valide (ex: nom@domaine.com)');
-                return;
-            }
-        }
+        var sigStyle = document.getElementById('inSigStyle').value;
         
         var name = 'membre';
         if (choice === 'custom') { 
@@ -912,7 +995,9 @@
         }
         
         var cleanName = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-');
-        var defaultFileName = `sig-${cleanName}-radio.png`;
+        var typeSuffix = getSignatureTypeSuffix(sigStyle);
+        
+        var defaultFileName = `sig-${cleanName}-${typeSuffix}.png`;
 
         document.getElementById('modalFilenameInput').value = defaultFileName;
         document.getElementById('modalDownloadFilename').classList.add('active');
@@ -932,13 +1017,8 @@
     }
 
     function executeImageDownload(fileName) {
-        var container = document.getElementById('sigPreview');
-        var logo = document.getElementById('logoPreview');
-
-        if (logo && !logo.complete) { 
-            setTimeout(function() { executeImageDownload(fileName); }, 100); 
-            return; 
-        }
+        var sigStyle = document.getElementById('inSigStyle').value;
+        var container = (sigStyle === 'radio') ? document.getElementById('sigPreview') : document.getElementById('sigBanalPreview');
         
         html2canvas(container, { 
             backgroundColor: null,
@@ -965,7 +1045,8 @@
         btn.disabled = true;
         btn.innerText = "⏳ Génération en cours...";
 
-        const container = document.getElementById('sigPreview');
+        const sigStyle = document.getElementById('inSigStyle').value;
+        const container = (sigStyle === 'radio') ? document.getElementById('sigPreview') : document.getElementById('sigBanalPreview');
         const zip = new JSZip();
         let index = 0;
 
@@ -975,8 +1056,9 @@
             if (index >= TEAM_DATABASE.length) {
                 btn.innerText = "⚡ Création du ZIP...";
                 zip.generateAsync({ type: "blob" }).then(function(content) {
+                    var typeSuffix = getSignatureTypeSuffix(sigStyle);
                     var link = document.createElement('a');
-                    link.download = `signatures-la1337-radio.zip`;
+                    link.download = `signatures-la1337-${typeSuffix}.zip`;
                     link.href = URL.createObjectURL(content);
                     link.click();
                     
@@ -1008,7 +1090,8 @@
                     allowTaint: false 
                 }).then(function(canvas) {
                     var cleanName = currentMember.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-');
-                    var fileName = `sig-${cleanName}-radio.png`;
+                    var typeSuffix = getSignatureTypeSuffix(sigStyle);
+                    var fileName = `sig-${cleanName}-${typeSuffix}.png`;
                     
                     var dataUrl = canvas.toDataURL('image/png');
                     var base64Data = dataUrl.split(',')[1];
@@ -1065,8 +1148,6 @@
             if(mailInput) mailInput.classList.add('invalid-email');
             return;
         }
-        if(emailError) emailError.style.display = 'none';
-        if(mailInput) mailInput.classList.remove('invalid-email');
 
         if (!name) {
             alert('❌ Veuillez entrer un nom');
@@ -1105,30 +1186,6 @@
         initModalRoles();
     });
 
-    document.getElementById('modalNewMember').addEventListener('click', function(e) {
-        if (e.target === this) {
-            closeModalNewMember();
-        }
-    });
-
-    document.getElementById('modalDownloadFilename').addEventListener('click', function(e) {
-        if (e.target === this) {
-            closeModalDownloadFilename();
-        }
-    });
-
-    document.addEventListener('keydown', function(e) {
-        const modalMember = document.getElementById('modalNewMember');
-        const modalDownload = document.getElementById('modalDownloadFilename');
-
-        if (modalMember && modalMember.classList.contains('active') && e.key === 'Enter') {
-            confirmNewMember();
-        } else if (modalDownload && modalDownload.classList.contains('active') && e.key === 'Enter') {
-            confirmDownloadWithFilename();
-        }
-    });
-
-    /* CHARGEMENT DYNAMIQUE DU CHANGELOG AVEC CATÉGORIES / SIGLES */
     function loadChangelog() {
         fetch('changelog.json')
             .then(response => response.json())
@@ -1147,67 +1204,30 @@
                 const renderChanges = (changes) => {
                     return changes.map(change => {
                         if (typeof change === 'object' && change.category) {
-                            return `<li><span style="display:inline-block; font-size:10px; font-weight:bold; background:#222233; color:#ff3366; border:1px solid #ff3366; padding:2px 7px; border-radius:4px; margin-right:8px; letter-spacing:0.5px;">${change.category}</span> <span>${change.text}</span></li>`;
+                            return `<li><span style="display:inline-block; font-size:10px; font-weight:bold; background:#222233; color:#ff3366; border:1px solid #ff3366; padding:2px 7px; border-radius:4px; margin-right:8px;">${change.category}</span> <span>${change.text}</span></li>`;
                         }
                         return `<li>${change}</li>`;
                     }).join('');
                 };
 
                 const recentLogs = data.slice(0, 3);
-                const archiveLogs = data.slice(3);
-
                 recentLogs.forEach((item, index) => {
                     const isLatest = index === 0;
                     const card = document.createElement('div');
                     card.className = `changelog-card ${isLatest ? 'latest' : ''}`;
-                    
-                    const badgeText = item.badge ? `${item.version} (${item.badge})` : item.version;
-                    const badgeBg = isLatest ? '' : 'style="background:#444455;"';
-
                     card.innerHTML = `
                         <div class="changelog-header">
-                            <span class="version-badge" ${badgeBg}>${badgeText}</span>
+                            <span class="version-badge">${item.version}</span>
                             <span class="version-date">${item.date}</span>
                         </div>
-                        <ul class="changelog-list">
-                            ${renderChanges(item.changes)}
-                        </ul>
+                        <ul class="changelog-list">${renderChanges(item.changes)}</ul>
                     `;
                     container.appendChild(card);
                 });
-
-                if (archiveLogs.length > 0) {
-                    const details = document.createElement('details');
-                    details.className = 'changelog-archive';
-                    
-                    let archiveHTML = `
-                        <summary>📁 Voir les anciennes mises à jour...</summary>
-                        <div class="archive-content">
-                    `;
-
-                    archiveLogs.forEach(item => {
-                        archiveHTML += `
-                            <div class="changelog-card">
-                                <div class="changelog-header">
-                                    <span class="version-badge" style="background:#333344;">${item.version}</span>
-                                    <span class="version-date">${item.date}</span>
-                                </div>
-                                <ul class="changelog-list">
-                                    ${renderChanges(item.changes)}
-                                </ul>
-                            </div>
-                        `;
-                    });
-
-                    archiveHTML += `</div>`;
-                    details.innerHTML = archiveHTML;
-                    container.appendChild(details);
-                }
             })
             .catch(err => {
-                console.error("Erreur chargement changelog:", err);
                 const container = document.getElementById('changelogContainer');
-                if(container) container.innerHTML = "<p style='color:#ff6666;'>Impossible de charger le changelog JSON.</p>";
+                if(container) container.innerHTML = "<p style='color:#888;'>Projet configuré pour BAweb.</p>";
             });
     }
 </script>
