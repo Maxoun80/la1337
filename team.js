@@ -4,7 +4,7 @@
 
 const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS0a8y_ZHF2WsnBHMbrUKL8p-CH1SJI_6US5bc2Iv-IZRWWo8NiGJEtRjNZfwWSctJBjokRKZruvexz/pub?gid=1526030464&single=true&output=csv";
 
-// Ton dictionnaire de rôles d'origine
+// Dictionnaire des 15 rôles officiels
 const ROLE_MAP = {
     1:  "Directeur",
     2:  "Directeur Adjoint",
@@ -13,9 +13,9 @@ const ROLE_MAP = {
     5:  "Secrétaire",
     6:  "Trésorière",
     7:  "Animateur",
-    8: "Animatrice",
+    8:  "Animatrice",
     9:  "Programmation",
-    10:  "Technique",
+    10: "Technique",
     11: "RH",
     12: "Événementiel",
     13: "Communication",
@@ -23,26 +23,34 @@ const ROLE_MAP = {
     15: "Membre extérieur"
 };
 
-// Sécurité au cas où : si une partie du script cherche roleMap ou ROLE_MAP
+// Alias de sécurité pour éviter tout crash si un ancien script cherche ces variables
 const roleMap = ROLE_MAP;
+const ROLES_LIST = ROLE_MAP;
 
-const THEMES = {
-    cyber:    { url: "https://i.postimg.cc/63Y5PbDR/LA1337-Signatures-de-mail.png", color: "#ff3366" },
-    ete:      { url: "https://i.postimg.cc/7YyJTjw9/LA1337-Signatures-de-mail(1).png", color: "#ff3366" },
-    noel:     { url: "https://i.postimg.cc/XqWNpSdT/LA1337-Signatures-de-mail(2).png", color: "#ffffff" },
-    nouvelan: { url: "https://i.postimg.cc/4x0Jphpd/LA1337-Signatures-de-mail(3).png", color: "#dfb76c" }
+// BANNIÈRES ET THÈMES (Avec double nommage pour compatibilité HTML totale)
+const THEME_IMAGES = {
+    cyber:    { name: "⚡ Cyberpunk Rouge", url: "https://i.postimg.cc/63Y5PbDR/LA1337-Signatures-de-mail.png", color: "#ff3366", textColor: "#ff3366", roleColor: "#e1e1e6", liveBgColor: "#ff3366", liveTxtColor: "#ffffff" },
+    ete:      { name: "☀️ Été",            url: "https://i.postimg.cc/7YyJTjw9/LA1337-Signatures-de-mail(1).png", color: "#ff3366", textColor: "#ff3366", roleColor: "#e1e1e6", liveBgColor: "#ff3366", liveTxtColor: "#ffffff" },
+    noel:     { name: "❄️ Noël",           url: "https://i.postimg.cc/XqWNpSdT/LA1337-Signatures-de-mail(2).png", color: "#ffffff", textColor: "#ffffff", roleColor: "#e1e1e6", liveBgColor: "#ffffff", liveTxtColor: "#111111" },
+    nouvelan: { name: "🎉 Nouvel An",      url: "https://i.postimg.cc/4x0Jphpd/LA1337-Signatures-de-mail(3).png", color: "#dfb76c", textColor: "#dfb76c", roleColor: "#e1e1e6", liveBgColor: "#dfb76c", liveTxtColor: "#ffffff" }
 };
+const THEMES = THEME_IMAGES;
 
+// LOGOS (Avec double nommage pour compatibilité HTML totale)
+const LOGO_IMAGES = {
+    blanc: { name: "💿 Logo Blanc Officiel", url: "https://i.postimg.cc/4x659pDr/logo-small.png" },
+    noel:  { name: "🎅 Logo Bonnet de Noël", url: "https://i.postimg.cc/50Ty8Btq/Capture-d-ecran-2026-07-18-002918.png" }
+};
 const LOGOS = {
-    blanc: "https://i.postimg.cc/4x659pDr/logo-small.png",
-    noel:  "https://i.postimg.cc/50Ty8Btq/Capture-d-ecran-2026-07-18-002918.png"
+    blanc: LOGO_IMAGES.blanc.url,
+    noel:  LOGO_IMAGES.noel.url
 };
 
 let TEAM_DATA = [];
 const imageCache = {};
 
 // =============================================================================
-// 2. CHARGEMENT DES IMAGES (AVEC CACHE POUR EVITER LES BUGS)
+// 2. CHARGEMENT DES IMAGES (AVEC CACHE)
 // =============================================================================
 
 function loadImage(url) {
@@ -70,31 +78,34 @@ function getFormData() {
     const mail = document.getElementById("inMail")?.value || "";
     const phone = document.getElementById("inPhone")?.value || "";
     const template = document.getElementById("inTemplateSelect")?.value || "officiel";
-    const themeKey = document.getElementById("inThemeSelect")?.value || "cyber";
-    const logoKey = document.getElementById("inLogoSelect")?.value || "blanc";
+    const themeKey = document.getElementById("inThemeSelect")?.value || document.getElementById("inPresetTheme")?.value || "cyber";
+    const logoKey = document.getElementById("inLogoSelect")?.value || document.getElementById("inPresetLogo")?.value || "blanc";
 
     // Récupération des rôles cochés
     const selectedRoles = [];
     for (let i = 1; i <= 15; i++) {
-        const cb = document.getElementById(`role_${i}`);
+        const cb = document.getElementById(`role_${i}`) || document.querySelector(`input[name="roleCheck"][value="${i}"]`);
         if (cb && cb.checked) {
-            selectedRoles.push(ROLES_LIST[i]);
+            selectedRoles.push(ROLE_MAP[i]);
         }
     }
+
+    const currentTheme = THEME_IMAGES[themeKey] || THEME_IMAGES.cyber;
+    const currentLogo = LOGO_IMAGES[logoKey] ? LOGO_IMAGES[logoKey].url : LOGO_IMAGES.blanc.url;
 
     return {
         name,
         mail,
         phone,
         template,
-        theme: THEMES[themeKey] || THEMES.cyber,
-        logoUrl: LOGOS[logoKey] || LOGOS.blanc,
+        theme: currentTheme,
+        logoUrl: currentLogo,
         rolesText: selectedRoles.join(" • ") || "Membre"
     };
 }
 
 // =============================================================================
-// 4. MOTEUR DE DESSIN DU CANVAS (REFAIT ET SEPARE)
+// 4. MOTEUR DE DESSIN DU CANVAS
 // =============================================================================
 
 async function renderCanvas() {
@@ -106,15 +117,13 @@ async function renderCanvas() {
     const bannerImg = await loadImage(data.theme.url);
     const logoImg = await loadImage(data.logoUrl);
 
-    // Effacer le canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // --- MODE 1 : SIGNATURE OFFICIELLE (AVEC BANNIERE DE FOND) ---
-    if (data.template === "officiel") {
+    // MODE 1 : SIGNATURE OFFICIELLE
+    if (data.template === "officiel" || data.template === "radio") {
         canvas.height = 200;
         canvas.width = 600;
 
-        // 1. Dessin de la bannière
         if (bannerImg) {
             ctx.drawImage(bannerImg, 0, 0, canvas.width, canvas.height);
         } else {
@@ -122,17 +131,15 @@ async function renderCanvas() {
             ctx.fillRect(0, 0, canvas.width, canvas.height);
         }
 
-        // 2. Dessin du Logo
         if (logoImg) {
             ctx.drawImage(logoImg, 25, 25, 70, 70);
         }
 
-        // 3. Textes
         ctx.fillStyle = "#ffffff";
         ctx.font = "bold 22px Arial, sans-serif";
         ctx.fillText(data.name || "Prénom Nom", 110, 50);
 
-        ctx.fillStyle = data.theme.color;
+        ctx.fillStyle = data.theme.color || "#ff3366";
         ctx.font = "bold 13px Arial, sans-serif";
         ctx.fillText(data.rolesText.toUpperCase(), 110, 72);
 
@@ -143,26 +150,21 @@ async function renderCanvas() {
             ctx.fillText(`📞 ${data.phone}`, 110, 130);
         }
     }
-
-    // --- MODE 2 : SIGNATURE MINIMALISTE (SANS BANNIERE, LOGO + TEXTE) ---
-    else if (data.template === "minimaliste") {
+    // MODE 2 : SIGNATURE MINIMALISTE
+    else if (data.template === "minimaliste" || data.template === "baweb_minimal") {
         canvas.height = 120;
         canvas.width = 500;
 
-        // Fond transparent/neutre
         ctx.fillStyle = "#ffffff";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Logo à gauche
         if (logoImg) {
             ctx.drawImage(logoImg, 10, 20, 60, 60);
         }
 
-        // Ligne verticale de séparation
         ctx.fillStyle = "#ff3366";
         ctx.fillRect(85, 20, 3, 70);
 
-        // Textes à droite
         ctx.fillStyle = "#111111";
         ctx.font = "bold 18px Arial, sans-serif";
         ctx.fillText(data.name || "Prénom Nom", 100, 38);
@@ -175,16 +177,14 @@ async function renderCanvas() {
         ctx.font = "12px Arial, sans-serif";
         ctx.fillText(`${data.mail} ${data.phone ? " | " + data.phone : ""}`, 100, 78);
     }
-
-    // --- MODE 3 : SIGNATURE SIMPLE (TEXTE SUR 1 OU 2 LIGNES) ---
-    else if (data.template === "simple") {
+    // MODE 3 : SIGNATURE SIMPLE
+    else if (data.template === "simple" || data.template === "baweb_line") {
         canvas.height = 80;
         canvas.width = 500;
 
         ctx.fillStyle = "#ffffff";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Ligne 1 : Nom et Rôle
         ctx.fillStyle = "#111111";
         ctx.font = "bold 15px Arial, sans-serif";
         ctx.fillText(data.name || "Prénom Nom", 10, 30);
@@ -193,7 +193,6 @@ async function renderCanvas() {
         ctx.font = "13px Arial, sans-serif";
         ctx.fillText(`— ${data.rolesText}`, ctx.measureText((data.name || "Prénom Nom") + " ").width + 15, 30);
 
-        // Ligne 2 : Contact
         ctx.fillStyle = "#ff3366";
         ctx.font = "12px Arial, sans-serif";
         ctx.fillText(`${data.mail || ""} ${data.phone ? "• " + data.phone : ""}`, 10, 55);
@@ -228,7 +227,15 @@ async function loadTeamData() {
             const cols = parseCSVRow(lines[i]);
             if (!cols[0] && !cols[1]) continue;
             
-            const fullName = `${cols[1] || ''} ${cols[0] || ''}`.trim();
+            // Nettoyage strict : Prénom Nom uniquement (supprime les adresses email parasites)
+            let rawFirstName = (cols[1] || '').trim();
+            let rawLastName = (cols[0] || '').trim();
+            
+            // Si une adresse mail s'est glissée dans le nom, on la retire
+            rawFirstName = rawFirstName.replace(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\s*/, '');
+            rawLastName = rawLastName.replace(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\s*/, '');
+
+            const fullName = `${rawFirstName} ${rawLastName}`.trim();
             const roles = (cols[4] || '').split(',').map(r => parseInt(r.trim(), 10)).filter(r => !isNaN(r));
 
             members.push({
@@ -240,6 +247,8 @@ async function loadTeamData() {
             });
         }
         TEAM_DATA = members;
+        // Remplir la base de membres globale si nécessaire
+        window.TEAM_DATABASE = TEAM_DATA;
         populateSelect();
     } catch (e) {
         console.warn("⚠️ Sheet non disponible :", e);
@@ -250,11 +259,11 @@ function populateSelect() {
     const select = document.getElementById("inMemberSelect");
     if (!select) return;
     
-    select.innerHTML = '<option value="">-- Sélectionner un membre --</option>';
+    select.innerHTML = '<option value="">👥 Choisir un membre</option>';
     TEAM_DATA.forEach(m => {
         const opt = document.createElement("option");
         opt.value = m.id;
-        opt.textContent = m.name;
+        opt.textContent = m.name; // Affiche strictement Nom & Prénom
         select.appendChild(opt);
     });
 }
@@ -263,46 +272,43 @@ function selectMember(memberId) {
     const member = TEAM_DATA.find(m => m.id === memberId);
     if (!member) return;
 
-    document.getElementById("inName").value = member.name;
-    document.getElementById("inMail").value = member.mail;
-    document.getElementById("inPhone").value = member.phone;
+    if (document.getElementById("inName")) document.getElementById("inName").value = member.name;
+    if (document.getElementById("inMail")) document.getElementById("inMail").value = member.mail;
+    if (document.getElementById("inPhone")) document.getElementById("inPhone").value = member.phone;
 
-    // Réinitialiser puis cocher les checkboxes
+    // Décocher tout puis cocher les bons rôles
     for (let i = 1; i <= 15; i++) {
-        const cb = document.getElementById(`role_${i}`);
+        const cb = document.getElementById(`role_${i}`) || document.querySelector(`input[name="roleCheck"][value="${i}"]`);
         if (cb) cb.checked = member.roles.includes(i);
     }
 
+    if (typeof updateSig === "function") updateSig();
     renderCanvas();
 }
 
 // =============================================================================
-// 6. EVENT LISTENERS
+// 6. INITIALISATION
 // =============================================================================
 
 document.addEventListener("DOMContentLoaded", () => {
     loadTeamData();
 
-    // Re-dessiner lors des changements d'inputs texte
     ["inName", "inMail", "inPhone"].forEach(id => {
         document.getElementById(id)?.addEventListener("input", renderCanvas);
     });
 
-    // Re-dessiner lors des changements de sélecteurs
-    ["inTemplateSelect", "inThemeSelect", "inLogoSelect"].forEach(id => {
+    ["inTemplateSelect", "inThemeSelect", "inLogoSelect", "inPresetTheme", "inPresetLogo"].forEach(id => {
         document.getElementById(id)?.addEventListener("change", renderCanvas);
     });
 
-    // Re-dessiner lors du choix d'un membre
     document.getElementById("inMemberSelect")?.addEventListener("change", (e) => {
         selectMember(e.target.value);
     });
 
-    // Re-dessiner lors du clic sur les cases à cocher
     for (let i = 1; i <= 15; i++) {
-        document.getElementById(`role_${i}`)?.addEventListener("change", renderCanvas);
+        const cb = document.getElementById(`role_${i}`) || document.querySelector(`input[name="roleCheck"][value="${i}"]`);
+        cb?.addEventListener("change", renderCanvas);
     }
 
-    // Premier rendu à vide
     renderCanvas();
 });
