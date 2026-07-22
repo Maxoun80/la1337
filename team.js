@@ -83,47 +83,31 @@ async function loadTeamData() {
         for (let i = 1; i < lines.length; i++) {
             const cols = parseCSVRow(lines[i]);
             
-            let rawLastName = (cols[0] || '').trim();
-            let rawFirstName = (cols[1] || '').trim();
+            // Lecture directe et nettoyage des colonnes
+            let rawLastName = (cols[0] || '').trim().replace(/^"|"$/g, '');
+            let rawFirstName = (cols[1] || '').trim().replace(/^"|"$/g, '');
             
-            // Nettoyage des emails parasites si présents dans les colonnes nom/prénom
+            // Nettoyage des emails si collés dans le nom/prénom
             rawFirstName = rawFirstName.replace(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\s*/, '');
             rawLastName = rawLastName.replace(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\s*/, '');
 
-            // Si la ligne n'a pas de nom/prénom, on affiche un libellé de stock clair
             let fullName = `${rawFirstName} ${rawLastName.toUpperCase()}`.trim();
             if (!fullName) {
                 fullName = `📦 Ligne libre #${i}`;
             }
             
-            let email = '';
-            let phone = '';
-            let rolesRaw = '';
+            // Extraction directe des colonnes (Mail, Tél, Rôles)
+            let email = (cols[2] || '').trim().replace(/^"|"$/g, '');
+            let phone = (cols[3] || '').trim().replace(/^"|"$/g, '');
+            let rolesRaw = (cols[4] || '').trim().replace(/^"|"$/g, '');
 
-            // Détection automatique des colonnes
-            cols.forEach(col => {
-                const val = col.trim();
-                if (val.includes('@')) {
-                    email = val;
-                } else if (/^[0-9\s\.\-\+]{9,}$/.test(val) && !val.includes('0365170063')) {
-                    phone = val;
-                } else if (val.includes(',') || /^[0-9\s,]+$/.test(val)) {
-                    if (val.toUpperCase() !== 'FALSE' && val.toUpperCase() !== 'TRUE') {
-                        rolesRaw = val;
-                    }
-                }
-            });
+            // Sécurisations si valeurs absentes
+            if (!email || !email.includes('@')) email = 'contact@la1337.com';
+            if (phone.toUpperCase() === 'FALSE' || phone.toUpperCase() === 'TRUE') phone = '';
 
-            // Sécurisations et valeurs par défaut
-            if (!email) email = cols[2]?.includes('@') ? cols[2] : (cols[3]?.includes('@') ? cols[3] : 'contact@la1337.com');
-            if (!phone) {
-                const candidatePhone = cols[3] || cols[4] || '';
-                phone = (candidatePhone.toUpperCase() === 'FALSE' || candidatePhone.toUpperCase() === 'TRUE') ? '' : candidatePhone;
-            }
-            if (!rolesRaw) rolesRaw = cols[4] || cols[5] || '';
-
-            // Extraction des IDs des rôles
+            // Conversion ultra-stricte des rôles (supporte "7", "1,7", "1, 7, 10", etc.)
             const roles = rolesRaw
+                .replace(/[^0-9,]/g, '')
                 .split(',')
                 .map(r => parseInt(r.trim(), 10))
                 .filter(r => !isNaN(r));
