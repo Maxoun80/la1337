@@ -1,5 +1,5 @@
 // =============================================================================
-// 1. CONFIGURATION & CARTOGRAPHIES OFFICIELLES
+// 1. CONFIGURATION, CARTOGRAPHIES & BINDING TEMPLATES
 // =============================================================================
 
 const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS0a8y_ZHF2WsnBHMbrUKL8p-CH1SJI_6US5bc2Iv-IZRWWo8NiGJEtRjNZfwWSctJBjokRKZruvexz/pub?gid=1526030464&single=true&output=csv";
@@ -22,29 +22,43 @@ const ROLE_MAP = {
     15: "Membre extérieur"
 };
 
+// Configuration des options d'affichage selon le style sélectionné
 const SIGNATURE_TEMPLATES = {
-    officiel:    { id: "officiel",    name: " Signature Officielle Cyber / Complète" },
-    minimaliste: { id: "minimaliste", name: " Minimaliste / Épurée" },
-    ligne:       { id: "ligne",       name: " Version Ligne complète" },
-    courrier:    { id: "courrier",    name: " Version Courrier / Texte brut" }
-};
-
-const THEME_IMAGES = {
-    cyber:    { name: "🎧 Mode Radio Cyber", url: "https://i.postimg.cc/63Y5PbDR/LA1337-Signatures-de-mail.png" },
-    ete:      { name: "☀️ Mode Été",        url: "https://i.postimg.cc/7YyJTjw9/LA1337-Signatures-de-mail(1).png" },
-    noel:     { name: "🎄 Mode Noël",       url: "https://i.postimg.cc/XqWNpSdT/LA1337-Signatures-de-mail(2).png" },
-    nouvelan: { name: "🥂 Nouvel An",       url: "https://i.postimg.cc/4x0Jphpd/LA1337-Signatures-de-mail(3).png" }
-};
-
-const LOGO_IMAGES = { 
-    blanc: { name: "⚪ Logo Blanc Officiel", url: "https://i.postimg.cc/4x659pDr/logo-small.png" },
-    noel:  { name: "🎄 Logo Noël Officiel",  url: "https://i.postimg.cc/50Ty8Btq/Capture-d-ecran-2026-07-18-002918.png" }
+    officiel: {
+        id: "officiel",
+        name: " Signature Officielle Cyber / Complète",
+        showBanner: true,
+        showLogo: true,
+        showLive: true
+    },
+    minimaliste: {
+        id: "minimaliste",
+        name: " Minimaliste / Épurée",
+        showBanner: false,
+        showLogo: true,
+        showLive: false
+    },
+    ligne: {
+        id: "ligne",
+        name: " Version Ligne complète",
+        showBanner: false,
+        showLogo: true,
+        showLive: true
+    },
+    courrier: {
+        id: "courrier",
+        name: " Version Courrier / Texte brut",
+        showBanner: false,
+        showLogo: false,
+        showLive: false
+    }
 };
 
 let TEAM_DATABASE = [];
+let currentTemplate = "officiel";
 
 // =============================================================================
-// 2. LOCALSTORAGE & CHARGEMENT CSV GOOGLE SHEETS
+// 2. SYNCHRONISATION LOCALSTORAGE ET PARSER GOOGLE SHEETS
 // =============================================================================
 
 function getCustomMembers() {
@@ -145,14 +159,14 @@ async function loadTeamFromGoogleSheet() {
         populateTeamSelect();
 
     } catch (error) {
-        console.warn("⚠️ Utilisation du secours local :", error);
+        console.warn("⚠️ Secours local activé :", error);
         loadCustomMembers();
         populateTeamSelect();
     }
 }
 
 // =============================================================================
-// 3. SYNCHRONISATION AVEC L'INTERFACE HTML
+// 3. EVENT HANDLERS & MISE À JOUR DE L'INTERFACE
 // =============================================================================
 
 function populateTeamSelect() {
@@ -175,7 +189,6 @@ function populateTeamSelect() {
 function onTeamMemberSelect(memberId) {
     if (!memberId) return;
 
-    // Saisie manuelle : ouvre la modal existante du site
     if (memberId === "manual") {
         if (typeof openAddMemberModal === "function") openAddMemberModal();
         else if (typeof openModal === "function") openModal();
@@ -185,7 +198,6 @@ function onTeamMemberSelect(memberId) {
     const member = TEAM_DATABASE.find(m => m.id === memberId);
     if (!member) return;
 
-    // Remplissage du Nom / Mail / Téléphone
     const nameInput  = document.getElementById("inName")  || document.getElementById("nameInput");
     const mailInput  = document.getElementById("inMail")  || document.getElementById("mailInput");
     const phoneInput = document.getElementById("inPhone") || document.getElementById("phoneInput");
@@ -194,17 +206,14 @@ function onTeamMemberSelect(memberId) {
     if (mailInput)  { mailInput.value = member.mail;   mailInput.dispatchEvent(new Event('input', { bubbles: true })); }
     if (phoneInput) { phoneInput.value = member.phone; phoneInput.dispatchEvent(new Event('input', { bubbles: true })); }
 
-    // Remplissage des Checkboxes de Rôles
     const checkboxes = document.querySelectorAll('input[type="checkbox"]');
     checkboxes.forEach(cb => {
-        // On décoche par défaut si c'est une case de rôle
         if (cb.name === "roles" || cb.id.startsWith("role_") || cb.closest('.roles-container')) {
             cb.checked = false;
         }
     });
 
     member.roles.forEach(roleId => {
-        // Recherche par ID ou valeur de rôle
         const cb = document.getElementById(`role_${roleId}`) || 
                    document.querySelector(`input[value="${roleId}"]`) ||
                    document.querySelector(`input[value="${ROLE_MAP[roleId]}"]`);
@@ -214,14 +223,34 @@ function onTeamMemberSelect(memberId) {
         }
     });
 
-    // Appel des fonctions globales du script principal pour rafraîchir l'aperçu Canvas/HTML
-    if (typeof updateSignature === "function") updateSignature();
-    if (typeof render === "function") render();
-    if (typeof draw === "function") draw();
+    triggerRender();
+}
+
+// Gestion de la sélection du Style de Signature (Minimaliste, Ligne, Courrier, etc.)
+function onTemplateSelect(templateKey) {
+    if (!templateKey) return;
+    
+    // Détecte la clef du template à partir de la valeur sélectionnée
+    if (templateKey.includes("minimaliste") || templateKey === "minimaliste") currentTemplate = "minimaliste";
+    else if (templateKey.includes("ligne") || templateKey === "ligne") currentTemplate = "ligne";
+    else if (templateKey.includes("courrier") || templateKey === "courrier") currentTemplate = "courrier";
+    else currentTemplate = "officiel";
+
+    triggerRender();
+}
+
+// Fonction centrale pour Notifier le moteur de rendu HTML / Canvas principal
+function triggerRender() {
+    const config = SIGNATURE_TEMPLATES[currentTemplate] || SIGNATURE_TEMPLATES.officiel;
+
+    // Transmet l'ID du template aux fonctions du script principal si présent
+    if (typeof updateSignature === "function") updateSignature(currentTemplate, config);
+    if (typeof render === "function") render(currentTemplate, config);
+    if (typeof draw === "function") draw(currentTemplate, config);
 }
 
 // =============================================================================
-// 4. INITIALISATION AU CHARGEMENT
+// 4. INITIALISATION AU CHARGEMENT DU DOM
 // =============================================================================
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -229,10 +258,19 @@ document.addEventListener("DOMContentLoaded", () => {
     populateTeamSelect();
     loadTeamFromGoogleSheet();
 
-    const select = document.getElementById("inMemberSelect") || document.getElementById("memberSelect");
-    if (select) {
-        select.addEventListener("change", (e) => {
+    // 1. Écouteur pour la sélection d'un membre
+    const selectMember = document.getElementById("inMemberSelect") || document.getElementById("memberSelect");
+    if (selectMember) {
+        selectMember.addEventListener("change", (e) => {
             onTeamMemberSelect(e.target.value);
+        });
+    }
+
+    // 2. Écouteur pour le changement de Style de Signature
+    const selectTemplate = document.getElementById("inTemplateSelect") || document.getElementById("templateSelect") || document.querySelector('select[name="template"]');
+    if (selectTemplate) {
+        selectTemplate.addEventListener("change", (e) => {
+            onTemplateSelect(e.target.value);
         });
     }
 });
