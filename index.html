@@ -478,7 +478,7 @@
                 </select>
             </div>
 
-            <!-- SÉLECTEUR DE MEMBRES (MODIFIÉ POUR SYNC GOOGLE SHEETS) -->
+            <!-- SÉLECTEUR DE MEMBRES -->
             <div class="input-group">
                 <label>👤 Sélectionner le Membre de l'équipe</label>
                 <select id="inMemberSelect" onchange="handleMemberChange()">
@@ -580,7 +580,7 @@
         </div>
     </div>
 
-    <!-- ONGLET 2 : HISTORIQUE DES MISES À JOUR (DYNAMIQUE JSON) -->
+    <!-- ONGLET 2 : HISTORIQUE DES MISES À JOUR -->
     <div id="tab-changelog" class="tab-content">
         <div id="changelogContainer" class="changelog-container">
             <p style="color: #888;">Chargement des mises à jour...</p>
@@ -661,6 +661,7 @@
 
     function initRolesCheckboxes() {
         const container = document.getElementById('rolesContainer');
+        if(!container || typeof ROLE_MAP === 'undefined') return;
         container.innerHTML = '';
         for (const [code, name] of Object.entries(ROLE_MAP)) {
             const label = document.createElement('label');
@@ -680,9 +681,9 @@
     function toggleCustomRoleInput() {
         var chk = document.getElementById('chkCustomRole');
         var zone = document.getElementById('customRoleInputZone');
-        if (chk.checked) {
+        if (chk && chk.checked) {
             zone.style.display = 'block';
-        } else {
+        } else if (zone) {
             zone.style.display = 'none';
             document.getElementById('inCustomRoleText').value = '';
         }
@@ -692,7 +693,7 @@
     /* REMPLISSAGE DU SÉLECTEUR DE BÉNÉVOLES DEPUIS LE SHEETS */
     function initMemberSelector() {
         var select = document.getElementById('inMemberSelect');
-        if(!select) return;
+        if(!select || typeof TEAM_DATABASE === 'undefined') return;
         
         select.innerHTML = '';
         
@@ -741,27 +742,39 @@
     }
 
     function setSecureImage(url, targetId, isBackground, callback) {
+        if (!url) return;
         if (base64Cache[url]) { 
             applyImageToTarget(base64Cache[url], targetId, isBackground); 
             if(callback) callback();
             return; 
         }
-        const img = new Image(); img.crossOrigin = "Anonymous";
+        const img = new Image(); 
+        img.crossOrigin = "Anonymous";
         img.onload = function() {
-            const canvas = document.createElement("canvas"); canvas.width = img.width; canvas.height = img.height;
-            canvas.getContext("2d").drawImage(img, 0, 0); base64Cache[url] = canvas.toDataURL("image/png");
+            const canvas = document.createElement("canvas"); 
+            canvas.width = img.width; 
+            canvas.height = img.height;
+            canvas.getContext("2d").drawImage(img, 0, 0); 
+            base64Cache[url] = canvas.toDataURL("image/png");
             applyImageToTarget(base64Cache[url], targetId, isBackground);
             if(callback) callback();
-        }; img.src = url;
+        }; 
+        img.src = url;
     }
 
     function applyImageToTarget(dataUrl, targetId, isBackground) {
         const element = document.getElementById(targetId);
-        if (isBackground) { element.style.background = `url('${dataUrl}') center/cover`; } else { element.src = dataUrl; }
+        if (!element) return;
+        if (isBackground) { 
+            element.style.background = `url('${dataUrl}') center/cover`; 
+        } else { 
+            element.src = dataUrl; 
+        }
     }
 
     window.onload = function() {
         initRolesCheckboxes(); 
+        initMemberSelector();
         initThemeSelector(); 
         initLogoSelector();  
         
@@ -769,8 +782,8 @@
             const firstThemeKey = Object.keys(THEME_IMAGES)[0];
             const firstLogoKey = Object.keys(LOGO_IMAGES)[0];
 
-            if(firstThemeKey) setSecureImage(THEME_IMAGES[firstThemeKey].url, 'sigPreview', true);
-            if(firstLogoKey) setSecureImage(LOGO_IMAGES[firstLogoKey].url, 'logoPreview', false);
+            if(firstThemeKey && THEME_IMAGES[firstThemeKey]) setSecureImage(THEME_IMAGES[firstThemeKey].url, 'sigPreview', true);
+            if(firstLogoKey && LOGO_IMAGES[firstLogoKey]) setSecureImage(LOGO_IMAGES[firstLogoKey].url, 'logoPreview', false);
             applyPresetTheme();
         }
         
@@ -814,12 +827,13 @@
         } else if (choice === 'custom') {
             openModalNewMember();
         } else {
-            customZone.style.display = 'none';
-            var data = TEAM_DATABASE.find(m => m.id === choice);
-            if (data) {
-                // Remplissage auto des cases de rôles
-                for (var i = 0; i < checkboxes.length; i++) {
-                    checkboxes[i].checked = data.roles && data.roles.includes(parseInt(checkboxes[i].value));
+            if(customZone) customZone.style.display = 'none';
+            if(typeof TEAM_DATABASE !== 'undefined') {
+                var data = TEAM_DATABASE.find(m => m.id === choice);
+                if (data) {
+                    for (var i = 0; i < checkboxes.length; i++) {
+                        checkboxes[i].checked = data.roles && data.roles.includes(parseInt(checkboxes[i].value));
+                    }
                 }
             }
         }
@@ -862,13 +876,13 @@
             const mailInput = document.getElementById('inCustomMail');
             const emailError = document.getElementById('emailError');
             if (mail && mail !== 'contact@la1337.com' && !isValidEmail(mail)) {
-                mailInput.classList.add('invalid-email');
-                emailError.style.display = 'block';
+                if(mailInput) mailInput.classList.add('invalid-email');
+                if(emailError) emailError.style.display = 'block';
             } else {
-                mailInput.classList.remove('invalid-email');
-                emailError.style.display = 'none';
+                if(mailInput) mailInput.classList.remove('invalid-email');
+                if(emailError) emailError.style.display = 'none';
             }
-        } else if (choice !== '') {
+        } else if (choice !== '' && typeof TEAM_DATABASE !== 'undefined') {
             var data = TEAM_DATABASE.find(m => m.id === choice);
             if (data) {
                 name = data.name;
@@ -880,10 +894,12 @@
 
         var checkboxes = document.getElementsByName('roleCheck');
         var selectedRolesNames = [];
-        for (var i = 0; i < checkboxes.length; i++) {
-            if (checkboxes[i].checked) {
-                var codeCoche = parseInt(checkboxes[i].value);
-                selectedRolesNames.push(ROLE_MAP[codeCoche]);
+        if (typeof ROLE_MAP !== 'undefined') {
+            for (var i = 0; i < checkboxes.length; i++) {
+                if (checkboxes[i].checked) {
+                    var codeCoche = parseInt(checkboxes[i].value);
+                    if (ROLE_MAP[codeCoche]) selectedRolesNames.push(ROLE_MAP[codeCoche]);
+                }
             }
         }
         var chkCustom = document.getElementById('chkCustomRole');
@@ -933,7 +949,7 @@
         var name = 'membre';
         if (choice === 'custom') { 
             name = document.getElementById('inCustomName').value || 'membre'; 
-        } else { 
+        } else if (typeof TEAM_DATABASE !== 'undefined') { 
             var data = TEAM_DATABASE.find(m => m.id === choice); 
             if(data) name = data.name; 
         }
@@ -965,7 +981,7 @@
         var container = (sigStyle === 'radio') ? document.getElementById('sigPreview') : document.getElementById('sigBanalPreview');
         var logo = document.getElementById('logoPreview');
 
-        if (sigStyle === 'radio' && !logo.complete) { 
+        if (sigStyle === 'radio' && logo && !logo.complete) { 
             setTimeout(function() { executeImageDownload(fileName); }, 100); 
             return; 
         }
@@ -985,6 +1001,11 @@
     }
 
     function generateAllSignaturesZip() {
+        if (typeof TEAM_DATABASE === 'undefined' || TEAM_DATABASE.length === 0) {
+            alert('❌ La base de données des membres est vide.');
+            return;
+        }
+
         const btn = document.getElementById('bulkBtn');
         const originalText = btn.innerText;
         btn.disabled = true;
@@ -1054,7 +1075,7 @@
     /* MODAL NOUVEAU MEMBRE */
     function initModalRoles() {
         const container = document.getElementById('modalRolesContainer');
-        if(!container) return;
+        if(!container || typeof ROLE_MAP === 'undefined') return;
         container.innerHTML = '';
         for (const [code, name] of Object.entries(ROLE_MAP)) {
             const label = document.createElement('label');
@@ -1089,12 +1110,12 @@
         const mailInput = document.getElementById('modalMail');
 
         if (mail && !isValidEmail(mail)) {
-            emailError.style.display = 'block';
-            mailInput.classList.add('invalid-email');
+            if(emailError) emailError.style.display = 'block';
+            if(mailInput) mailInput.classList.add('invalid-email');
             return;
         }
-        emailError.style.display = 'none';
-        mailInput.classList.remove('invalid-email');
+        if(emailError) emailError.style.display = 'none';
+        if(mailInput) mailInput.classList.remove('invalid-email');
 
         if (!name) {
             alert('❌ Veuillez entrer un nom');
@@ -1117,7 +1138,9 @@
             roles: selectedRoles
         };
 
-        TEAM_DATABASE.push(newMember);
+        if(typeof TEAM_DATABASE !== 'undefined') {
+            TEAM_DATABASE.push(newMember);
+        }
         initMemberSelector();
 
         forceInjectMemberData(newMember);
@@ -1147,9 +1170,9 @@
         const modalMember = document.getElementById('modalNewMember');
         const modalDownload = document.getElementById('modalDownloadFilename');
 
-        if (modalMember.classList.contains('active') && e.key === 'Enter') {
+        if (modalMember && modalMember.classList.contains('active') && e.key === 'Enter') {
             confirmNewMember();
-        } else if (modalDownload.classList.contains('active') && e.key === 'Enter') {
+        } else if (modalDownload && modalDownload.classList.contains('active') && e.key === 'Enter') {
             confirmDownloadWithFilename();
         }
     });
@@ -1160,11 +1183,14 @@
             .then(response => response.json())
             .then(data => {
                 const container = document.getElementById('changelogContainer');
+                if(!container) return;
                 container.innerHTML = '';
 
                 if (data.length > 0) {
-                    document.getElementById('footerVersion').innerText = data[0].version;
-                    document.getElementById('footerDate').innerText = data[0].date;
+                    const fVer = document.getElementById('footerVersion');
+                    const fDate = document.getElementById('footerDate');
+                    if(fVer) fVer.innerText = data[0].version;
+                    if(fDate) fDate.innerText = data[0].date;
                 }
 
                 const renderChanges = (changes) => {
@@ -1229,7 +1255,8 @@
             })
             .catch(err => {
                 console.error("Erreur chargement changelog:", err);
-                document.getElementById('changelogContainer').innerHTML = "<p style='color:#ff6666;'>Impossible de charger le changelog JSON.</p>";
+                const container = document.getElementById('changelogContainer');
+                if(container) container.innerHTML = "<p style='color:#ff6666;'>Impossible de charger le changelog JSON.</p>";
             });
     }
 </script>
