@@ -72,7 +72,10 @@ function parseCSVRow(row) {
 
 async function loadTeamData() {
     try {
-        const res = await fetch(GOOGLE_SHEET_CSV_URL);
+        // Ajout d'un paramètre anti-cache (Horodatage exact) pour forcer la mise à jour immédiate
+        const antiCacheUrl = GOOGLE_SHEET_CSV_URL + '&t=' + new Date().getTime();
+        
+        const res = await fetch(antiCacheUrl, { cache: "no-store" });
         const text = await res.text();
         const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
         
