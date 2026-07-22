@@ -30,10 +30,11 @@ window.ROLES_LIST = ROLE_MAP;
 
 // BANNIÈRES & THÈMES
 const THEME_IMAGES = {
-    cyber:    { name: "⚡ Cyberpunk Rouge", url: "https://i.postimg.cc/63Y5PbDR/LA1337-Signatures-de-mail.png", color: "#ff3366", textColor: "#ff3366", roleColor: "#e1e1e6", liveBgColor: "#ff3366", liveTxtColor: "#ffffff" },
-    ete:      { name: "☀️ Été",            url: "https://i.postimg.cc/7YyJTjw9/LA1337-Signatures-de-mail(1).png", color: "#ff3366", textColor: "#ff3366", roleColor: "#e1e1e6", liveBgColor: "#ff3366", liveTxtColor: "#ffffff" },
-    noel:     { name: "❄️ Noël",           url: "https://i.postimg.cc/XqWNpSdT/LA1337-Signatures-de-mail(2).png", color: "#ffffff", textColor: "#ffffff", roleColor: "#e1e1e6", liveBgColor: "#ffffff", liveTxtColor: "#111111" },
-    nouvelan: { name: "🎉 Nouvel An",      url: "https://i.postimg.cc/4x0Jphpd/LA1337-Signatures-de-mail(3).png", color: "#dfb76c", textColor: "#dfb76c", roleColor: "#e1e1e6", liveBgColor: "#dfb76c", liveTxtColor: "#ffffff" }
+    cyber:    { name: "⚡ Cyberpunk Rouge", url: "https://i.postimg.cc/SsB3VfZD/general.png", color: "#ff3366", textColor: "#ff3366", roleColor: "#e1e1e6", liveBgColor: "#ff3366", liveTxtColor: "#ffffff" },
+    ete:      { name: "☀️ Été (prochainement disponible)",            url: "[LIEN POSTIMG]", color: "#ff3366", textColor: "#ff3366", roleColor: "#e1e1e6", liveBgColor: "#ff3366", liveTxtColor: "#ffffff" },
+    noel:     { name: "❄️ Noël",           url: "https://i.postimg.cc/LXcwv3yx/noel.png", color: "#ffffff", textColor: "#ffffff", roleColor: "#e1e1e6", liveBgColor: "#ffffff", liveTxtColor: "#111111" },
+    nouvelan: { name: "🎉 Nouvel An",      url: "https://i.postimg.cc/76FdXnBB/nouvel-an.png", color: "#dfb76c", textColor: "#dfb76c", roleColor: "#e1e1e6", liveBgColor: "#dfb76c", liveTxtColor: "#ffffff" },
+    nouvelan: { name: "☀️ Telethon",      url: "https://i.postimg.cc/zBs6pFdt/telethon.png", color: "#dfb76c", textColor: "#dfb76c", roleColor: "#e1e1e6", liveBgColor: "#dfb76c", liveTxtColor: "#ffffff" }
 };
 window.THEME_IMAGES = THEME_IMAGES;
 window.THEMES = THEME_IMAGES;
