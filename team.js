@@ -6,16 +6,21 @@ const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS
 
 // Ton dictionnaire de rôles d'origine
 const ROLE_MAP = {
-    1: "Président",
-    2: "Fondateur",
-    3: "Vice-Président",
-    4: "Trésorier",
-    5: "Secrétaire",
-    6: "Animateur / Chroniqueur",
-    7: "Réalisateur / Technicien",
-    8: "Community Manager",
-    9: "Développeur / Webmaster",
-    10: "Bénévole"
+    1:  "Directeur",
+    2:  "Directeur Adjoint",
+    3:  "Président",
+    4:  "Vice-Président",
+    5:  "Secrétaire",
+    6:  "Trésorière",
+    7:  "Animateur",
+    8: "Animatrice",
+    9:  "Programmation",
+    10:  "Technique",
+    11: "RH",
+    12: "Événementiel",
+    13: "Communication",
+    14: "Journaliste",
+    15: "Membre extérieur"
 };
 
 // Sécurité au cas où : si une partie du script cherche roleMap ou ROLE_MAP
