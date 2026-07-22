@@ -1,8 +1,36 @@
 [
   {
     "version": "v1.9.0",
-    "date": "22/07/2026",
+    "date": "22/07/2026 à 13:45",
     "isCurrent": true,
+    "changes": [
+      {
+        "category": "Data & Sync",
+        "text": "Mise en place d'un système anti-cache strict (?t=timestamp) sur l'URL Google Sheet pour assurer la mise à jour instantanée."
+      },
+      {
+        "category": "Data & Sync",
+        "text": "Préservation des 'Lignes libres' du Google Sheet sans effacement ni décalage de l'inventaire des membres."
+      },
+      {
+        "category": "BAweb",
+        "text": "Intégration complète des styles de signature pour les courriers administratifs BAweb (Ligne complète & Carte minimaliste)."
+      },
+      {
+        "category": "Correctif",
+        "text": "Fix du sélecteur de logos : affichage et application instantanée du logo sélectionné."
+      },
+      {
+        "category": "Export",
+        "text": "Optimisation du rendu html2canvas pour la génération PNG et les exports ZIP groupés."
+      }
+    ]
+  },
+  
+  {
+    "version": "v1.9.0",
+    "date": "22/07/2026 à 03:15",
+    "isCurrent": false,
     "changes": [
       {
         "category": "BAweb",
