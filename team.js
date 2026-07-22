@@ -72,7 +72,7 @@ function parseCSVRow(row) {
 
 async function loadTeamData() {
     try {
-        // Ajout d'un paramètre anti-cache (Horodatage exact) pour forcer la mise à jour immédiate
+        // Paramètre anti-cache (Horodatage exact) pour forcer la synchronisation instantanée
         const antiCacheUrl = GOOGLE_SHEET_CSV_URL + '&t=' + new Date().getTime();
         
         const res = await fetch(antiCacheUrl, { cache: "no-store" });
@@ -82,16 +82,19 @@ async function loadTeamData() {
         const members = [];
         for (let i = 1; i < lines.length; i++) {
             const cols = parseCSVRow(lines[i]);
-            if (!cols[0] && !cols[1]) continue;
             
             let rawLastName = (cols[0] || '').trim();
             let rawFirstName = (cols[1] || '').trim();
             
-            // Nettoyage des emails parasites
+            // Nettoyage des emails parasites si présents dans les colonnes nom/prénom
             rawFirstName = rawFirstName.replace(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\s*/, '');
             rawLastName = rawLastName.replace(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\s*/, '');
 
-            const fullName = `${rawFirstName} ${rawLastName.toUpperCase()}`.trim();
+            // Si la ligne n'a pas de nom/prénom, on affiche un libellé de stock clair
+            let fullName = `${rawFirstName} ${rawLastName.toUpperCase()}`.trim();
+            if (!fullName) {
+                fullName = `📦 Ligne libre #${i}`;
+            }
             
             let email = '';
             let phone = '';
@@ -111,7 +114,7 @@ async function loadTeamData() {
                 }
             });
 
-            // Sécurisations
+            // Sécurisations et valeurs par défaut
             if (!email) email = cols[2]?.includes('@') ? cols[2] : (cols[3]?.includes('@') ? cols[3] : 'contact@la1337.com');
             if (!phone) {
                 const candidatePhone = cols[3] || cols[4] || '';
