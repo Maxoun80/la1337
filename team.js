@@ -24,7 +24,7 @@ const ROLE_MAP = {
     15: "Membre extérieur"
 };
 
-// 2. TEMPLATES / STYLES DE SIGNATURES (Officiel, Minimaliste, Courrier, etc.)
+// 2. TEMPLATES / STYLES DE SIGNATURES
 const SIGNATURE_TEMPLATES = {
     officiel: {
         id: "officiel",
@@ -241,7 +241,52 @@ async function loadTeamFromGoogleSheet() {
 }
 
 // =============================================================================
-// 4. GESTION DE L'IHM, SÉLECTION ET MODAL
+// 4. GESTION DES MODALS & SAISIE MANUELLE
+// =============================================================================
+
+function openAddMemberModal() {
+    const modal = document.getElementById("addMemberModal") || document.getElementById("memberModal") || document.querySelector(".modal");
+    if (modal) {
+        modal.classList.add("active");
+        modal.classList.add("show");
+        modal.style.display = "flex";
+    } else {
+        // Fallback si la pop-in HTML n'existe pas : invite JS simple
+        const name = prompt("Nom et Prénom du nouveau membre :");
+        if (!name) return;
+        const mail = prompt("Adresse E-mail :");
+        const phone = prompt("Téléphone (ex: 03 65 17 00 63) :", "03 65 17 00 63");
+        const roleStr = prompt("Rôle(s) (ex: Animateur) :");
+
+        const newMember = {
+            id: name.toLowerCase().replace(/[^a-z0-9]/g, "_"),
+            name: name,
+            mail: mail || "",
+            phone: phone || "03 65 17 00 63",
+            roles: []
+        };
+
+        addCustomMember(newMember);
+        TEAM_DATABASE.push(newMember);
+        populateTeamSelect();
+        
+        const select = document.getElementById("inMemberSelect");
+        if (select) select.value = newMember.id;
+        onTeamMemberSelect(newMember.id);
+    }
+}
+
+function closeAddMemberModal() {
+    const modal = document.getElementById("addMemberModal") || document.getElementById("memberModal") || document.querySelector(".modal");
+    if (modal) {
+        modal.classList.remove("active");
+        modal.classList.remove("show");
+        modal.style.display = "none";
+    }
+}
+
+// =============================================================================
+// 5. GESTION DE L'IHM, SÉLECTION ET TEMPLATES
 // =============================================================================
 
 function populateTeamSelect() {
@@ -266,14 +311,7 @@ function onTeamMemberSelect(memberId) {
 
     // Déclenchement de la pop-up / modal lors de la Saisie Manuelle
     if (memberId === "manual") {
-        if (typeof openAddMemberModal === "function") {
-            openAddMemberModal();
-        } else if (typeof openModal === "function") {
-            openModal();
-        } else {
-            const modalEl = document.getElementById("addMemberModal") || document.getElementById("memberModal");
-            if (modalEl) modalEl.classList.add("active");
-        }
+        openAddMemberModal();
         return;
     }
 
@@ -310,7 +348,6 @@ function onTeamMemberSelect(memberId) {
     if (typeof draw === "function") draw();
 }
 
-// Rétablir la mise à jour lors du changement de template/style
 function onTemplateSelect(templateId) {
     const template = SIGNATURE_TEMPLATES[templateId] || SIGNATURE_TEMPLATES.officiel;
     if (typeof updateSignature === "function") updateSignature(template);
@@ -319,7 +356,7 @@ function onTemplateSelect(templateId) {
 }
 
 // =============================================================================
-// 5. INITIALISATION
+// 6. INITIALISATION & ÉCOUTEURS D'ÉVÉNEMENTS
 // =============================================================================
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -338,7 +375,24 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // 4. Écoute du sélecteur de style / template si présent
+    // 4. Écoute des boutons d'ouverture / fermeture du Modal (si présents dans le HTML)
+    const btnAddMember = document.getElementById("btnAddMember") || document.querySelector(".btn-add-member");
+    if (btnAddMember) {
+        btnAddMember.addEventListener("click", (e) => {
+            e.preventDefault();
+            openAddMemberModal();
+        });
+    }
+
+    const btnCloseModal = document.getElementById("btnCloseModal") || document.querySelector(".btn-close-modal");
+    if (btnCloseModal) {
+        btnCloseModal.addEventListener("click", (e) => {
+            e.preventDefault();
+            closeAddMemberModal();
+        });
+    }
+
+    // 5. Écoute du sélecteur de style / template
     const templateSelect = document.getElementById("inTemplateSelect") || document.getElementById("templateSelect");
     if (templateSelect) {
         templateSelect.addEventListener("change", (e) => {
