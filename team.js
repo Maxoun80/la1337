@@ -41,7 +41,7 @@ window.THEMES = THEME_IMAGES;
 // LOGOS
 const LOGO_IMAGES = {
     blanc: { name: "💿 Logo Blanc Officiel", url: "https://i.postimg.cc/4x659pDr/logo-small.png" },
-    noel:  { name: "🎅 Logo Bonnet de Noël", url: "https://i.postimg.cc/50Ty8Btq/Capture-d-ecran-2026-07-18-002918.png" }
+    noel:  { name: "🎅 Logo Bonnet de Noël", url: "https://i.postimg.cc/QNKx2GKj/Logo-de-Noel.png" }
 };
 window.LOGO_IMAGES = LOGO_IMAGES;
 window.LOGOS = {
