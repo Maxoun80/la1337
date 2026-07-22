@@ -1,5 +1,5 @@
 // =============================================================================
-// 1. CONFIGURATION, CARTOGRAPHIE & BANNIÈRES / LOGOS (LA 1337 RADIO)
+// 1. CONFIGURATION, CARTOGRAPHIE & BANNIÈRES / LOGOS / TEMPLATES (LA 1337 RADIO)
 // =============================================================================
 
 // Lien de publication CSV officiel de ton Google Sheet
@@ -24,7 +24,43 @@ const ROLE_MAP = {
     15: "Membre extérieur"
 };
 
-// 2. BANNIÈRES THÉMATIQUES AVEC COULEURS ADAPTÉES
+// 2. TEMPLATES / STYLES DE SIGNATURES (Officiel, Minimaliste, Courrier, etc.)
+const SIGNATURE_TEMPLATES = {
+    officiel: {
+        id: "officiel",
+        name: " Signature Officielle Cyber / Complète",
+        showBanner: true,
+        showLogo: true,
+        showLive: true,
+        layout: "full"
+    },
+    minimaliste: {
+        id: "minimaliste",
+        name: " Minimaliste / Épurée",
+        showBanner: false,
+        showLogo: true,
+        showLive: false,
+        layout: "compact"
+    },
+    ligne: {
+        id: "ligne",
+        name: " Version Ligne complète",
+        showBanner: false,
+        showLogo: true,
+        showLive: true,
+        layout: "inline"
+    },
+    courrier: {
+        id: "courrier",
+        name: " Version Courrier / Texte brut",
+        showBanner: false,
+        showLogo: false,
+        showLive: false,
+        layout: "text"
+    }
+};
+
+// 3. BANNIÈRES THÉMATIQUES AVEC COULEURS ADAPTÉES
 const THEME_IMAGES = {
     cyber: {
         name: "🎧 Mode Radio Cyber (Par défaut - Officiel)",
@@ -60,7 +96,7 @@ const THEME_IMAGES = {
     }
 };
 
-// 3. LOGOS DE LA RADIO
+// 4. LOGOS DE LA RADIO
 const LOGO_IMAGES = { 
     blanc: {
         name: "⚪ Logo Blanc Officiel",
@@ -228,7 +264,7 @@ function populateTeamSelect() {
 function onTeamMemberSelect(memberId) {
     if (!memberId) return;
 
-    // 🎯 Déclenchement de la pop-up / modal lors de la Saisie Manuelle
+    // Déclenchement de la pop-up / modal lors de la Saisie Manuelle
     if (memberId === "manual") {
         if (typeof openAddMemberModal === "function") {
             openAddMemberModal();
@@ -268,9 +304,18 @@ function onTeamMemberSelect(memberId) {
 
     updateInputValue(rolesInput, roleLabels.join(" - "));
 
+    // Événements de mise à jour globaux
     if (typeof updateSignature === "function") updateSignature();
     if (typeof render === "function") render();
     if (typeof draw === "function") draw();
+}
+
+// Rétablir la mise à jour lors du changement de template/style
+function onTemplateSelect(templateId) {
+    const template = SIGNATURE_TEMPLATES[templateId] || SIGNATURE_TEMPLATES.officiel;
+    if (typeof updateSignature === "function") updateSignature(template);
+    if (typeof render === "function") render(template);
+    if (typeof draw === "function") draw(template);
 }
 
 // =============================================================================
@@ -290,6 +335,14 @@ document.addEventListener("DOMContentLoaded", () => {
     if (select) {
         select.addEventListener("change", (e) => {
             onTeamMemberSelect(e.target.value);
+        });
+    }
+
+    // 4. Écoute du sélecteur de style / template si présent
+    const templateSelect = document.getElementById("inTemplateSelect") || document.getElementById("templateSelect");
+    if (templateSelect) {
+        templateSelect.addEventListener("change", (e) => {
+            onTemplateSelect(e.target.value);
         });
     }
 });
