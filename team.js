@@ -30,11 +30,11 @@ window.ROLES_LIST = ROLE_MAP;
 
 // BANNIÈRES & THÈMES
 const THEME_IMAGES = {
-    cyber:    { name: "⚡ Cyberpunk Rouge", url: "https://i.postimg.cc/SsB3VfZD/general.png", color: "#ff3366", textColor: "#ff3366", roleColor: "#e1e1e6", liveBgColor: "#ff3366", liveTxtColor: "#ffffff" },
-    ete:      { name: "☀️ Été (prochainement disponible)",            url: "[LIEN POSTIMG]", color: "#ff3366", textColor: "#ff3366", roleColor: "#e1e1e6", liveBgColor: "#ff3366", liveTxtColor: "#ffffff" },
-    noel:     { name: "❄️ Noël",           url: "https://i.postimg.cc/LXcwv3yx/noel.png", color: "#ffffff", textColor: "#ffffff", roleColor: "#e1e1e6", liveBgColor: "#ffffff", liveTxtColor: "#111111" },
-    nouvelan: { name: "🎉 Nouvel An",      url: "https://i.postimg.cc/76FdXnBB/nouvel-an.png", color: "#dfb76c", textColor: "#dfb76c", roleColor: "#e1e1e6", liveBgColor: "#dfb76c", liveTxtColor: "#ffffff" },
-    telethon: { name: "☀️ Telethon",       url: "https://i.postimg.cc/zBs6pFdt/telethon.png", color: "#FFCC00", textColor: "#FFCC00", roleColor: "#ffffff", liveBgColor: "#FFCC00", liveTxtColor: "#111111" }
+    cyber:    { name: "⚡ Généraliste",        url: "https://i.postimg.cc/SsB3VfZD/general.png", color: "#c00000", textColor: "#c00000", roleColor: "#e1e1e6", liveBgColor: "#c00000", liveTxtColor: "#ffffff" },
+    ete:      { name: "☀️ Été (prochainement)", url: "[LIEN POSTIMG]",                            color: "#ff3366", textColor: "#ff3366", roleColor: "#e1e1e6", liveBgColor: "#ff3366", liveTxtColor: "#ffffff" },
+    noel:     { name: "❄️ Noël",              url: "https://i.postimg.cc/LXcwv3yx/noel.png",    color: "#ffffff", textColor: "#ffffff", roleColor: "#e1e1e6", liveBgColor: "#ffffff", liveTxtColor: "#111111" },
+    nouvelan: { name: "🎉 Nouvel An",         url: "https://i.postimg.cc/76FdXnBB/nouvel-an.png",color: "#dfb76c", textColor: "#dfb76c", roleColor: "#e1e1e6", liveBgColor: "#dfb76c", liveTxtColor: "#ffffff" },
+    telethon: { name: "☀️ Telethon",          url: "https://i.postimg.cc/zBs6pFdt/telethon.png", color: "#a20352", textColor: "#a20352", roleColor: "#ffffff", liveBgColor: "#a20352", liveTxtColor: "#ffffff" }
 };
 window.THEME_IMAGES = THEME_IMAGES;
 window.THEMES = THEME_IMAGES;
