@@ -1,8 +1,8 @@
 [
   {
     "version": "v1.9.0",
-    "badge": "Actuelle",
-    "date": "22/07/2026 à 03:05",
+    "date": "22/07/2026",
+    "isCurrent": true,
     "changes": [
       {
         "category": "BAweb",
@@ -10,29 +10,56 @@
       },
       {
         "category": "Correctif",
-        "text": "Correctif sur le sélecteur de logos : application instantanée du logo sélectionné dans la prévisualisation."
+        "text": "Fix du sélecteur de logos : affichage et application instantanée du logo sélectionné."
       },
       {
         "category": "Data",
-        "text": "Synchronisation dynamique des rôles et des données membres directement depuis 'team.js'."
+        "text": "Liaison dynamique des rôles et membres directement depuis la base 'team.js'."
       },
       {
         "category": "Export",
-        "text": "Optimisation du rendu html2canvas pour la génération des images PNG et des exports groupés au format ZIP."
+        "text": "Optimisation du rendu html2canvas pour la génération PNG et les exports ZIP groupés."
       }
     ]
   },
   {
     "version": "v1.8.0",
     "date": "22/07/2026",
+    "isCurrent": false,
     "changes": [
       {
         "category": "Feature",
-        "text": "Ajout de la modale de saisie pour l'ajout rapide d'un nouveau membre sans rechargement de page."
+        "text": "Ajout de la modale de création rapide pour les nouveaux membres sans rechargement de page."
       },
       {
         "category": "UI",
         "text": "Mise en place de l'onglet 'Mises à jour & Nouveautés' avec chargement dynamique de l'historique."
+      }
+    ]
+  },
+  {
+    "version": "v1.7.0",
+    "date": "15/07/2026",
+    "isCurrent": false,
+    "changes": [
+      {
+        "category": "Feature",
+        "text": "Ajout de l'export groupé ZIP pour l'ensemble des membres de la radio."
+      },
+      {
+        "category": "UI",
+        "text": "Nouveaux thèmes graphiques et bannières personnalisées ajoutés."
+      }
+    ]
+  },
+  {
+    "version": "v1.0.0",
+    "date": "01/06/2026",
+    "isCurrent": false,
+    "changes": [
+      {
+        "category": "Init",
+        "text": "Lancement officiel du studio de création de signatures pour LA 1337."
       }
     ]
   }
