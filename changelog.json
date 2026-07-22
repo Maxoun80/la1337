@@ -1,108 +1,38 @@
 [
   {
-    "version": "v1.8.0",
+    "version": "v1.9.0",
     "badge": "Actuelle",
-    "date": "22/07/2026 à 02:15",
+    "date": "22/07/2026",
     "changes": [
       {
-        "category": "🌐 CONNECTIVITÉ",
-        "text": "Synchronisation dynamique et en direct avec le Google Sheet officiel via publication CSV."
+        "category": "BAweb",
+        "text": "Intégration complète des styles de signature pour les courriers administratifs BAweb (Ligne complète & Carte minimaliste)."
       },
       {
-        "category": "👥 ÉQUIPE",
-        "text": "Prise en charge intégrale des 15 rôles officiels (<code>ROLE_MAP</code>) et gestion des rôles multiples."
+        "category": "Correctif",
+        "text": "Correctif sur le sélecteur de logos : application instantanée du logo sélectionné dans la prévisualisation."
       },
       {
-        "category": "⚙️ TECHNIQUE",
-        "text": "Restructuration globale de <code>team.js</code>, suppression de la base fixe au profit du flux live tout en conservant le support <code>localStorage</code>."
+        "category": "Data",
+        "text": "Synchronisation dynamique des rôles et des données membres directement depuis 'team.js'."
       },
       {
-        "category": "🎨 UI/UX",
-        "text": "Correction du ciblage du sélecteur <code>#inMemberSelect</code> et rétablissement du déclenchement des événements pour les bannières et logos."
+        "category": "Export",
+        "text": "Optimisation du rendu html2canvas pour la génération des images PNG et des exports groupés au format ZIP."
       }
     ]
   },
   {
-    "version": "v1.7.3",
-    "date": "22/07/2026 à 01:20",
+    "version": "v1.8.0",
+    "date": "22/07/2026",
     "changes": [
       {
-        "category": "⚙️ TECHNIQUE",
-        "text": "Déportation du changelog dans un fichier JSON externe avec gestion dynamique des catégories et sigles colorés."
+        "category": "Feature",
+        "text": "Ajout de la modale de saisie pour l'ajout rapide d'un nouveau membre sans rechargement de page."
       },
       {
-        "category": "🎨 UI/UX",
-        "text": "Intégration de badges thématiques par catégorie pour une lisibilité accrue des mises à jour."
-      },
-      {
-        "category": "📁 ARCHIVES",
-        "text": "Système d'archivage automatique en accordéon dès que l'historique dépasse 3 versions."
-      }
-    ]
-  },
-  {
-    "version": "v1.7.2",
-    "date": "22/07/2026 à 01:17",
-    "changes": [
-      {
-        "category": "📄 SIGNATURES",
-        "text": "Nommage automatique épuré et court pour l'export PNG (ex: <code>sig-nom-type.png</code>)."
-      },
-      {
-        "category": "⚡ FONCTIONNALITÉ",
-        "text": "Intégration de la pop-in personnalisable de saisie du nom de fichier avant téléchargement."
-      }
-    ]
-  },
-  {
-    "version": "v1.7.0",
-    "date": "21/07/2026 à 22:45",
-    "changes": [
-      {
-        "category": "👤 MEMBRES",
-        "text": "Nouveau module modal de création rapide de membres avec enregistrement dans le LocalStorage."
-      },
-      {
-        "category": "🔒 SÉCURITÉ",
-        "text": "Validation en temps réel du format des adresses e-mail avec alerte visuelle."
-      }
-    ]
-  },
-  {
-    "version": "v1.6.0",
-    "date": "20/07/2026",
-    "changes": [
-      {
-        "category": "📦 BULK EXPORT",
-        "text": "Génération et exportation globale de l'ensemble des signatures de l'équipe au format archive ZIP."
-      },
-      {
-        "category": "⚙️ TECHNIQUE",
-        "text": "Support multi-rôles simultanés via cases à cocher et rôle personnalisé en saisie libre."
-      }
-    ]
-  },
-  {
-    "version": "v1.5.0",
-    "date": "18/07/2026",
-    "changes": [
-      {
-        "category": "🎨 TEMPLATES",
-        "text": "Ajout des styles de signatures alternatives (Version Ligne complète & Version Minimaliste / Courrier)."
-      },
-      {
-        "category": "🖼️ DESIGN",
-        "text": "Gestion dynamique des bannières thématiques et personnalisation du logo Studio Radio."
-      }
-    ]
-  },
-  {
-    "version": "v1.0.0",
-    "date": "10/07/2026",
-    "changes": [
-      {
-        "category": "🚀 LANCEMENT",
-        "text": "Version initiale du Studio Signature Mail LA 1337 RADIO."
+        "category": "UI",
+        "text": "Mise en place de l'onglet 'Mises à jour & Nouveautés' avec chargement dynamique de l'historique."
       }
     ]
   }
