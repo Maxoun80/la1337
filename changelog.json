@@ -1,7 +1,29 @@
 [
   {
-    "version": "v1.7.3",
+    "version": "v1.8.0",
     "badge": "Actuelle",
+    "date": "22/07/2026 à 02:15",
+    "changes": [
+      {
+        "category": "🌐 CONNECTIVITÉ",
+        "text": "Synchronisation dynamique et en direct avec le Google Sheet officiel via publication CSV."
+      },
+      {
+        "category": "👥 ÉQUIPE",
+        "text": "Prise en charge intégrale des 15 rôles officiels (<code>ROLE_MAP</code>) et gestion des rôles multiples."
+      },
+      {
+        "category": "⚙️ TECHNIQUE",
+        "text": "Restructuration globale de <code>team.js</code>, suppression de la base fixe au profit du flux live tout en conservant le support <code>localStorage</code>."
+      },
+      {
+        "category": "🎨 UI/UX",
+        "text": "Correction du ciblage du sélecteur <code>#inMemberSelect</code> et rétablissement du déclenchement des événements pour les bannières et logos."
+      }
+    ]
+  },
+  {
+    "version": "v1.7.3",
     "date": "22/07/2026 à 01:20",
     "changes": [
       {
