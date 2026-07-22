@@ -6,23 +6,19 @@
     "changes": [
       {
         "category": "Data & Sync",
-        "text": "Mise en place d'un système anti-cache strict (?t=timestamp) sur l'URL Google Sheet pour assurer la mise à jour instantanée."
+        "text": "Mise en place d'un système anti-cache strict sur le Google Sheet."
       },
       {
         "category": "Data & Sync",
-        "text": "Préservation des 'Lignes libres' du Google Sheet sans effacement ni décalage de l'inventaire des membres."
+        "text": "Préservation des lignes libres sans décalage d'inventaire."
       },
       {
         "category": "BAweb",
-        "text": "Intégration complète des styles de signature pour les courriers administratifs BAweb (Ligne complète & Carte minimaliste)."
+        "text": "Intégration complète des styles de signature pour les courriers administratifs."
       },
       {
         "category": "Correctif",
-        "text": "Fix du sélecteur de logos : affichage et application instantanée du logo sélectionné."
-      },
-      {
-        "category": "Export",
-        "text": "Optimisation du rendu html2canvas pour la génération PNG et les exports ZIP groupés."
+        "text": "Fix du sélecteur de logos : affichage et application instantanée."
       }
     ]
   },
@@ -33,26 +29,7 @@
     "changes": [
       {
         "category": "Feature",
-        "text": "Ajout de la modale de création rapide pour les nouveaux membres sans rechargement de page."
-      },
-      {
-        "category": "UI",
-        "text": "Mise en place de l'onglet 'Mises à jour & Nouveautés' avec chargement dynamique de l'historique."
-      }
-    ]
-  },
-  {
-    "version": "v1.7.0",
-    "date": "15/07/2026",
-    "isCurrent": false,
-    "changes": [
-      {
-        "category": "Feature",
-        "text": "Ajout de l'export groupé ZIP pour l'ensemble des membres de la radio."
-      },
-      {
-        "category": "UI",
-        "text": "Nouveaux thèmes graphiques et bannières personnalisées ajoutés."
+        "text": "Ajout de la modale de création rapide pour les nouveaux membres."
       }
     ]
   },
@@ -63,7 +40,7 @@
     "changes": [
       {
         "category": "Init",
-        "text": "Lancement officiel du studio de création de signatures pour LA 1337."
+        "text": "Lancement officiel du studio de création de signatures."
       }
     ]
   }
