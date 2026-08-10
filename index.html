@@ -732,11 +732,19 @@
         select.appendChild(optCustom);
         
         TEAM_DATABASE.forEach(function(member) {
-            var opt = document.createElement('option');
-            opt.value = member.id;
-            opt.innerText = member.name;
-            select.appendChild(opt);
-        });
+        var opt = document.createElement('option');
+        opt.value = member.id;
+        
+        // On sépare le nom et le prénom pour inverser l'ordre
+        var parts = member.name.split(' ');
+        var prenom = parts[0];
+        var nom = parts.slice(1).join(' ');
+        
+        // Affichage : NOM Prénom (avec le nom en majuscules)
+        opt.innerText = `${nom.toUpperCase()} ${prenom}`;
+        
+        select.appendChild(opt);
+    });
     }
 
     function initThemeSelector() {
