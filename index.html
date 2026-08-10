@@ -5,7 +5,6 @@
     <title>LA 1337 - Studio Signature Mail & BAweb</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
@@ -444,7 +443,7 @@
             <h1>🎙️ LA 1337 RADIO 🎙️</h1>
             <div class="subtitle">Studio de Création de Signatures Mail & BAweb</div>
         </div>
-        <a href="admin.html" style="background: #20202b; color: #ff3366; border: 1px solid #ff3366; padding: 10px 16px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; transition: all 0.2s;" onmouseover="this.style.background='#ff3366'; this.style.color='#fff';" onmouseout="this.style.background='#20202b'; this.style.color='#ff3366';">
+        <a href="login.html" style="background: #20202b; color: #ff3366; border: 1px solid #ff3366; padding: 10px 16px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; transition: all 0.2s;" onmouseover="this.style.background='#ff3366'; this.style.color='#fff';" onmouseout="this.style.background='#20202b'; this.style.color='#ff3366';">
             ⚙️ Administration
         </a>
     </div>
@@ -574,7 +573,7 @@
         </div>
     </div>
 
-    <!-- ONGLET 2 : HISTORIQUE DES MISES À JOUR (DYNAMIQUE SUPABASE) -->
+    <!-- ONGLET 2 : HISTORIQUE DES MISES À JOUR (CHANGELOG SUPABASE) -->
     <div id="tab-changelog" class="tab-content">
         <div id="changelogContainer" class="changelog-container">
             <p style="color: #888;">Chargement des mises à jour...</p>
@@ -634,43 +633,18 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="team.js"></script>
 
 <script>
-    // Supabase
+    // Config Supabase
     const SUPABASE_URL = 'https://appepchfrfghfulirckz.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_wjpCqcbmlEnHvYhJRziUGQ_SIubrlSg';
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     const base64Cache = {};
-    let loadedThemesData = [];
-    let loadedLogosData = [];
 
-    const ROLE_MAP_FALLBACK = {
-        1: "Directeur", 2: "Directeur Adjoint", 3: "Président", 4: "Vice-Président", 5: "Secrétaire",
-        6: "Trésorière", 7: "Animateur", 8: "Animatrice", 9: "Programmation", 10: "Technique",
-        11: "RH", 12: "Événementiel", 13: "Communication", 14: "Journaliste", 15: "Membre extérieur"
-    };
-
-    function getRoleMap() {
-        return (typeof ROLE_MAP !== 'undefined') ? ROLE_MAP : ROLE_MAP_FALLBACK;
-    }
-
-    /* GESTION DES ONGLETS */
-    function switchTab(tabId, btnElement) {
-        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-        
-        const targetTab = document.getElementById(tabId);
-        if (targetTab) targetTab.classList.add('active');
-        if (btnElement) btnElement.classList.add('active');
-
-        if (tabId === 'tab-changelog') {
-            loadChangelog();
-        }
-    }
-
-    /* GENERATION SIGNATURE SIMPLE / BAWEB */
+    /* FONCTION DE GÉNÉRATION DES SIGNATURES SIMPLES / BAWEB */
     function generateBanalSignature(name, role, mail, phone, style) {
         var logoImgSrc = document.getElementById('logoPreview') ? document.getElementById('logoPreview').src : '';
         
@@ -685,6 +659,7 @@
                 </div>
             `;
         } else {
+            // Style BAweb Line
             return `
                 <div style="font-family: Arial, sans-serif; color: #111; text-align: left; background: #fff; padding: 15px 20px; border-radius: 6px; border-left: 3px solid #ff3366;">
                     <strong style="font-size: 15px; text-transform: uppercase;">${name}</strong> — 
@@ -695,12 +670,25 @@
         }
     }
 
+    /* GESTION DU MENU ET ONGLETS (SÉCURISÉE ET CONNECTÉE SUPABASE) */
+    function switchTab(tabId, btnElement) {
+        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        
+        const targetTab = document.getElementById(tabId);
+        if (targetTab) targetTab.classList.add('active');
+        if (btnElement) btnElement.classList.add('active');
+
+        if (tabId === 'tab-changelog') {
+            loadChangelog();
+        }
+    }
+
     function initRolesCheckboxes() {
         const container = document.getElementById('rolesContainer');
-        if(!container) return;
-        const rMap = getRoleMap();
+        if(!container || typeof ROLE_MAP === 'undefined') return;
         container.innerHTML = '';
-        for (const [code, name] of Object.entries(rMap)) {
+        for (const [code, name] of Object.entries(ROLE_MAP)) {
             const label = document.createElement('label');
             label.className = 'checkbox-item';
             label.innerHTML = `<input type="checkbox" name="roleCheck" value="${code}" onchange="updateSig()"> ${name}`;
@@ -729,7 +717,7 @@
 
     function initMemberSelector() {
         var select = document.getElementById('inMemberSelect');
-        if(!select) return;
+        if(!select || typeof TEAM_DATABASE === 'undefined') return;
         
         select.innerHTML = '';
         
@@ -745,55 +733,66 @@
         optCustom.innerText = '✍️ [NOUVEAU MEMBRE - Saisie libre]';
         select.appendChild(optCustom);
         
-        if (typeof TEAM_DATABASE !== 'undefined' && Array.isArray(TEAM_DATABASE)) {
-            TEAM_DATABASE.forEach(function(member) {
-                var opt = document.createElement('option');
-                opt.value = member.id;
-                
-                var parts = (member.name || '').split(' ');
-                var prenom = parts[0] || '';
-                var nom = parts.slice(1).join(' ');
-                
-                opt.innerText = `${nom.toUpperCase()} ${prenom}`;
-                select.appendChild(opt);
-            });
+        TEAM_DATABASE.forEach(function(member) {
+            var opt = document.createElement('option');
+            opt.value = member.id;
+            
+            var parts = member.name.split(' ');
+            var prenom = parts[0];
+            var nom = parts.slice(1).join(' ');
+            
+            opt.innerText = `${nom.toUpperCase()} ${prenom}`;
+            select.appendChild(opt);
+        });
+    }
+
+    async function initThemeSelector() {
+        var select = document.getElementById('inPresetTheme');
+        if (!select) return;
+
+        const { data: themes, error } = await supabaseClient
+            .from('themes')
+            .select('*');
+
+        if (error) {
+            console.error("Erreur Supabase :", error);
+            return;
+        }
+
+        select.innerHTML = '';
+
+        const filteredThemes = (themes || []).filter(t => {
+            return (t.active === true || t.active === 'true' || t.active === 1);
+        });
+
+        filteredThemes.sort((a, b) => (b.prioritaire === true) - (a.prioritaire === true));
+
+        filteredThemes.forEach((theme, index) => {
+            var opt = document.createElement('option');
+            opt.value = theme.id; 
+            opt.innerText = theme.name;
+
+            if (theme.prioritaire === true || (index === 0 && !filteredThemes.some(t => t.prioritaire === true))) {
+                opt.selected = true;
+            }
+
+            select.appendChild(opt);
+        });
+
+        if (typeof applyPresetTheme === 'function') {
+            applyPresetTheme();
         }
     }
 
-    async function fetchThemesAndLogos() {
-        const selectTheme = document.getElementById('inPresetTheme');
-        const selectLogo = document.getElementById('inPresetLogo');
-
-        // Récupération des Bannières / Thèmes
-        const { data: themes } = await supabaseClient.from('themes').select('*');
-        loadedThemesData = themes || [];
-
-        if (selectTheme) {
-            selectTheme.innerHTML = '';
-            loadedThemesData.forEach((t, i) => {
-                let opt = document.createElement('option');
-                opt.value = t.id;
-                opt.innerText = t.name || 'Bannière ' + t.id;
-                if (i === 0) opt.selected = true;
-                selectTheme.appendChild(opt);
-            });
-            applyPresetTheme();
-        }
-
-        // Récupération des Logos
-        const { data: logos } = await supabaseClient.from('logos').select('*');
-        loadedLogosData = logos || [];
-
-        if (selectLogo) {
-            selectLogo.innerHTML = '';
-            loadedLogosData.forEach((l, i) => {
-                let opt = document.createElement('option');
-                opt.value = l.id;
-                opt.innerText = l.name || 'Logo ' + l.id;
-                if (i === 0) opt.selected = true;
-                selectLogo.appendChild(opt);
-            });
-            applyPresetLogo();
+    function initLogoSelector() {
+        var select = document.getElementById('inPresetLogo');
+        if(!select || typeof LOGO_IMAGES === 'undefined') return;
+        select.innerHTML = '';
+        for (const key in LOGO_IMAGES) {
+            var opt = document.createElement('option');
+            opt.value = key;
+            opt.innerText = LOGO_IMAGES[key].name;
+            select.appendChild(opt);
         }
     }
 
@@ -815,9 +814,6 @@
             applyImageToTarget(base64Cache[url], targetId, isBackground);
             if(callback) callback();
         }; 
-        img.onerror = function() {
-            applyImageToTarget(url, targetId, isBackground);
-        };
         img.src = url;
     }
 
@@ -825,43 +821,53 @@
         const element = document.getElementById(targetId);
         if (!element) return;
         if (isBackground) { 
-            element.style.backgroundImage = `url('${dataUrl}')`; 
+            element.style.background = `url('${dataUrl}') center/cover`; 
         } else { 
             element.src = dataUrl; 
         }
     }
 
-    function applyPresetLogo() { 
-        var select = document.getElementById('inPresetLogo');
-        if (!select) return;
-        var id = select.value;
-        var logoData = loadedLogosData.find(l => String(l.id) === String(id));
-        if (logoData && logoData.url) {
-            setSecureImage(logoData.url, 'logoPreview', false); 
+    window.onload = function() {
+        initRolesCheckboxes(); 
+        initMemberSelector();
+        initThemeSelector(); 
+        initLogoSelector();  
+        
+        if (typeof THEME_IMAGES !== 'undefined' && typeof LOGO_IMAGES !== 'undefined') {
+            const firstThemeKey = Object.keys(THEME_IMAGES)[0];
+            const firstLogoKey = Object.keys(LOGO_IMAGES)[0];
+
+            if(firstThemeKey && THEME_IMAGES[firstThemeKey]) setSecureImage(THEME_IMAGES[firstThemeKey].url, 'sigPreview', true);
+            if(firstLogoKey && LOGO_IMAGES[firstLogoKey]) setSecureImage(LOGO_IMAGES[firstLogoKey].url, 'logoPreview', false);
+            applyPresetTheme();
         }
+        
+        loadChangelog();
+    };
+
+    function applyPresetLogo() { 
+        var logoKey = document.getElementById('inPresetLogo').value;
+        if (typeof LOGO_IMAGES !== 'undefined' && LOGO_IMAGES[logoKey]) setSecureImage(LOGO_IMAGES[logoKey].url, 'logoPreview', false); 
         updateSig(); 
     }
     
     function applyPresetTheme() { 
-        var select = document.getElementById('inPresetTheme');
-        if (!select) return;
-        var id = select.value;
-        var themeData = loadedThemesData.find(t => String(t.id) === String(id));
-
+        var themeKey = document.getElementById('inPresetTheme').value; 
+        if (typeof THEME_IMAGES === 'undefined') return;
+        var themeData = THEME_IMAGES[themeKey];
         if (themeData) {
-            if (themeData.url) setSecureImage(themeData.url, 'sigPreview', true);
+            setSecureImage(themeData.url, 'sigPreview', true);
             
-            var mainColor = themeData.textColor || themeData.color || '#ff3366';
-            document.getElementById('outName').style.color = mainColor;
-            document.getElementById('outUrlText').style.color = mainColor;
-            document.getElementById('borderContainer').style.borderRightColor = mainColor;
-            document.getElementById('iconMail').style.color = mainColor;
-            document.getElementById('iconPhone').style.color = mainColor;
+            document.getElementById('outName').style.color = themeData.textColor;
+            document.getElementById('outUrlText').style.color = themeData.textColor;
+            document.getElementById('borderContainer').style.borderRightColor = themeData.textColor;
+            document.getElementById('iconMail').style.color = themeData.textColor;
+            document.getElementById('iconPhone').style.color = themeData.textColor;
             
-            document.getElementById('outRole').style.color = themeData.roleColor || '#e1e1e6';
+            document.getElementById('outRole').style.color = themeData.roleColor;
             
-            document.getElementById('liveBadge').style.backgroundColor = themeData.liveBgColor || mainColor;
-            document.getElementById('liveBadge').style.color = themeData.liveTxtColor || '#ffffff';
+            document.getElementById('liveBadge').style.backgroundColor = themeData.liveBgColor;
+            document.getElementById('liveBadge').style.color = themeData.liveTxtColor;
         }
         updateSig(); 
     }
@@ -874,12 +880,11 @@
         if (choice === '') {
             return;
         } else if (choice === 'custom') {
-            if(customZone) customZone.style.display = 'grid';
             openModalNewMember();
         } else {
             if(customZone) customZone.style.display = 'none';
-            if(typeof TEAM_DATABASE !== 'undefined' && Array.isArray(TEAM_DATABASE)) {
-                var data = TEAM_DATABASE.find(m => String(m.id) === String(choice));
+            if(typeof TEAM_DATABASE !== 'undefined') {
+                var data = TEAM_DATABASE.find(m => m.id === choice);
                 if (data) {
                     for (var i = 0; i < checkboxes.length; i++) {
                         checkboxes[i].checked = data.roles && data.roles.includes(parseInt(checkboxes[i].value));
@@ -922,8 +927,8 @@
             name = document.getElementById('inCustomName').value || 'Prénom NOM';
             mail = document.getElementById('inCustomMail').value || 'contact@la1337.com';
             phone = document.getElementById('inCustomPhone').value || '03 65 17 00 63';
-        } else if (choice !== '' && typeof TEAM_DATABASE !== 'undefined' && Array.isArray(TEAM_DATABASE)) {
-            var data = TEAM_DATABASE.find(m => String(m.id) === String(choice));
+        } else if (choice !== '' && typeof TEAM_DATABASE !== 'undefined') {
+            var data = TEAM_DATABASE.find(m => m.id === choice);
             if (data) {
                 name = data.name;
                 mail = data.mail;
@@ -934,15 +939,14 @@
 
         var checkboxes = document.getElementsByName('roleCheck');
         var selectedRolesNames = [];
-        var rMap = getRoleMap();
-
-        for (var i = 0; i < checkboxes.length; i++) {
-            if (checkboxes[i].checked) {
-                var codeCoche = parseInt(checkboxes[i].value);
-                if (rMap[codeCoche]) selectedRolesNames.push(rMap[codeCoche]);
+        if (typeof ROLE_MAP !== 'undefined') {
+            for (var i = 0; i < checkboxes.length; i++) {
+                if (checkboxes[i].checked) {
+                    var codeCoche = parseInt(checkboxes[i].value);
+                    if (ROLE_MAP[codeCoche]) selectedRolesNames.push(ROLE_MAP[codeCoche]);
+                }
             }
         }
-
         var chkCustom = document.getElementById('chkCustomRole');
         var customTxt = document.getElementById('inCustomRoleText').value.trim();
         if (chkCustom && chkCustom.checked && customTxt !== "") {
@@ -980,8 +984,8 @@
         var name = 'membre';
         if (choice === 'custom') { 
             name = document.getElementById('inCustomName').value || 'membre'; 
-        } else if (typeof TEAM_DATABASE !== 'undefined' && Array.isArray(TEAM_DATABASE)) { 
-            var data = TEAM_DATABASE.find(m => String(m.id) === String(choice)); 
+        } else if (typeof TEAM_DATABASE !== 'undefined') { 
+            var data = TEAM_DATABASE.find(m => m.id === choice); 
             if(data) name = data.name; 
         }
         
@@ -1026,7 +1030,7 @@
     }
 
     function generateAllSignaturesZip() {
-        if (typeof TEAM_DATABASE === 'undefined' || !Array.isArray(TEAM_DATABASE) || TEAM_DATABASE.length === 0) {
+        if (typeof TEAM_DATABASE === 'undefined' || TEAM_DATABASE.length === 0) {
             alert('❌ La base de données des membres est vide.');
             return;
         }
@@ -1100,10 +1104,9 @@
     /* MODAL NOUVEAU MEMBRE */
     function initModalRoles() {
         const container = document.getElementById('modalRolesContainer');
-        if(!container) return;
-        const rMap = getRoleMap();
+        if(!container || typeof ROLE_MAP === 'undefined') return;
         container.innerHTML = '';
-        for (const [code, name] of Object.entries(rMap)) {
+        for (const [code, name] of Object.entries(ROLE_MAP)) {
             const label = document.createElement('label');
             label.className = 'modal-checkbox';
             label.innerHTML = `<input type="checkbox" name="modalRole" value="${code}"> ${name}`;
@@ -1124,6 +1127,8 @@
 
     function closeModalNewMember() {
         document.getElementById('modalNewMember').classList.remove('active');
+        document.getElementById('inMemberSelect').value = '';
+        handleMemberChange();
     }
 
     function confirmNewMember() {
@@ -1160,18 +1165,23 @@
             roles: selectedRoles
         };
 
-        if(typeof TEAM_DATABASE !== 'undefined' && Array.isArray(TEAM_DATABASE)) {
+        if(typeof TEAM_DATABASE !== 'undefined') {
             TEAM_DATABASE.push(newMember);
         }
         initMemberSelector();
 
+        forceInjectMemberData(newMember);
         document.getElementById('modalNewMember').classList.remove('active');
         document.getElementById('inMemberSelect').value = newMember.id;
         handleMemberChange();
         updateSig();
     }
 
-    /* CHARGEMENT DYNAMIQUE DU CHANGELOG DEPUIS SUPABASE */
+    window.addEventListener('DOMContentLoaded', function() {
+        initModalRoles();
+    });
+
+    /* CHARGEMENT DYNAMIQUE DEPUIS SUPABASE POUR LE CHANGELOG */
     async function loadChangelog() {
         const container = document.getElementById('changelogContainer');
         if(!container) return;
@@ -1182,7 +1192,7 @@
             .order('created_at', { ascending: false });
 
         if (error) {
-            console.error("Erreur de chargement du changelog :", error);
+            console.error("Erreur de chargement Supabase changelog :", error);
             container.innerHTML = "<p style='color:#888;'>Impossible de charger les notes de version.</p>";
             return;
         }
@@ -1195,7 +1205,7 @@
         container.innerHTML = '';
         logs.forEach((item, index) => {
             const isLatest = index === 0;
-            const dateStr = item.created_at ? new Date(item.created_at).toLocaleDateString('fr-FR') : '';
+            const dateStr = item.created_at ? new Date(item.created_at).toLocaleDateString('fr-FR') : (item.date || '');
             const card = document.createElement('div');
             card.className = `changelog-card ${isLatest ? 'latest' : ''}`;
             card.innerHTML = `
@@ -1203,20 +1213,11 @@
                     <span class="version-badge">${item.version || 'v1.0'}</span>
                     <span class="version-date">${dateStr}</span>
                 </div>
-                <div class="changelog-text">${item.description || ''}</div>
+                <div class="changelog-text">${item.description || item.text || ''}</div>
             `;
             container.appendChild(card);
         });
     }
-
-    /* INITIALISATION GLOBALE */
-    window.addEventListener('DOMContentLoaded', function() {
-        initRolesCheckboxes(); 
-        initModalRoles();
-        initMemberSelector();
-        fetchThemesAndLogos();
-        loadChangelog();
-    });
 </script>
 
 </body>
