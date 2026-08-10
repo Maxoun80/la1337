@@ -747,17 +747,48 @@
     });
     }
 
-    function initThemeSelector() {
-        var select = document.getElementById('inPresetTheme');
-        if(!select || typeof THEME_IMAGES === 'undefined') return;
-        select.innerHTML = '';
-        for (const key in THEME_IMAGES) {
-            var opt = document.createElement('option');
-            opt.value = key;
-            opt.innerText = THEME_IMAGES[key].name;
-            select.appendChild(opt);
-        }
+   async function initThemeSelector() {
+    var select = document.getElementById('inPresetTheme');
+    if (!select) return;
+
+    // On va chercher directement dans la table Supabase
+    const { data: themes, error } = await supabaseClient
+        .from('themes') // Remplace 'themes' par le nom exact de ta table dans Supabase si besoin
+        .select('*')
+        .order('id', { ascending: true });
+
+    if (error) {
+        console.error("Erreur chargement thèmes :", error);
+        return;
     }
+
+    select.innerHTML = '';
+
+    // 1. Filtrer pour ne garder que ceux qui sont actifs (si la colonne existe)
+    // 2. Trier pour mettre les prioritaires en premier
+    const filteredThemes = (themes || []).filter(t => t.active !== false).sort((a, b) => {
+        return (b.prioritaire === true) - (a.prioritaire === true);
+    });
+
+    filteredThemes.forEach((theme, index) => {
+        var opt = document.createElement('option');
+        opt.value = theme.id; // ou theme.url selon ta structure
+        opt.innerText = theme.name;
+
+        // Sélectionne automatiquement le premier (qui sera prioritaire)
+        if (index === 0 || theme.prioritaire === true) {
+            // Si on veut que le prioritaire soit sélectionné par défaut :
+            if (theme.prioritaire === true) opt.selected = true;
+        }
+
+        select.appendChild(opt);
+    });
+    
+    // Déclenche l'application du thème par défaut sélectionné
+    if (typeof applyPresetTheme === 'function') {
+        applyPresetTheme();
+    }
+}
 
     function initLogoSelector() {
         var select = document.getElementById('inPresetLogo');
