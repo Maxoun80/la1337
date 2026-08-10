@@ -186,7 +186,7 @@
             gap: 8px;
         }
 
-        /* Notice de modification */
+        /* Banner de modification */
         .editing-banner {
             background-color: rgba(251, 169, 76, 0.15);
             border: 1px solid var(--warning);
@@ -211,9 +211,9 @@
 
     <!-- Onglets de Navigation -->
     <div class="nav-tabs">
-        <button class="tab-btn active" onclick="switchTab('themes-tab')"><i class="fa-solid fa-palette"></i> Bannières / Thèmes</button>
-        <button class="tab-btn" onclick="switchTab('logos-tab')"><i class="fa-solid fa-image"></i> Logos</button>
-        <button class="tab-btn" onclick="switchTab('members-tab')"><i class="fa-solid fa-users"></i> Membres</button>
+        <button class="tab-btn active" onclick="switchTab('themes-tab', event)"><i class="fa-solid fa-palette"></i> Bannières / Thèmes</button>
+        <button class="tab-btn" onclick="switchTab('logos-tab', event)"><i class="fa-solid fa-image"></i> Logos</button>
+        <button class="tab-btn" onclick="switchTab('members-tab', event)"><i class="fa-solid fa-users"></i> Membres</button>
     </div>
 
     <!-- =================================================================== -->
@@ -238,7 +238,7 @@
 
                 <div class="form-group full-width">
                     <label for="theme-url">URL de l'image (Bannière)</label>
-                    <input type="url" id="theme-url" required placeholder="https://..." onchange="previewThemeUrl(this.value)">
+                    <input type="url" id="theme-url" required placeholder="https://...">
                 </div>
 
                 <div class="form-group">
@@ -344,7 +344,7 @@
     <!-- =================================================================== -->
     <div id="members-tab" class="tab-content">
         <h2>Gestion des Membres</h2>
-        <p style="color: var(--text-muted)">Les membres sont gérés via la table <code>membres</code> dans Supabase.</p>
+        <p style="color: var(--text-muted)">Les membres enregistrés dans la table <code>membres</code> de Supabase :</p>
         <table>
             <thead>
                 <tr>
@@ -364,23 +364,30 @@
 
 <script>
 // =============================================================================
-// SUPABASE CLIENT CONFIG
+// SUPABASE CLIENT & DICTIONNAIRE
 // =============================================================================
 const SUPABASE_URL = 'https://appepchfrfghfulirckz.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_wjpCqcbmlEnHvYhJRziUGQ_SIubrlSg';
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Stockage local
+const ROLE_MAP = {
+    1: "Directeur", 2: "Directeur Adjoint", 3: "Président", 4: "Vice-Président", 5: "Secrétaire",
+    6: "Trésorière", 7: "Animateur", 8: "Animatrice", 9: "Programmation", 10: "Technique",
+    11: "RH", 12: "Événementiel", 13: "Communication", 14: "Journaliste", 15: "Membre extérieur"
+};
+
 let loadedThemes = [];
 let loadedLogos = [];
 
 // Navigation entre onglets
-function switchTab(tabId) {
+function switchTab(tabId, event) {
     document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
     
     document.getElementById(tabId).classList.add('active');
-    event.currentTarget.classList.add('active');
+    if (event && event.currentTarget) {
+        event.currentTarget.classList.add('active');
+    }
 }
 
 // =============================================================================
@@ -469,10 +476,8 @@ async function handleThemeSubmit(e) {
 
     let result;
     if (id) {
-        // UPDATE (Modification)
         result = await supabaseClient.from('themes').update(payload).eq('id', id);
     } else {
-        // INSERT (Création)
         result = await supabaseClient.from('themes').insert([payload]);
     }
 
@@ -584,12 +589,66 @@ async function deleteLogo(id) {
 }
 
 // =============================================================================
+// GESTION DES MEMBRES
+// =============================================================================
+
+async function fetchMembers() {
+    const tbody = document.getElementById('members-list');
+    if (!tbody) return;
+
+    try {
+        const { data: membres, error } = await supabaseClient
+            .from('membres')
+            .select('*')
+            .order('nom', { ascending: true });
+
+        if (error) {
+            tbody.innerHTML = `<tr><td colspan="5" style="color:var(--danger)">Erreur : ${error.message}</td></tr>`;
+            return;
+        }
+
+        if (!membres || membres.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5">Aucun membre enregistré dans Supabase.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = '';
+        membres.forEach(m => {
+            const rolesArray = m.roles ? (Array.isArray(m.roles) ? m.roles : String(m.roles).split(',').map(Number)) : [];
+            const namesRoles = rolesArray.map(id => ROLE_MAP[id]).filter(Boolean).join(' / ') || 'Sans rôle';
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><strong>${m.prenom || ''} ${(m.nom || '').toUpperCase()}</strong></td>
+                <td>${m.email || ''}</td>
+                <td>${m.telephone || '03 65 17 00 63'}</td>
+                <td><span style="color:var(--accent); font-weight:600;">${namesRoles}</span></td>
+                <td class="actions-cell">
+                    <button class="btn btn-danger" onclick="deleteMember('${m.id}')"><i class="fa-solid fa-trash"></i></button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="5" style="color:var(--danger)">Erreur : ${err.message}</td></tr>`;
+    }
+}
+
+async function deleteMember(id) {
+    if (!confirm("Voulez-vous vraiment supprimer ce membre ?")) return;
+    const { error } = await supabaseClient.from('membres').delete().eq('id', id);
+    if (error) alert("Erreur suppression : " + error.message);
+    else fetchMembers();
+}
+
+// =============================================================================
 // CHARGEMENT INITIAL
 // =============================================================================
 
 document.addEventListener('DOMContentLoaded', () => {
     fetchThemes();
     fetchLogos();
+    fetchMembers();
 });
 </script>
 
