@@ -1,34 +1,26 @@
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-    // Initialise ton client Supabase (mets tes propres clés ici)
-    const supabaseUrl = ' TON_URL_SUPABASE ';
-    const supabaseKey = ' TA_CLE_ANON_SUPABASE ';
-    const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Administration - LA 1337</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const supabaseUrl = 'https://appepchfrfghfulirckz.supabase.co';
+        const supabaseKey = 'sb_publishable_wjpCqcbmlEnHvYhJRziUGQ_SIubrlSg';
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
-    async function checkAdminAccess() {
-        // Récupère la session de l'utilisateur connecté
-        const { data: { session }, error } = await supabaseClient.auth.getSession();
-
-        if (error || !session) {
-            // Pas connecté -> Redirection immédiate vers une page de login ou l'accueil
-            window.location.href = 'index.html';
-            return;
+        async function checkAdminAccess() {
+            const { data: { session }, error } = await supabaseClient.auth.getSession();
+            if (error || !session) {
+                window.location.href = 'login.html';
+                return;
+            }
         }
-
-        // Optionnel : Vérifier si l'utilisateur a un rôle "admin" 
-        // (par exemple stocké dans la table 'profiles' ou dans les app_metadata)
-        const { data: profile, err } = await supabaseClient
-            .from('profiles')
-            .select('is_admin')
-            .eq('id', session.user.id)
-            .single();
-
-        if (err || !profile || !profile.is_admin) {
-            alert('Accès refusé : Réservé aux administrateurs de la radio.');
-            window.location.href = 'index.html';
-        }
-    }
-
-    // Lance la vérification dès le chargement de la page admin
-    checkAdminAccess();
-</script>
+        checkAdminAccess();
+    </script>
+</head>
+<body style="background: #0f0f12; color: #fff; font-family: Arial, sans-serif; padding: 40px;">
+    <h1>Panneau d'administration</h1>
+    <!-- Le reste de ton contenu admin ici -->
+</body>
+</html>
