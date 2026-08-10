@@ -8,11 +8,14 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { font-family: system-ui, -apple-system, sans-serif; max-width: 650px; margin: 40px auto; padding: 20px; background: #f8f9fa; color: #333; }
-        h2 { border-bottom: 2px solid #0070f3; padding-bottom: 8px; margin-top: 30px; }
+        h2 { border-bottom: 2px solid #ff3366; padding-bottom: 8px; margin-top: 30px; }
         form { display: flex; flex-direction: column; gap: 12px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         input, button { padding: 12px; font-size: 15px; border: 1px solid #ddd; border-radius: 6px; }
-        button { background-color: #0070f3; color: white; border: none; font-weight: bold; cursor: pointer; transition: background 0.2s; }
-        button:hover { background-color: #0051a2; }
+        button { background-color: #ff3366; color: white; border: none; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+        button:hover { background-color: #e02454; }
+        .roles-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; background: #f1f3f5; padding: 12px; border-radius: 6px; border: 1px solid #ddd; }
+        .role-item { display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; }
+        .role-item input { width: 16px; height: 16px; accent-color: #ff3366; cursor: pointer; }
         ul { list-style: none; padding: 0; }
         li { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 12px; background: white; border-radius: 6px; border: 1px solid #eee; }
         .btn-delete { background: #dc3545; color: white; border: none; padding: 6px 12px; font-size: 13px; border-radius: 4px; cursor: pointer; }
@@ -25,8 +28,14 @@
     <form id="form-ajout">
         <input type="text" id="add-prenom" placeholder="Prénom" required>
         <input type="text" id="add-nom" placeholder="Nom" required>
-        <input type="text" id="add-role" placeholder="Rôle (ex: Technicien, Directeur...)" required>
-        <input type="email" id="add-email" placeholder="E-mail (@la1337.fr)" required>
+        <input type="email" id="add-email" placeholder="E-mail (@la1337.com)" required>
+        <input type="text" id="add-phone" placeholder="Téléphone (ex: 06 00 00 00 00)">
+
+        <label style="font-weight: bold; font-size: 13px; color: #ff3366; margin-top: 5px;">Rôles dans l'équipe :</label>
+        <div class="roles-grid" id="admin-roles-container">
+            <!-- Injecté automatiquement par JS -->
+        </div>
+
         <button type="submit">Ajouter au générateur</button>
     </form>
 
@@ -36,17 +45,45 @@
     </ul>
 
     <script>
-        // 1. Connexion Supabase
+        // Dictionnaire des 15 rôles officiels
+        const ROLE_MAP = {
+            1:  "Directeur",
+            2:  "Directeur Adjoint",
+            3:  "Président",
+            4:  "Vice-Président",
+            5:  "Secrétaire",
+            6:  "Trésorière",
+            7:  "Animateur",
+            8:  "Animatrice",
+            9:  "Programmation",
+            10: "Technique",
+            11: "RH",
+            12: "Événementiel",
+            13: "Communication",
+            14: "Journaliste",
+            15: "Membre extérieur"
+        };
+
+        // Connexion Supabase
         const SUPABASE_URL = 'https://appepchfrfghfulirckz.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_wjpCqcbmlEnHvYhJRziUGQ_SIubrlSg';
-
-        // Initialisation exacte conforme au SDK du navigateur
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // 2. Fonction pour afficher la liste des membres
+        // Remplissage des cases à cocher dans l'admin
+        function afficherCheckboxesRoles() {
+            const container = document.getElementById('admin-roles-container');
+            container.innerHTML = '';
+            for (const [id, nom] of Object.entries(ROLE_MAP)) {
+                const label = document.createElement('label');
+                label.className = 'role-item';
+                label.innerHTML = `<input type="checkbox" name="adminRole" value="${id}"> ${nom}`;
+                container.appendChild(label);
+            }
+        }
+
+        // Afficher la liste des membres
         async function afficherMembres() {
             const ul = document.getElementById('liste-membres');
-            
             try {
                 const { data: membres, error } = await supabaseClient
                     .from('membres')
@@ -54,85 +91,76 @@
                     .order('nom', { ascending: true });
 
                 if (error) {
-                    console.error("Erreur lors du chargement :", error);
                     ul.innerHTML = `<li style="color:red">⚠️ Erreur Supabase : ${error.message}</li>`;
                     return;
                 }
 
                 ul.innerHTML = '';
-
                 if (!membres || membres.length === 0) {
-                    ul.innerHTML = '<li>Aucun membre trouvé dans la base de données.</li>';
+                    ul.innerHTML = '<li>Aucun membre trouvé.</li>';
                     return;
                 }
 
                 membres.forEach(m => {
+                    // Conversion des IDs de rôles en noms lisibles
+                    const rolesArray = m.roles ? (Array.isArray(m.roles) ? m.roles : String(m.roles).split(',').map(Number)) : [];
+                    const namesRoles = rolesArray.map(id => ROLE_MAP[id]).filter(Boolean).join(' / ') || 'Sans rôle';
+
                     const li = document.createElement('li');
                     li.innerHTML = `
-                        <span><strong>${m.prenom || ''} ${(m.nom || '').toUpperCase()}</strong> - ${m.role || 'Sans rôle'} <em>(${m.email || 'Pas d\'email'})</em></span>
+                        <span><strong>${m.prenom || ''} ${(m.nom || '').toUpperCase()}</strong> - <span style="color:#ff3366; font-weight:600;">${namesRoles}</span> <em>(${m.email || ''})</em></span>
                         <button class="btn-delete" onclick="supprimerMembre('${m.id}')">Supprimer</button>
                     `;
                     ul.appendChild(li);
                 });
-
             } catch (err) {
-                console.error("Erreur réseau ou script :", err);
-                ul.innerHTML = `<li style="color:red">⚠️ Erreur de connexion au serveur (${err.message})</li>`;
+                ul.innerHTML = `<li style="color:red">⚠️ Erreur de connexion (${err.message})</li>`;
             }
         }
 
-        // 3. Fonction pour ajouter un membre
+        // Soumission du formulaire d'ajout
         document.getElementById('form-ajout').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
+            // Récupérer les cases cochées
+            const checkboxes = document.querySelectorAll('input[name="adminRole"]:checked');
+            const selectedRoles = Array.from(checkboxes).map(cb => parseInt(cb.value, 10));
+
             const nouveauMembre = {
                 prenom: document.getElementById('add-prenom').value.trim(),
                 nom: document.getElementById('add-nom').value.trim(),
-                role: document.getElementById('add-role').value.trim(),
-                email: document.getElementById('add-email').value.trim()
+                email: document.getElementById('add-email').value.trim(),
+                telephone: document.getElementById('add-phone').value.trim(),
+                roles: selectedRoles // Envoi du tableau de numéros [1, 10...]
             };
 
-            try {
-                const { data, error } = await supabaseClient
-                    .from('membres')
-                    .insert([nouveauMembre]);
+            const { error } = await supabaseClient
+                .from('membres')
+                .insert([nouveauMembre]);
 
-                if (error) {
-                    alert('⚠️ Impossible d\'ajouter le membre : ' + error.message);
-                    console.error("Détail de l'erreur d'ajout :", error);
-                } else {
-                    alert('✅ Membre ajouté avec succès !');
-                    document.getElementById('form-ajout').reset();
-                    afficherMembres(); // Rafraîchir la liste instantanément
-                }
-            } catch (err) {
-                alert('⚠️ Erreur réseau lors de l\'envoi : ' + err.message);
-                console.error("Exception attrapée :", err);
+            if (error) {
+                alert('⚠️ Erreur : ' + error.message);
+            } else {
+                alert('✅ Membre ajouté avec succès !');
+                document.getElementById('form-ajout').reset();
+                afficherMembres();
             }
         });
 
-        // 4. Fonction pour supprimer un membre
+        // Suppression d'un membre
         async function supprimerMembre(id) {
             if (confirm('Voulez-vous vraiment supprimer ce membre ?')) {
-                try {
-                    const { error } = await supabaseClient
-                        .from('membres')
-                        .delete()
-                        .eq('id', id);
-
-                    if (error) {
-                        alert('⚠️ Erreur lors de la suppression : ' + error.message);
-                    } else {
-                        afficherMembres(); // Rafraîchir la liste
-                    }
-                } catch (err) {
-                    alert('⚠️ Erreur réseau : ' + err.message);
-                }
+                const { error } = await supabaseClient.from('membres').delete().eq('id', id);
+                if (error) alert('⚠️ Erreur : ' + error.message);
+                else afficherMembres();
             }
         }
 
-        // Lancement au chargement de la page
-        document.addEventListener('DOMContentLoaded', afficherMembres);
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', () => {
+            afficherCheckboxesRoles();
+            afficherMembres();
+        });
     </script>
 </body>
 </html>
