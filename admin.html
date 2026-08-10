@@ -3,16 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Administration - Signature Mail</title>
+    <title>Administration - Signature Mail LA 1337</title>
     <!-- SDK Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { font-family: system-ui, sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; }
-        form { display: flex; flex-direction: column; gap: 10px; margin-bottom: 30px; }
-        input, button { padding: 10px; font-size: 16px; }
-        button { background-color: #0070f3; color: white; border: none; cursor: pointer; border-radius: 4px; }
-        li { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding: 8px; background: #f4f4f4; border-radius: 4px; }
-        .btn-delete { background: #e00; padding: 5px 10px; font-size: 12px; }
+        body { font-family: system-ui, -apple-system, sans-serif; max-width: 650px; margin: 40px auto; padding: 20px; background: #f8f9fa; color: #333; }
+        h2 { border-bottom: 2px solid #0070f3; padding-bottom: 8px; margin-top: 30px; }
+        form { display: flex; flex-direction: column; gap: 12px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        input, button { padding: 12px; font-size: 15px; border: 1px solid #ddd; border-radius: 6px; }
+        button { background-color: #0070f3; color: white; border: none; font-weight: bold; cursor: pointer; transition: background 0.2s; }
+        button:hover { background-color: #0051a2; }
+        ul { list-style: none; padding: 0; }
+        li { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 12px; background: white; border-radius: 6px; border: 1px solid #eee; }
+        .btn-delete { background: #dc3545; color: white; border: none; padding: 6px 12px; font-size: 13px; border-radius: 4px; cursor: pointer; }
+        .btn-delete:hover { background: #bd2130; }
     </style>
 </head>
 <body>
@@ -21,66 +25,114 @@
     <form id="form-ajout">
         <input type="text" id="add-prenom" placeholder="Prénom" required>
         <input type="text" id="add-nom" placeholder="Nom" required>
-        <input type="text" id="add-role" placeholder="Rôle (ex: Responsable Com)" required>
-        <input type="email" id="add-email" placeholder="E-mail" required>
+        <input type="text" id="add-role" placeholder="Rôle (ex: Technicien, Directeur...)" required>
+        <input type="email" id="add-email" placeholder="E-mail (@la1337.fr)" required>
         <button type="submit">Ajouter au générateur</button>
     </form>
 
     <h2>📋 Liste des membres actuels</h2>
-    <ul id="liste-membres"></ul>
+    <ul id="liste-membres">
+        <li>Chargement des membres...</li>
+    </ul>
 
     <script>
-        const SUPABASE_URL = 'https://VOTRE_PROJET.supabase.co';
-        const SUPABASE_ANON_KEY = 'VOTRE_CLE_ANON_PUBLIQUE';
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // 1. Connexion Supabase
+        const SUPABASE_URL = 'https://appepchfrfghfulirckz.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_wjpCqcbmlEnHvYhJRziUGQ_SIubrlSg';
 
-        // Afficher la liste des membres avec bouton de suppression
+        // Initialisation exacte conforme au SDK du navigateur
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // 2. Fonction pour afficher la liste des membres
         async function afficherMembres() {
-            const { data: membres, error } = await supabaseClient.from('membres').select('*').order('nom');
             const ul = document.getElementById('liste-membres');
-            ul.innerHTML = '';
+            
+            try {
+                const { data: membres, error } = await supabaseClient
+                    .from('membres')
+                    .select('*')
+                    .order('nom', { ascending: true });
 
-            if (membres) {
+                if (error) {
+                    console.error("Erreur lors du chargement :", error);
+                    ul.innerHTML = `<li style="color:red">⚠️ Erreur Supabase : ${error.message}</li>`;
+                    return;
+                }
+
+                ul.innerHTML = '';
+
+                if (!membres || membres.length === 0) {
+                    ul.innerHTML = '<li>Aucun membre trouvé dans la base de données.</li>';
+                    return;
+                }
+
                 membres.forEach(m => {
                     const li = document.createElement('li');
                     li.innerHTML = `
-                        <span><strong>${m.prenom} ${m.nom}</strong> - ${m.role} (${m.email})</span>
-                        <button class="btn-delete" onclick="supprimerMembre(${m.id})">Supprimer</button>
+                        <span><strong>${m.prenom || ''} ${(m.nom || '').toUpperCase()}</strong> - ${m.role || 'Sans rôle'} <em>(${m.email || 'Pas d\'email'})</em></span>
+                        <button class="btn-delete" onclick="supprimerMembre('${m.id}')">Supprimer</button>
                     `;
                     ul.appendChild(li);
                 });
+
+            } catch (err) {
+                console.error("Erreur réseau ou script :", err);
+                ul.innerHTML = `<li style="color:red">⚠️ Erreur de connexion au serveur (${err.message})</li>`;
             }
         }
 
-        // Ajouter un membre
+        // 3. Fonction pour ajouter un membre
         document.getElementById('form-ajout').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const nouveau = {
-                prenom: document.getElementById('add-prenom').value,
-                nom: document.getElementById('add-nom').value,
-                role: document.getElementById('add-role').value,
-                email: document.getElementById('add-email').value
+            
+            const nouveauMembre = {
+                prenom: document.getElementById('add-prenom').value.trim(),
+                nom: document.getElementById('add-nom').value.trim(),
+                role: document.getElementById('add-role').value.trim(),
+                email: document.getElementById('add-email').value.trim()
             };
 
-            const { error } = await supabaseClient.from('membres').insert([nouveau]);
-            if (error) {
-                alert('Erreur : ' + error.message);
-            } else {
-                alert('Membre ajouté !');
-                document.getElementById('form-ajout').reset();
-                afficherMembres();
+            try {
+                const { data, error } = await supabaseClient
+                    .from('membres')
+                    .insert([nouveauMembre]);
+
+                if (error) {
+                    alert('⚠️ Impossible d\'ajouter le membre : ' + error.message);
+                    console.error("Détail de l'erreur d'ajout :", error);
+                } else {
+                    alert('✅ Membre ajouté avec succès !');
+                    document.getElementById('form-ajout').reset();
+                    afficherMembres(); // Rafraîchir la liste instantanément
+                }
+            } catch (err) {
+                alert('⚠️ Erreur réseau lors de l\'envoi : ' + err.message);
+                console.error("Exception attrapée :", err);
             }
         });
 
-        // Supprimer un membre
+        // 4. Fonction pour supprimer un membre
         async function supprimerMembre(id) {
             if (confirm('Voulez-vous vraiment supprimer ce membre ?')) {
-                await supabaseClient.from('membres').delete().eq('id', id);
-                afficherMembres();
+                try {
+                    const { error } = await supabaseClient
+                        .from('membres')
+                        .delete()
+                        .eq('id', id);
+
+                    if (error) {
+                        alert('⚠️ Erreur lors de la suppression : ' + error.message);
+                    } else {
+                        afficherMembres(); // Rafraîchir la liste
+                    }
+                } catch (err) {
+                    alert('⚠️ Erreur réseau : ' + err.message);
+                }
             }
         }
 
-        afficherMembres();
+        // Lancement au chargement de la page
+        document.addEventListener('DOMContentLoaded', afficherMembres);
     </script>
 </body>
 </html>
