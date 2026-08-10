@@ -3,196 +3,302 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Administration - Signature Mail LA 1337</title>
+    <title>Administration - Signature Mail & Studio LA 1337</title>
     <!-- SDK Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { font-family: system-ui, -apple-system, sans-serif; max-width: 650px; margin: 40px auto; padding: 20px; background: #f8f9fa; color: #333; }
-        h2 { border-bottom: 2px solid #ff3366; padding-bottom: 8px; margin-top: 30px; }
-        form { display: flex; flex-direction: column; gap: 12px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        input, button { padding: 12px; font-size: 15px; border: 1px solid #ddd; border-radius: 6px; }
-        button { background-color: #ff3366; color: white; border: none; font-weight: bold; cursor: pointer; transition: background 0.2s; }
-        button:hover { background-color: #e02454; }
-        .roles-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; background: #f1f3f5; padding: 12px; border-radius: 6px; border: 1px solid #ddd; }
-        .role-item { display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; }
+        body { font-family: system-ui, -apple-system, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; background: #0f0f12; color: #fff; }
+        h1 { color: #ff3366; text-align: center; margin-bottom: 30px; text-transform: uppercase; letter-spacing: 2px; }
+        h2 { border-bottom: 2px solid #ff3366; padding-bottom: 8px; margin-top: 40px; color: #ff3366; font-size: 20px; }
+        
+        .admin-section { background: #1a1a22; padding: 20px; border-radius: 12px; border: 1px solid #2a2a35; margin-bottom: 30px; }
+        form { display: flex; flex-direction: column; gap: 12px; }
+        .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .form-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        
+        label { font-size: 12px; color: #aaa; font-weight: bold; text-transform: uppercase; }
+        input[type="text"], input[type="email"], input[type="url"], select { padding: 12px; font-size: 14px; background: #0d0d12; color: #fff; border: 1px solid #333344; border-radius: 6px; box-sizing: border-box; width: 100%; }
+        input[type="color"] { padding: 2px; height: 42px; background: #0d0d12; border: 1px solid #333344; border-radius: 6px; cursor: pointer; width: 100%; }
+        
+        button { background: linear-gradient(135deg, #ff3366, #ff66cc); color: white; border: none; padding: 12px 20px; font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: all 0.2s; margin-top: 10px; }
+        button:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(255, 51, 102, 0.4); }
+        
+        .roles-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; background: #0d0d12; padding: 12px; border-radius: 6px; border: 1px solid #333344; }
+        .role-item { display: flex; align-items: center; gap: 8px; font-size: 12px; cursor: pointer; color: #ddd; }
         .role-item input { width: 16px; height: 16px; accent-color: #ff3366; cursor: pointer; }
-        ul { list-style: none; padding: 0; }
-        li { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 12px; background: white; border-radius: 6px; border: 1px solid #eee; }
-        .btn-delete { background: #dc3545; color: white; border: none; padding: 6px 12px; font-size: 13px; border-radius: 4px; cursor: pointer; }
-        .btn-delete:hover { background: #bd2130; }
+        
+        ul { list-style: none; padding: 0; margin: 15px 0 0 0; }
+        li { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 12px; background: #0d0d12; border-radius: 6px; border: 1px solid #2a2a35; }
+        
+        .btn-delete { background: #dc3545; color: white; border: none; padding: 6px 12px; font-size: 12px; border-radius: 4px; cursor: pointer; margin-top: 0; }
+        .btn-delete:hover { background: #bd2130; box-shadow: none; transform: none; }
+        
+        .color-preview-box { display: inline-block; width: 14px; height: 14px; border-radius: 50%; border: 1px solid #fff; margin-right: 4px; vertical-align: middle; }
+        .item-thumb { width: 40px; height: 25px; object-fit: cover; border-radius: 4px; vertical-align: middle; margin-right: 10px; border: 1px solid #444; }
     </style>
 </head>
 <body>
 
-    <h2>➕ Ajouter un membre</h2>
-    <form id="form-ajout">
-        <input type="text" id="add-prenom" placeholder="Prénom" required oninput="genererEmailAuto()">
-        <input type="text" id="add-nom" placeholder="Nom" required oninput="genererEmailAuto()">
-        <input type="email" id="add-email" value="@la1337.com" required>
-        <input type="text" id="add-phone" value="03 65 17 00 63" placeholder="Téléphone">
+    <h1>🎙️ Admin - LA 1337 Studio 🎙️</h1>
 
-        <label style="font-weight: bold; font-size: 13px; color: #ff3366; margin-top: 5px;">Rôles dans l'équipe :</label>
-        <div class="roles-grid" id="admin-roles-container">
-            <!-- Injecté automatiquement par JS -->
-        </div>
+    <!-- 1. GESTION DES MEMBRES -->
+    <div class="admin-section">
+        <h2>👤 Gestion des Membres</h2>
+        <form id="form-membre">
+            <div class="form-grid-2">
+                <div>
+                    <label>Prénom</label>
+                    <input type="text" id="add-prenom" placeholder="Ex: Maxence" required oninput="genererEmailAuto()">
+                </div>
+                <div>
+                    <label>Nom</label>
+                    <input type="text" id="add-nom" placeholder="Ex: Rocmont" required oninput="genererEmailAuto()">
+                </div>
+            </div>
+            
+            <div class="form-grid-2">
+                <div>
+                    <label>Email Radio</label>
+                    <input type="email" id="add-email" value="@la1337.com" required>
+                </div>
+                <div>
+                    <label>Téléphone</label>
+                    <input type="text" id="add-phone" value="03 65 17 00 63" placeholder="03 65 17 00 63">
+                </div>
+            </div>
 
-        <button type="submit">Ajouter au générateur</button>
-    </form>
+            <div>
+                <label>Rôles / Fonctions :</label>
+                <div class="roles-grid" id="admin-roles-container"></div>
+            </div>
 
-    <h2>📋 Liste des membres actuels</h2>
-    <ul id="liste-membres">
-        <li>Chargement des membres...</li>
-    </ul>
+            <button type="submit">➕ Ajouter le membre</button>
+        </form>
+
+        <ul id="liste-membres"><li>Chargement des membres...</li></ul>
+    </div>
+
+    <!-- 2. GESTION DES BANNIÈRES / THÈMES -->
+    <div class="admin-section">
+        <h2>🎭 Gestion des Bannières & Thèmes</h2>
+        <form id="form-theme">
+            <div class="form-grid-2">
+                <div>
+                    <label>Nom du thème</label>
+                    <input type="text" id="theme-name" placeholder="Ex: ⚡ Généraliste / ☀️ Été" required>
+                </div>
+                <div>
+                    <label>URL de l'image (PostImg / Hôte)</label>
+                    <input type="url" id="theme-url" placeholder="https://i.postimg.cc/..." required>
+                </div>
+            </div>
+
+            <div class="form-grid-3">
+                <div>
+                    <label>Couleur Nom / Titre</label>
+                    <input type="color" id="theme-textColor" value="#ff3366">
+                </div>
+                <div>
+                    <label>Couleur Rôle / Poste</label>
+                    <input type="color" id="theme-roleColor" value="#e1e1e6">
+                </div>
+                <div>
+                    <label>Fond Badge LIVE</label>
+                    <input type="color" id="theme-liveBgColor" value="#ff3366">
+                </div>
+            </div>
+
+            <button type="submit">🎨 Ajouter la bannière</button>
+        </form>
+
+        <ul id="liste-themes"><li>Chargement des thèmes...</li></ul>
+    </div>
+
+    <!-- 3. GESTION DES LOGOS -->
+    <div class="admin-section">
+        <h2>💿 Gestion des Logos</h2>
+        <form id="form-logo">
+            <div class="form-grid-2">
+                <div>
+                    <label>Nom du Logo</label>
+                    <input type="text" id="logo-name" placeholder="Ex: 💿 Logo Blanc Officiel" required>
+                </div>
+                <div>
+                    <label>URL de l'image (PNG Transparent)</label>
+                    <input type="url" id="logo-url" placeholder="https://i.postimg.cc/..." required>
+                </div>
+            </div>
+            <button type="submit">💿 Ajouter le logo</button>
+        </form>
+
+        <ul id="liste-logos"><li>Chargement des logos...</li></ul>
+    </div>
 
     <script>
-        // Dictionnaire des 15 rôles officiels
         const ROLE_MAP = {
-            1:  "Directeur",
-            2:  "Directeur Adjoint",
-            3:  "Président",
-            4:  "Vice-Président",
-            5:  "Secrétaire",
-            6:  "Trésorière",
-            7:  "Animateur",
-            8:  "Animatrice",
-            9:  "Programmation",
-            10: "Technique",
-            11: "RH",
-            12: "Événementiel",
-            13: "Communication",
-            14: "Journaliste",
-            15: "Membre extérieur"
+            1: "Directeur", 2: "Directeur Adjoint", 3: "Président", 4: "Vice-Président", 5: "Secrétaire",
+            6: "Trésorière", 7: "Animateur", 8: "Animatrice", 9: "Programmation", 10: "Technique",
+            11: "RH", 12: "Événementiel", 13: "Communication", 14: "Journaliste", 15: "Membre extérieur"
         };
 
-        // Connexion Supabase
         const SUPABASE_URL = 'https://appepchfrfghfulirckz.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_wjpCqcbmlEnHvYhJRziUGQ_SIubrlSg';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // Génération dynamique de l'email dans la vraie valeur du champ
+        // --- EMAIL AUTOMATIQUE ---
         function genererEmailAuto() {
             const prenom = document.getElementById('add-prenom').value.trim();
             const nom = document.getElementById('add-nom').value.trim();
             const emailInput = document.getElementById('add-email');
 
-            if (!prenom) {
-                emailInput.value = '@la1337.com';
-                return;
-            }
-
-            // Nettoyage des accents et minuscules
-            const prenomClean = prenom.toLowerCase()
-                .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-                .replace(/[^a-z0-9]/g, '');
-
+            if (!prenom) { emailInput.value = '@la1337.com'; return; }
+            const prenomClean = prenom.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, '');
             let initialNom = '';
             if (nom) {
-                const nomClean = nom.toLowerCase()
-                    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-                    .replace(/[^a-z0-9]/g, '');
-                if (nomClean.length > 0) {
-                    initialNom = '.' + nomClean.charAt(0);
-                }
+                const nomClean = nom.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, '');
+                if (nomClean.length > 0) initialNom = '.' + nomClean.charAt(0);
             }
-
             emailInput.value = `${prenomClean}${initialNom}@la1337.com`;
         }
 
-        // Remplissage des cases à cocher dans l'admin
+        // --- CHARGEMENT ROLES EN CHECKBOXES ---
         function afficherCheckboxesRoles() {
             const container = document.getElementById('admin-roles-container');
             container.innerHTML = '';
             for (const [id, nom] of Object.entries(ROLE_MAP)) {
-                const label = document.createElement('label');
-                label.className = 'role-item';
-                label.innerHTML = `<input type="checkbox" name="adminRole" value="${id}"> ${nom}`;
-                container.appendChild(label);
+                container.innerHTML += `<label class="role-item"><input type="checkbox" name="adminRole" value="${id}"> ${nom}</label>`;
             }
         }
 
-        // Afficher la liste des membres
+        // --- MEMBRES ---
         async function afficherMembres() {
             const ul = document.getElementById('liste-membres');
-            try {
-                const { data: membres, error } = await supabaseClient
-                    .from('membres')
-                    .select('*')
-                    .order('nom', { ascending: true });
-
-                if (error) {
-                    ul.innerHTML = `<li style="color:red">⚠️ Erreur Supabase : ${error.message}</li>`;
-                    return;
-                }
-
-                ul.innerHTML = '';
-                if (!membres || membres.length === 0) {
-                    ul.innerHTML = '<li>Aucun membre trouvé.</li>';
-                    return;
-                }
-
-                membres.forEach(m => {
-                    const rolesArray = m.roles ? (Array.isArray(m.roles) ? m.roles : String(m.roles).split(',').map(Number)) : [];
-                    const namesRoles = rolesArray.map(id => ROLE_MAP[id]).filter(Boolean).join(' / ') || 'Sans rôle';
-
-                    const li = document.createElement('li');
-                    li.innerHTML = `
-                        <span><strong>${m.prenom || ''} ${(m.nom || '').toUpperCase()}</strong> - <span style="color:#ff3366; font-weight:600;">${namesRoles}</span> <em>(${m.email || ''})</em></span>
-                        <button class="btn-delete" onclick="supprimerMembre('${m.id}')">Supprimer</button>
-                    `;
-                    ul.appendChild(li);
-                });
-            } catch (err) {
-                ul.innerHTML = `<li style="color:red">⚠️ Erreur de connexion (${err.message})</li>`;
-            }
+            const { data: membres, error } = await supabaseClient.from('membres').select('*').order('nom', { ascending: true });
+            if (error) { ul.innerHTML = `<li style="color:red">Erreur: ${error.message}</li>`; return; }
+            
+            ul.innerHTML = membres.length === 0 ? '<li>Aucun membre.</li>' : '';
+            membres.forEach(m => {
+                const rolesArray = m.roles ? (Array.isArray(m.roles) ? m.roles : String(m.roles).split(',').map(Number)) : [];
+                const namesRoles = rolesArray.map(id => ROLE_MAP[id]).filter(Boolean).join(' / ') || 'Sans rôle';
+                ul.innerHTML += `
+                    <li>
+                        <span><strong>${m.prenom || ''} ${(m.nom || '').toUpperCase()}</strong> — <span style="color:#ff3366;">${namesRoles}</span> <em>(${m.email || ''})</em></span>
+                        <button class="btn-delete" onclick="supprimerItem('membres', '${m.id}', afficherMembres)">Supprimer</button>
+                    </li>`;
+            });
         }
 
-        // Soumission du formulaire d'ajout
-        document.getElementById('form-ajout').addEventListener('submit', async (e) => {
+        document.getElementById('form-membre').addEventListener('submit', async (e) => {
             e.preventDefault();
-
-            const checkboxes = document.querySelectorAll('input[name="adminRole"]:checked');
-            const selectedRoles = Array.from(checkboxes).map(cb => parseInt(cb.value, 10));
-
-            const nouveauMembre = {
+            const selectedRoles = Array.from(document.querySelectorAll('input[name="adminRole"]:checked')).map(cb => parseInt(cb.value, 10));
+            const nouveau = {
                 prenom: document.getElementById('add-prenom').value.trim(),
                 nom: document.getElementById('add-nom').value.trim(),
                 email: document.getElementById('add-email').value.trim(),
+                telephone: document.getElementById('add-phone').value.trim() || '03 65 17 00 63',
                 roles: selectedRoles
             };
-
-            const phoneValue = document.getElementById('add-phone').value.trim();
-            if (phoneValue) {
-                nouveauMembre.telephone = phoneValue;
-            }
-
-            const { error } = await supabaseClient
-                .from('membres')
-                .insert([nouveauMembre]);
-
-            if (error) {
-                alert('⚠️ Erreur : ' + error.message);
-            } else {
-                alert('✅ Membre ajouté avec succès !');
-                document.getElementById('form-ajout').reset();
+            const { error } = await supabaseClient.from('membres').insert([nouveau]);
+            if (error) alert('Erreur : ' + error.message);
+            else {
+                alert('✅ Membre ajouté !');
+                document.getElementById('form-membre').reset();
                 document.getElementById('add-phone').value = '03 65 17 00 63';
                 document.getElementById('add-email').value = '@la1337.com';
                 afficherMembres();
             }
         });
 
-        // Suppression d'un membre
-        async function supprimerMembre(id) {
-            if (confirm('Voulez-vous vraiment supprimer ce membre ?')) {
-                const { error } = await supabaseClient.from('membres').delete().eq('id', id);
-                if (error) alert('⚠️ Erreur : ' + error.message);
-                else afficherMembres();
+        // --- BANNIÈRES / THÈMES ---
+        async function afficherThemes() {
+            const ul = document.getElementById('liste-themes');
+            const { data: themes, error } = await supabaseClient.from('themes').select('*').order('id', { ascending: true });
+            if (error) { ul.innerHTML = `<li>Gérez vos thèmes dans Supabase. (${error.message})</li>`; return; }
+            
+            ul.innerHTML = themes.length === 0 ? '<li>Aucun thème.</li>' : '';
+            themes.forEach(t => {
+                ul.innerHTML += `
+                    <li>
+                        <span>
+                            <img src="${t.url}" class="item-thumb" alt="bg">
+                            <strong>${t.name}</strong> 
+                            <span class="color-preview-box" style="background:${t.textColor}" title="Texte"></span>
+                            <span class="color-preview-box" style="background:${t.roleColor}" title="Rôle"></span>
+                        </span>
+                        <button class="btn-delete" onclick="supprimerItem('themes', '${t.id}', afficherThemes)">Supprimer</button>
+                    </li>`;
+            });
+        }
+
+        document.getElementById('form-theme').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const nouveau = {
+                name: document.getElementById('theme-name').value.trim(),
+                url: document.getElementById('theme-url').value.trim(),
+                color: document.getElementById('theme-textColor').value,
+                textColor: document.getElementById('theme-textColor').value,
+                roleColor: document.getElementById('theme-roleColor').value,
+                liveBgColor: document.getElementById('theme-liveBgColor').value,
+                liveTxtColor: '#ffffff'
+            };
+            const { error } = await supabaseClient.from('themes').insert([nouveau]);
+            if (error) alert('Erreur : ' + error.message);
+            else {
+                alert('✅ Bannière ajoutée !');
+                document.getElementById('form-theme').reset();
+                afficherThemes();
+            }
+        });
+
+        // --- LOGOS ---
+        async function afficherLogos() {
+            const ul = document.getElementById('liste-logos');
+            const { data: logos, error } = await supabaseClient.from('logos').select('*').order('id', { ascending: true });
+            if (error) { ul.innerHTML = `<li>Gérez vos logos dans Supabase. (${error.message})</li>`; return; }
+            
+            ul.innerHTML = logos.length === 0 ? '<li>Aucun logo.</li>' : '';
+            logos.forEach(l => {
+                ul.innerHTML += `
+                    <li>
+                        <span>
+                            <img src="${l.url}" class="item-thumb" style="object-fit:contain;" alt="logo">
+                            <strong>${l.name}</strong>
+                        </span>
+                        <button class="btn-delete" onclick="supprimerItem('logos', '${l.id}', afficherLogos)">Supprimer</button>
+                    </li>`;
+            });
+        }
+
+        document.getElementById('form-logo').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const nouveau = {
+                name: document.getElementById('logo-name').value.trim(),
+                url: document.getElementById('logo-url').value.trim()
+            };
+            const { error } = await supabaseClient.from('logos').insert([nouveau]);
+            if (error) alert('Erreur : ' + error.message);
+            else {
+                alert('✅ Logo ajouté !');
+                document.getElementById('form-logo').reset();
+                afficherLogos();
+            }
+        });
+
+        // --- FONCTION SUPPRESSION GENERIQUE ---
+        async function supprimerItem(table, id, callback) {
+            if (confirm(`Voulez-vous vraiment supprimer cet élément de ${table} ?`)) {
+                const { error } = await supabaseClient.from(table).delete().eq('id', id);
+                if (error) alert('Erreur : ' + error.message);
+                else callback();
             }
         }
 
-        // Initialisation
+        // --- INIT ---
         document.addEventListener('DOMContentLoaded', () => {
             afficherCheckboxesRoles();
             afficherMembres();
+            afficherThemes();
+            afficherLogos();
         });
     </script>
 </body>
