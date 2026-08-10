@@ -763,7 +763,12 @@
     select.innerHTML = '';
 
     // On ne garde que les éléments où 'active' est explicitement true (ou non défini pour éviter de tout bloquer)
-    const filteredThemes = (themes || []).filter(t => t.active === true || t.active === null || t.active === undefined);
+    // On remplace le filtre par une version qui "force" la conversion en booléen
+const filteredThemes = (themes || []).filter(t => {
+    // Force la conversion : si la valeur est 'true', 1, ou true, ça passe.
+    const isActive = (t.active === true || t.active === 'true' || t.active === 1);
+    return isActive;
+});
 
     // Tri : les prioritaires en premier
     filteredThemes.sort((a, b) => (b.prioritaire === true) - (a.prioritaire === true));
