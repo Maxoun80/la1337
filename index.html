@@ -58,11 +58,11 @@
             font-size: 13px;
             text-transform: uppercase;
             letter-spacing: 1px;
-            cursor: pointer;
-            transition: all 0.2s;
+            text-decoration: none;
             display: flex;
             align-items: center;
             gap: 8px;
+            transition: all 0.2s;
         }
         .tab-btn:hover {
             color: #fff;
@@ -73,14 +73,6 @@
             color: #fff;
             border-color: transparent;
             box-shadow: 0 4px 15px rgba(255, 51, 102, 0.3);
-        }
-
-        /* SECTIONS DES ONGLETS */
-        .tab-content {
-            display: none;
-        }
-        .tab-content.active {
-            display: block;
         }
 
         /* STYLES DU FORMULAIRE ET GÉNÉRATEUR */
@@ -267,62 +259,6 @@
             box-shadow: 0 6px 20px rgba(19, 153, 117, 0.4);
         }
 
-        /* STYLES DU MODULE DE MISE À JOUR */
-        .changelog-container {
-            text-align: left;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-        .changelog-card {
-            background: #0d0d12;
-            border: 1px solid #2a2a35;
-            border-radius: 12px;
-            padding: 20px 25px;
-            position: relative;
-        }
-        .changelog-card.latest {
-            border-color: #ff3366;
-            box-shadow: 0 0 15px rgba(255, 51, 102, 0.15);
-        }
-        .changelog-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-            border-bottom: 1px solid #1a1a22;
-            padding-bottom: 10px;
-        }
-        .version-badge {
-            background: #ff3366;
-            color: #fff;
-            font-weight: bold;
-            font-size: 12px;
-            padding: 4px 10px;
-            border-radius: 6px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .version-date {
-            color: #888899;
-            font-size: 12px;
-            font-weight: 600;
-        }
-        .changelog-list {
-            margin: 0;
-            padding: 0;
-            list-style: none;
-            color: #d1d1e0;
-            font-size: 13px;
-            line-height: 1.8;
-        }
-        .changelog-list li {
-            margin-bottom: 6px;
-            display: flex;
-            align-items: baseline;
-            flex-wrap: wrap;
-        }
-
         /* MODAL STYLES */
         .modal-overlay {
             display: none;
@@ -458,134 +394,121 @@
     
     <!-- MENU DE NAVIGATION -->
     <div class="nav-tabs">
-        <button class="tab-btn active" onclick="switchTab('tab-generator', this)">
-            🎨 Générateur
-        </button>
-        <button class="tab-btn" onclick="switchTab('tab-changelog', this)">
-            📜 Mises à jour & Nouveautés
-        </button>
+        <a href="index.html" class="tab-btn active">🎨 Générateur</a>
+        <a href="changelog.html" class="tab-btn">📜 Mises à jour & Nouveautés</a>
     </div>
 
-    <!-- ONGLET 1 : GÉNÉRATEUR -->
-    <div id="tab-generator" class="tab-content active">
-        <div class="form-container">
-            <!-- SÉLECTEUR DU TYPE DE SIGNATURE -->
-            <div class="input-group full-width">
-                <label style="color: #33cc99;">🎨 Style de Signature</label>
-                <select id="inSigStyle" onchange="updateSig()">
-                    <option value="radio">🎧 Signature Officielle Graphique</option>
-                    <option value="baweb_line">📄 Signature BAweb (Ligne complète : Nom, Fonction, Tél, Mail, Web)</option>
-                    <option value="baweb_minimal">✉️ Signature Minimaliste BAweb (Courrier : Logo + Nom, Prénom, Fonction)</option>
-                </select>
-            </div>
+    <!-- GÉNÉRATEUR -->
+    <div class="form-container">
+        <!-- SÉLECTEUR DU TYPE DE SIGNATURE -->
+        <div class="input-group full-width">
+            <label style="color: #33cc99;">🎨 Style de Signature</label>
+            <select id="inSigStyle" onchange="updateSig()">
+                <option value="radio">🎧 Signature Officielle Graphique</option>
+                <option value="baweb_line">📄 Signature BAweb (Ligne complète : Nom, Fonction, Tél, Mail, Web)</option>
+                <option value="baweb_minimal">✉️ Signature Minimaliste BAweb (Courrier : Logo + Nom, Prénom, Fonction)</option>
+            </select>
+        </div>
 
-            <!-- SÉLECTEUR DE MEMBRES -->
-            <div class="input-group">
-                <label>👤 Sélectionner le Membre de l'équipe</label>
-                <select id="inMemberSelect" onchange="handleMemberChange()">
-                    <option value="">👥 Choisissez un membre</option>
-                    <option value="custom">✍️ [NOUVEAU MEMBRE - Saisie libre]</option>
-                </select>
+        <!-- SÉLECTEUR DE MEMBRES -->
+        <div class="input-group">
+            <label>👤 Sélectionner le Membre de l'équipe</label>
+            <select id="inMemberSelect" onchange="handleMemberChange()">
+                <option value="">👥 Choisissez un membre</option>
+                <option value="custom">✍️ [NOUVEAU MEMBRE - Saisie libre]</option>
+            </select>
+        </div>
+        
+        <!-- SÉLECTEUR DE BANNIÈRE -->
+        <div class="input-group" id="groupPresetTheme">
+            <label>🎭 Sélectionner la Bannière Thématique</label>
+            <select id="inPresetTheme" onchange="applyPresetTheme()">
+                <!-- Rempli automatiquement -->
+            </select>
+        </div>
+
+        <!-- ZONE DE SAISIE LIBRE -->
+        <div id="customMemberZone" class="input-group full-width custom-member-zone">
+            <div>
+                <label style="color: #fff;">Nom Prénom du nouveau</label>
+                <input type="text" id="inCustomName" placeholder="Ex: MARTIN Lucas" style="width:100%; box-sizing:border-box;" oninput="updateSig()">
+            </div>
+            <div>
+                <label style="color: #fff;">Email Radio</label>
+                <input type="email" id="inCustomMail" placeholder="lucas@la1337.com" style="width:100%; box-sizing:border-box;" oninput="updateSig()">
+                <div class="email-error" id="emailError">⚠️ Email invalide</div>
+            </div>
+            <div style="grid-column: span 2;">
+                <label style="color: #fff;">Numéro de Téléphone</label>
+                <input type="text" id="inCustomPhone" placeholder="06 00 00 00 00" style="width:100%; box-sizing:border-box;" oninput="updateSig()">
+            </div>
+        </div>
+
+        <!-- SÉLECTEUR DE LOGO -->
+        <div class="input-group full-width" id="groupPresetLogo">
+            <label>💿 Sélectionner le Logo (Radio / BAweb)</label>
+            <select id="inPresetLogo" onchange="applyPresetLogo()">
+                <!-- Rempli automatiquement -->
+            </select>
+        </div>
+
+        <!-- CASES À COCHER DES RÔLES -->
+        <div class="input-group full-width">
+            <label>💼 Choisir ton ou tes rôles (Plusieurs choix possibles)</label>
+            <div id="rolesContainer" class="roles-checkbox-container">
+                <!-- Rempli automatiquement -->
             </div>
             
-            <!-- SÉLECTEUR DE BANNIÈRE -->
-            <div class="input-group" id="groupPresetTheme">
-                <label>🎭 Sélectionner la Bannière Thématique</label>
-                <select id="inPresetTheme" onchange="applyPresetTheme()">
-                    <!-- Rempli automatiquement -->
-                </select>
+            <div id="customRoleInputZone" class="custom-role-input-zone">
+                <label style="color: #fff; margin-bottom: 5px; display: block;">Saisir le rôle personnalisé :</label>
+                <input type="text" id="inCustomRoleText" placeholder="Ex: Grand Maître des Platines / Stagiaire" style="width: 100%; box-sizing: border-box;" oninput="updateSig()">
             </div>
-
-            <!-- ZONE DE SAISIE LIBRE -->
-            <div id="customMemberZone" class="input-group full-width custom-member-zone">
-                <div>
-                    <label style="color: #fff;">Nom Prénom du nouveau</label>
-                    <input type="text" id="inCustomName" placeholder="Ex: MARTIN Lucas" style="width:100%; box-sizing:border-box;" oninput="updateSig()">
-                </div>
-                <div>
-                    <label style="color: #fff;">Email Radio</label>
-                    <input type="email" id="inCustomMail" placeholder="lucas@la1337.com" style="width:100%; box-sizing:border-box;" oninput="updateSig()">
-                    <div class="email-error" id="emailError">⚠️ Email invalide</div>
-                </div>
-                <div style="grid-column: span 2;">
-                    <label style="color: #fff;">Numéro de Téléphone</label>
-                    <input type="text" id="inCustomPhone" placeholder="06 00 00 00 00" style="width:100%; box-sizing:border-box;" oninput="updateSig()">
-                </div>
-            </div>
-
-            <!-- SÉLECTEUR DE LOGO -->
-            <div class="input-group full-width" id="groupPresetLogo">
-                <label>💿 Sélectionner le Logo (Radio / BAweb)</label>
-                <select id="inPresetLogo" onchange="applyPresetLogo()">
-                    <!-- Rempli automatiquement -->
-                </select>
-            </div>
-
-            <!-- CASES À COCHER DES RÔLES -->
-            <div class="input-group full-width">
-                <label>💼 Choisir ton ou tes rôles (Plusieurs choix possibles)</label>
-                <div id="rolesContainer" class="roles-checkbox-container">
-                    <!-- Rempli automatiquement -->
-                </div>
-                
-                <div id="customRoleInputZone" class="custom-role-input-zone">
-                    <label style="color: #fff; margin-bottom: 5px; display: block;">Saisir le rôle personnalisé :</label>
-                    <input type="text" id="inCustomRoleText" placeholder="Ex: Grand Maître des Platines / Stagiaire" style="width: 100%; box-sizing: border-box;" oninput="updateSig()">
-                </div>
-            </div>
-        </div>
-
-        <div class="preview-header">Aperçu de la signature :</div>
-        
-        <div class="preview-area">
-            <!-- APERÇU SIG RADIO -->
-            <div id="sigPreview" style="width: 650px; height: 135px; background-size: cover; background-position: center; border: 1px solid #22222b; border-radius: 12px; overflow: hidden; padding: 20px 25px; box-sizing: border-box; position: relative;">
-                <table cellpadding="0" cellspacing="0" style="width: 100%; height: 100%; border-collapse: collapse; text-align: left; font-family: 'Segoe UI', Arial, sans-serif; color: #ffffff; position: relative; z-index: 2;">
-                    <tr>
-                        <td id="borderContainer" style="width: 110px; vertical-align: middle; padding-right: 15px; border-right: 3px solid #ff3366;">
-                            <img id="logoPreview" crossorigin="anonymous" src="" alt="LA 1337" style="width: 95px; height: auto; display: block; filter: drop-shadow(0px 2px 5px rgba(0,0,0,0.5));">
-                        </td>
-                        <td style="vertical-align: middle; padding-left: 20px;">
-                            <div id="outName" style="font-size: 21px; font-weight: bold; color: #ff3366; margin-bottom: 1px; letter-spacing: 0.5px; text-shadow: 2px 2px 4px rgba(0,0,0,0.9);">Prénom NOM</div>
-                            <div id="outRole" style="font-size: 13px; font-weight: bold; color: #e1e1e6; font-style: italic; margin-bottom: 15px; text-shadow: 2px 2px 5px rgba(0,0,0,1), -1px -1px 2px rgba(0,0,0,1);">Votre Rôle / Poste</div>
-                            <div style="font-size: 11px; color: #ffffff; text-shadow: 2px 2px 4px rgba(0,0,0,1), -1px -1px 2px rgba(0,0,0,1); display: flex; gap: 15px;">
-                                <span><strong id="iconMail" style="color: #ff3366; text-shadow: none;">📧</strong> <span id="outMail">contact@la1337.com</span></span>
-                                <span id="outPhoneContainer"><strong id="iconPhone" style="color: #ff3366; text-shadow: none;">📞</strong> <span id="outPhone">03 65 17 00 63</span></span>
-                            </div>
-                        </td>
-                        <td style="vertical-align: middle; width: 180px; text-align: right;">
-                            <div id="liveBadge" style="display: inline-block; background: #ff3366; color: #ffffff; font-size: 9px; font-weight: 900; padding: 4px 10px; border-radius: 6px; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.5);">🎙️ LIVE ON</div>
-                            <div id="outUrlText" style="font-size: 14px; font-weight: 900; color: #ff3366; margin-bottom: 15px; letter-spacing: 0.5px; text-shadow: 2px 2px 4px rgba(0,0,0,0.9);">WWW.LA1337.COM</div>
-                            <div style="display: block; text-align: right;">
-                                <div style="display: inline-flex; align-items: center; margin-left: 10px; font-size: 10px; font-weight: bold; color: #ffffff; text-shadow: 2px 2px 4px rgba(0,0,0,1);">
-                                    <svg style="width: 11px; height: 11px; fill: #ffffff; margin-right: 4px;" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.051.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
-                                    <span>@LA1337RADIO</span>
-                                </div>
-                                <div style="display: inline-flex; align-items: center; margin-left: 10px; font-size: 10px; font-weight: bold; color: #ffffff; text-shadow: 2px 2px 4px rgba(0,0,0,1);">
-                                    <svg style="width: 11px; height: 11px; fill: #ffffff; margin-right: 4px;" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-                                    <span>@LA1337RADIO</span>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-
-            <!-- APERÇU SIG SIMPLE / BAWEB MINIMALISTE -->
-            <div id="sigBanalPreview" style="display: none; padding: 10px;"></div>
-        </div>
-
-        <div class="actions-container">
-            <button class="btn-download" onclick="openModalDownloadFilename()">📸 Télécharger la Signature (PNG)</button>
-            <button class="btn-download btn-bulk" id="bulkBtn" onclick="generateAllSignaturesZip()">⚡ Générer TOUTES les signatures de l'équipe (ZIP)</button>
         </div>
     </div>
 
-    <!-- ONGLET 2 : HISTORIQUE DES MISES À JOUR (CHANGELOG RESTAURÉ) -->
-    <div id="tab-changelog" class="tab-content">
-        <div id="changelogContainer" class="changelog-container">
-            <p style="color: #888;">Chargement des mises à jour...</p>
+    <div class="preview-header">Aperçu de la signature :</div>
+    
+    <div class="preview-area">
+        <!-- APERÇU SIG RADIO -->
+        <div id="sigPreview" style="width: 650px; height: 135px; background-size: cover; background-position: center; border: 1px solid #22222b; border-radius: 12px; overflow: hidden; padding: 20px 25px; box-sizing: border-box; position: relative;">
+            <table cellpadding="0" cellspacing="0" style="width: 100%; height: 100%; border-collapse: collapse; text-align: left; font-family: 'Segoe UI', Arial, sans-serif; color: #ffffff; position: relative; z-index: 2;">
+                <tr>
+                    <td id="borderContainer" style="width: 110px; vertical-align: middle; padding-right: 15px; border-right: 3px solid #ff3366;">
+                        <img id="logoPreview" crossorigin="anonymous" src="" alt="LA 1337" style="width: 95px; height: auto; display: block; filter: drop-shadow(0px 2px 5px rgba(0,0,0,0.5));">
+                    </td>
+                    <td style="vertical-align: middle; padding-left: 20px;">
+                        <div id="outName" style="font-size: 21px; font-weight: bold; color: #ff3366; margin-bottom: 1px; letter-spacing: 0.5px; text-shadow: 2px 2px 4px rgba(0,0,0,0.9);">Prénom NOM</div>
+                        <div id="outRole" style="font-size: 13px; font-weight: bold; color: #e1e1e6; font-style: italic; margin-bottom: 15px; text-shadow: 2px 2px 5px rgba(0,0,0,1), -1px -1px 2px rgba(0,0,0,1);">Votre Rôle / Poste</div>
+                        <div style="font-size: 11px; color: #ffffff; text-shadow: 2px 2px 4px rgba(0,0,0,1), -1px -1px 2px rgba(0,0,0,1); display: flex; gap: 15px;">
+                            <span><strong id="iconMail" style="color: #ff3366; text-shadow: none;">📧</strong> <span id="outMail">contact@la1337.com</span></span>
+                            <span id="outPhoneContainer"><strong id="iconPhone" style="color: #ff3366; text-shadow: none;">📞</strong> <span id="outPhone">03 65 17 00 63</span></span>
+                        </div>
+                    </td>
+                    <td style="vertical-align: middle; width: 180px; text-align: right;">
+                        <div id="liveBadge" style="display: inline-block; background: #ff3366; color: #ffffff; font-size: 9px; font-weight: 900; padding: 4px 10px; border-radius: 6px; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.5);">🎙️ LIVE ON</div>
+                        <div id="outUrlText" style="font-size: 14px; font-weight: 900; color: #ff3366; margin-bottom: 15px; letter-spacing: 0.5px; text-shadow: 2px 2px 4px rgba(0,0,0,0.9);">WWW.LA1337.COM</div>
+                        <div style="display: block; text-align: right;">
+                            <div style="display: inline-flex; align-items: center; margin-left: 10px; font-size: 10px; font-weight: bold; color: #ffffff; text-shadow: 2px 2px 4px rgba(0,0,0,1);">
+                                <svg style="width: 11px; height: 11px; fill: #ffffff; margin-right: 4px;" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.051.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                                <span>@LA1337RADIO</span>
+                            </div>
+                            <div style="display: inline-flex; align-items: center; margin-left: 10px; font-size: 10px; font-weight: bold; color: #ffffff; text-shadow: 2px 2px 4px rgba(0,0,0,1);">
+                                <svg style="width: 11px; height: 11px; fill: #ffffff; margin-right: 4px;" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                                <span>@LA1337RADIO</span>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </table>
         </div>
+
+        <!-- APERÇU SIG SIMPLE / BAWEB MINIMALISTE -->
+        <div id="sigBanalPreview" style="display: none; padding: 10px;"></div>
+    </div>
+
+    <div class="actions-container">
+        <button class="btn-download" onclick="openModalDownloadFilename()">📸 Télécharger la Signature (PNG)</button>
+        <button class="btn-download btn-bulk" id="bulkBtn" onclick="generateAllSignaturesZip()">⚡ Générer TOUTES les signatures de l'équipe (ZIP)</button>
     </div>
 </div>
 
@@ -647,7 +570,6 @@
 <script>
     const base64Cache = {};
 
-    /* FONCTION DE GÉNÉRATION DES SIGNATURES SIMPLES / BAWEB */
     function generateBanalSignature(name, role, mail, phone, style) {
         var logoImgSrc = document.getElementById('logoPreview') ? document.getElementById('logoPreview').src : '';
         
@@ -662,7 +584,6 @@
                 </div>
             `;
         } else {
-            // Style BAweb Line
             return `
                 <div style="font-family: Arial, sans-serif; color: #111; text-align: left; background: #fff; padding: 15px 20px; border-radius: 6px; border-left: 3px solid #ff3366;">
                     <strong style="font-size: 15px; text-transform: uppercase;">${name}</strong> — 
@@ -671,15 +592,6 @@
                 </div>
             `;
         }
-    }
-
-    /* GESTION DU MENU ET ONGLETS */
-    function switchTab(tabId, btnElement) {
-        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-        
-        document.getElementById(tabId).classList.add('active');
-        btnElement.classList.add('active');
     }
 
     function initRolesCheckboxes() {
@@ -732,64 +644,51 @@
         select.appendChild(optCustom);
         
         TEAM_DATABASE.forEach(function(member) {
-        var opt = document.createElement('option');
-        opt.value = member.id;
-        
-        // On sépare le nom et le prénom pour inverser l'ordre
-        var parts = member.name.split(' ');
-        var prenom = parts[0];
-        var nom = parts.slice(1).join(' ');
-        
-        // Affichage : NOM Prénom (avec le nom en majuscules)
-        opt.innerText = `${nom.toUpperCase()} ${prenom}`;
-        
-        select.appendChild(opt);
-    });
+            var opt = document.createElement('option');
+            opt.value = member.id;
+            var parts = member.name.split(' ');
+            var prenom = parts[0];
+            var nom = parts.slice(1).join(' ');
+            opt.innerText = `${nom.toUpperCase()} ${prenom}`;
+            select.appendChild(opt);
+        });
     }
 
-   async function initThemeSelector() {
-    var select = document.getElementById('inPresetTheme');
-    if (!select) return;
+    async function initThemeSelector() {
+        var select = document.getElementById('inPresetTheme');
+        if (!select) return;
 
-    const { data: themes, error } = await supabaseClient
-        .from('themes')
-        .select('*');
+        const { data: themes, error } = await supabaseClient
+            .from('themes')
+            .select('*');
 
-    if (error) {
-        console.error("Erreur Supabase :", error);
-        return;
-    }
-
-    select.innerHTML = '';
-
-    // On ne garde que les éléments où 'active' est explicitement true (ou non défini pour éviter de tout bloquer)
-    // On remplace le filtre par une version qui "force" la conversion en booléen
-const filteredThemes = (themes || []).filter(t => {
-    // Force la conversion : si la valeur est 'true', 1, ou true, ça passe.
-    const isActive = (t.active === true || t.active === 'true' || t.active === 1);
-    return isActive;
-});
-
-    // Tri : les prioritaires en premier
-    filteredThemes.sort((a, b) => (b.prioritaire === true) - (a.prioritaire === true));
-
-    filteredThemes.forEach((theme, index) => {
-        var opt = document.createElement('option');
-        opt.value = theme.id; 
-        opt.innerText = theme.name;
-
-        // Sélectionne le prioritaire par défaut, ou le premier par défaut
-        if (theme.prioritaire === true || (index === 0 && !filteredThemes.some(t => t.prioritaire === true))) {
-            opt.selected = true;
+        if (error) {
+            console.error("Erreur Supabase :", error);
+            return;
         }
 
-        select.appendChild(opt);
-    });
+        select.innerHTML = '';
 
-    if (typeof applyPresetTheme === 'function') {
-        applyPresetTheme();
+        const filteredThemes = (themes || []).filter(t => (t.active === true || t.active === 'true' || t.active === 1));
+
+        filteredThemes.sort((a, b) => (b.prioritaire === true) - (a.prioritaire === true));
+
+        filteredThemes.forEach((theme, index) => {
+            var opt = document.createElement('option');
+            opt.value = theme.id; 
+            opt.innerText = theme.name;
+
+            if (theme.prioritaire === true || (index === 0 && !filteredThemes.some(t => t.prioritaire === true))) {
+                opt.selected = true;
+            }
+
+            select.appendChild(opt);
+        });
+
+        if (typeof applyPresetTheme === 'function') {
+            applyPresetTheme();
+        }
     }
-}
 
     function initLogoSelector() {
         var select = document.getElementById('inPresetLogo');
@@ -848,8 +747,6 @@ const filteredThemes = (themes || []).filter(t => {
             if(firstLogoKey && LOGO_IMAGES[firstLogoKey]) setSecureImage(LOGO_IMAGES[firstLogoKey].url, 'logoPreview', false);
             applyPresetTheme();
         }
-        
-        loadChangelog();
     };
 
     function applyPresetLogo() { 
@@ -970,7 +867,7 @@ const filteredThemes = (themes || []).filter(t => {
             document.getElementById('outRole').innerText = rolesString || 'Votre Rôle / Poste';
         } else {
             groupTheme.style.display = 'none';
-            groupLogo.style.display = 'flex'; // Logos conservés pour le style BAweb
+            groupLogo.style.display = 'flex';
             radioPreview.style.display = 'none';
             banalPreview.style.display = 'block';
             banalPreview.innerHTML = generateBanalSignature(name, rolesString, mail, phone, sigStyle);
@@ -1108,7 +1005,6 @@ const filteredThemes = (themes || []).filter(t => {
         processNext();
     }
 
-    /* MODAL NOUVEAU MEMBRE */
     function initModalRoles() {
         const container = document.getElementById('modalRolesContainer');
         if(!container || typeof ROLE_MAP === 'undefined') return;
@@ -1187,44 +1083,6 @@ const filteredThemes = (themes || []).filter(t => {
     window.addEventListener('DOMContentLoaded', function() {
         initModalRoles();
     });
-
-    function loadChangelog() {
-        fetch('changelog.json')
-            .then(response => response.json())
-            .then(data => {
-                const container = document.getElementById('changelogContainer');
-                if(!container) return;
-                container.innerHTML = '';
-
-                const renderChanges = (changes) => {
-                    return changes.map(change => {
-                        if (typeof change === 'object' && change.category) {
-                            return `<li><span style="display:inline-block; font-size:10px; font-weight:bold; background:#222233; color:#ff3366; border:1px solid #ff3366; padding:2px 7px; border-radius:4px; margin-right:8px;">${change.category}</span> <span>${change.text}</span></li>`;
-                        }
-                        return `<li>${change}</li>`;
-                    }).join('');
-                };
-
-                const recentLogs = data.slice(0, 3);
-                recentLogs.forEach((item, index) => {
-                    const isLatest = index === 0;
-                    const card = document.createElement('div');
-                    card.className = `changelog-card ${isLatest ? 'latest' : ''}`;
-                    card.innerHTML = `
-                        <div class="changelog-header">
-                            <span class="version-badge">${item.version}</span>
-                            <span class="version-date">${item.date}</span>
-                        </div>
-                        <ul class="changelog-list">${renderChanges(item.changes)}</ul>
-                    `;
-                    container.appendChild(card);
-                });
-            })
-            .catch(err => {
-                const container = document.getElementById('changelogContainer');
-                if(container) container.innerHTML = "<p style='color:#888;'>Projet configuré pour BAweb.</p>";
-            });
-    }
 </script>
 
 </body>
