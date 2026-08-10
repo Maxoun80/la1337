@@ -6,7 +6,7 @@
 
 
 // 1. Initialisation de la connexion Supabase
-const SUPABASE_URL = 'https://appepchfrfghfulirckz.supabase.co/rest/v1/';
+const SUPABASE_URL = 'https://appepchfrfghfulirckz.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_wjpCqcbmlEnHvYhJRziUGQ_SIubrlSg';
 
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
