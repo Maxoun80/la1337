@@ -1,15 +1,12 @@
 // =============================================================================
-// 1. CONFIGURATION GENERALE & RESSOURCES
+// 1. INITIALISATION DU CLIENT SUPABASE ET STRUCTURES GLOBALES
 // =============================================================================
 
-// 1. Initialisation de la connexion Supabase
 const SUPABASE_URL = 'https://appepchfrfghfulirckz.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_wjpCqcbmlEnHvYhJRziUGQ_SIubrlSg';
-
-// Client Supabase connecté au SDK global du navigateur
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Dictionnaire officiel des 15 rôles LA 1337
+// Dictionnaire des 15 rôles officiels
 const ROLE_MAP = {
     1:  "Directeur",
     2:  "Directeur Adjoint",
@@ -28,63 +25,130 @@ const ROLE_MAP = {
     15: "Membre extérieur"
 };
 
-// Aliases globaux pour compatibilité HTML
 window.ROLE_MAP = ROLE_MAP;
 window.roleMap = ROLE_MAP;
 window.ROLES_LIST = ROLE_MAP;
 
-// BANNIÈRES & THÈMES
-const THEME_IMAGES = {
-    cyber:    { name: "⚡ Généraliste",        url: "https://i.postimg.cc/SsB3VfZD/general.png", color: "#c00000", textColor: "#c00000", roleColor: "#e1e1e6", liveBgColor: "#c00000", liveTxtColor: "#ffffff" },
-    ete:      { name: "☀️ Été (prochainement)", url: "[LIEN POSTIMG]",                            color: "#ff3366", textColor: "#ff3366", roleColor: "#e1e1e6", liveBgColor: "#ff3366", liveTxtColor: "#ffffff" },
-    noel:     { name: "❄️ Noël",              url: "https://i.postimg.cc/LXcwv3yx/noel.png",    color: "#ffffff", textColor: "#ffffff", roleColor: "#e1e1e6", liveBgColor: "#ffffff", liveTxtColor: "#111111" },
-    nouvelan: { name: "🎉 Nouvel An",         url: "https://i.postimg.cc/76FdXnBB/nouvel-an.png",color: "#dfb76c", textColor: "#dfb76c", roleColor: "#e1e1e6", liveBgColor: "#dfb76c", liveTxtColor: "#ffffff" },
-    telethon: { name: "☀️ Telethon",          url: "https://i.postimg.cc/zBs6pFdt/telethon.png", color: "#a20352", textColor: "#a20352", roleColor: "#ffffff", liveBgColor: "#a20352", liveTxtColor: "#ffffff" }
-};
+// Objets globaux dynamiques alimentés par Supabase
+let THEME_IMAGES = {};
+let LOGO_IMAGES = {};
+let TEAM_DATA = [];
+
 window.THEME_IMAGES = THEME_IMAGES;
 window.THEMES = THEME_IMAGES;
-
-// LOGOS
-const LOGO_IMAGES = {
-    blanc: { name: "💿 Logo Blanc Officiel", url: "https://i.postimg.cc/4x659pDr/logo-small.png" },
-    noel:  { name: "🎅 Logo Bonnet de Noël", url: "https://i.postimg.cc/QNKx2GKj/Logo-de-Noel.png" }
-};
 window.LOGO_IMAGES = LOGO_IMAGES;
-window.LOGOS = {
-    blanc: LOGO_IMAGES.blanc.url,
-    noel:  LOGO_IMAGES.noel.url
-};
-
-let TEAM_DATA = [];
+window.LOGOS = LOGO_IMAGES;
 window.TEAM_DATABASE = [];
-const imageCache = {};
 
 // =============================================================================
-// 2. CHARGEMENT SUPABASE & INITIALISATION DU SELECTEUR
+// 2. REMPLISSAGE DYNAMIQUE DES SÉLECTEURS (<select>) DANS INDEX.HTML
 // =============================================================================
+
+function renderThemeSelectOptions() {
+    const select = document.getElementById('inThemeSelect') || document.getElementById('theme-select');
+    if (!select) return;
+
+    select.innerHTML = '';
+    for (const [key, theme] of Object.entries(THEME_IMAGES)) {
+        const option = document.createElement('option');
+        option.value = key;
+        option.textContent = theme.name;
+        select.appendChild(option);
+    }
+}
+
+function renderLogoSelectOptions() {
+    const select = document.getElementById('inLogoSelect') || document.getElementById('logo-select');
+    if (!select) return;
+
+    select.innerHTML = '';
+    for (const [key, logo] of Object.entries(LOGO_IMAGES)) {
+        const option = document.createElement('option');
+        option.value = key;
+        option.textContent = logo.name;
+        select.appendChild(option);
+    }
+}
+
+function renderMemberSelectOptions() {
+    const select = document.getElementById('inMemberSelect') || document.getElementById('member-select');
+    if (!select) return;
+
+    select.innerHTML = '<option value="custom">-- Choisir un membre pré-enregistré --</option>';
+    TEAM_DATA.forEach(m => {
+        const option = document.createElement('option');
+        option.value = m.id;
+        option.textContent = m.name;
+        select.appendChild(option);
+    });
+}
+
+// =============================================================================
+// 3. RECUPÉRATION DES DONNÉES SUPABASE ET DÉCLENCHEMENT DU RENDU
+// =============================================================================
+
+async function loadThemesFromSupabase() {
+    try {
+        const { data: themes, error } = await supabaseClient.from('themes').select('*').order('id', { ascending: true });
+        if (error) { console.error("Erreur thèmes Supabase:", error.message); return; }
+
+        if (themes && themes.length > 0) {
+            THEME_IMAGES = {};
+            themes.forEach(t => {
+                const key = t.id ? `theme_${t.id}` : t.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+                THEME_IMAGES[key] = {
+                    id: t.id,
+                    name: t.name,
+                    url: t.url,
+                    color: t.textColor || t.color || "#ff3366",
+                    textColor: t.textColor || t.color || "#ff3366",
+                    roleColor: t.roleColor || "#e1e1e6",
+                    liveBgColor: t.liveBgColor || "#ff3366",
+                    liveTxtColor: t.liveTxtColor || "#ffffff"
+                };
+            });
+            window.THEME_IMAGES = THEME_IMAGES;
+            window.THEMES = THEME_IMAGES;
+            renderThemeSelectOptions();
+        }
+    } catch (err) {
+        console.error("Erreur chargement thèmes :", err);
+    }
+}
+
+async function loadLogosFromSupabase() {
+    try {
+        const { data: logos, error } = await supabaseClient.from('logos').select('*').order('id', { ascending: true });
+        if (error) { console.error("Erreur logos Supabase:", error.message); return; }
+
+        if (logos && logos.length > 0) {
+            LOGO_IMAGES = {};
+            logos.forEach(l => {
+                const key = l.id ? `logo_${l.id}` : l.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+                LOGO_IMAGES[key] = { id: l.id, name: l.name, url: l.url };
+            });
+            window.LOGO_IMAGES = LOGO_IMAGES;
+            window.LOGOS = LOGO_IMAGES;
+            renderLogoSelectOptions();
+        }
+    } catch (err) {
+        console.error("Erreur chargement logos :", err);
+    }
+}
 
 async function loadTeamMembers() {
     try {
-        const { data: membres, error } = await supabaseClient
-            .from('membres')
-            .select('*')
-            .order('nom', { ascending: true });
+        const { data: membres, error } = await supabaseClient.from('membres').select('*').order('nom', { ascending: true });
+        if (error) { console.error("Erreur membres Supabase:", error.message); return; }
 
-        if (error) {
-            console.error('Erreur Supabase :', error.message);
-            return;
-        }
-
-        // Adapter la structure de la base pour le reste de l'application
         const formattedMembers = membres.map(m => {
             const fullName = `${m.prenom || ''} ${(m.nom || '').toUpperCase()}`.trim();
             return {
                 id: String(m.id),
                 name: fullName,
                 mail: m.email || '',
-                phone: m.telephone || '',
+                phone: m.telephone || '03 65 17 00 63',
                 roles: m.roles ? (Array.isArray(m.roles) ? m.roles : String(m.roles).split(',').map(Number)) : [],
-                roleName: m.role || '',
                 prenom: m.prenom || '',
                 nom: m.nom || ''
             };
@@ -92,92 +156,30 @@ async function loadTeamMembers() {
 
         TEAM_DATA = formattedMembers;
         window.TEAM_DATABASE = formattedMembers;
-
-        initMemberSelector();
-
+        renderMemberSelectOptions();
     } catch (err) {
-        console.error("Erreur lors du chargement des membres :", err);
+        console.error("Erreur chargement membres :", err);
     }
 }
 
-function initMemberSelector() {
-    const select = document.getElementById('inMemberSelect') || document.getElementById('member-select');
-    if (!select) return;
-
-    select.innerHTML = '<option value="">-- Sélectionner un membre --</option>';
-
-    window.TEAM_DATABASE.forEach(membre => {
-        const option = document.createElement('option');
-        option.value = membre.id;
-        option.textContent = membre.name;
-        
-        option.dataset.prenom = membre.prenom;
-        option.dataset.nom = membre.nom;
-        option.dataset.role = membre.roleName;
-        option.dataset.email = membre.mail;
-
-        select.appendChild(option);
-    });
-}
-
 // =============================================================================
-// 3. FONCTION DE SECOURS (PARSER CSV)
-// =============================================================================
-
-function parseCSVRow(row) {
-    const result = [];
-    let current = '', inQuotes = false;
-    for (let i = 0; i < row.length; i++) {
-        const char = row[i];
-        if (char === '"') inQuotes = !inQuotes;
-        else if (char === ',' && !inQuotes) { result.push(current.trim()); current = ''; }
-        else current += char;
-    }
-    result.push(current.trim());
-    return result;
-}
-
-async function loadTeamData() {
-    // Si la base Supabase est déjà chargée, on privilégie Supabase
-    if (window.TEAM_DATABASE && window.TEAM_DATABASE.length > 0) {
-        return;
-    }
-    await loadTeamMembers();
-}
-
-// =============================================================================
-// 4. SÉLECTION ET MAJ DES RÔLES / CHAMPS
+// 4. SELECTION D'UN MEMBRE DANS LE GÉNÉRATEUR
 // =============================================================================
 
 function selectMember(memberId) {
     const member = window.TEAM_DATABASE.find(m => String(m.id) === String(memberId));
     if (!member) return;
 
-    // 1. Remplissage des champs simples s'ils existent dans la page
-    const inputName = document.getElementById('inName');
-    const inputEmail = document.getElementById('inEmail');
-    const inputPhone = document.getElementById('inPhone');
-    const inputRole = document.getElementById('inRole');
+    // Remplir les champs du formulaire du générateur
+    const inName = document.getElementById('inName') || document.getElementById('name');
+    const inMail = document.getElementById('inMail') || document.getElementById('email');
+    const inPhone = document.getElementById('inPhone') || document.getElementById('phone');
 
-    // Déclenchement de l'événement 'input' pour mise à jour visuelle instantanée
-    if (inputName) {
-        inputName.value = member.name;
-        inputName.dispatchEvent(new Event('input', { bubbles: true }));
-    }
-    if (inputEmail) {
-        inputEmail.value = member.mail;
-        inputEmail.dispatchEvent(new Event('input', { bubbles: true }));
-    }
-    if (inputPhone) {
-        inputPhone.value = member.phone;
-        inputPhone.dispatchEvent(new Event('input', { bubbles: true }));
-    }
-    if (inputRole) {
-        inputRole.value = member.roleName;
-        inputRole.dispatchEvent(new Event('input', { bubbles: true }));
-    }
+    if (inName) inName.value = member.name;
+    if (inMail) inMail.value = member.mail;
+    if (inPhone) inPhone.value = member.phone;
 
-    // 2. Gestion des cases à cocher de rôles (Checkbox)
+    // Réinitialiser puis cocher les bons rôles
     const checkboxes = document.getElementsByName('roleCheck');
     for (let i = 0; i < checkboxes.length; i++) {
         checkboxes[i].checked = false;
@@ -192,33 +194,37 @@ function selectMember(memberId) {
         }
     }
 
-    // 3. Réinitialiser le rôle sur-mesure
-    const chkCustom = document.getElementById('chkCustomRole');
-    if (chkCustom) chkCustom.checked = false;
-    const customZone = document.getElementById('customRoleInputZone');
-    if (customZone) customZone.style.display = 'none';
-
-    // 4. Mettre à jour le rendu visuel de la signature
+    // Force la réactualisation de la signature visuelle
     if (typeof updateSig === "function") updateSig();
 }
 
-// Interception de l'événement de changement dans le <select>
-const originalHandleMemberChange = window.handleMemberChange;
 window.handleMemberChange = function() {
     const select = document.getElementById('inMemberSelect') || document.getElementById('member-select');
     const choice = select?.value;
 
-    if (choice && choice !== 'custom' && choice !== '') {
+    if (choice && choice !== 'custom') {
         selectMember(choice);
-    } else if (typeof originalHandleMemberChange === 'function') {
-        originalHandleMemberChange();
     }
 };
 
 // =============================================================================
-// 5. INITIALISATION
+// 5. INITIALISATION GLOBALE AUTOMATIQUE
 // =============================================================================
 
+async function initAllAppData() {
+    // Chargement parallèle de toutes les tables Supabase
+    await Promise.all([
+        loadThemesFromSupabase(),
+        loadLogosFromSupabase(),
+        loadTeamMembers()
+    ]);
+
+    // Application automatique des premiers éléments en base au chargement de la page
+    if (typeof applyPresetTheme === "function") applyPresetTheme();
+    if (typeof applyPresetLogo === "function") applyPresetLogo();
+    if (typeof updateSig === "function") updateSig();
+}
+
 document.addEventListener("DOMContentLoaded", () => {
-    loadTeamMembers();
+    initAllAppData();
 });
