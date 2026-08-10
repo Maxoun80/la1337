@@ -9,7 +9,8 @@
 const SUPABASE_URL = 'https://appepchfrfghfulirckz.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_wjpCqcbmlEnHvYhJRziUGQ_SIubrlSg';
 
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Remise en conformité avec le SDK chargé dans le navigateur
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 
 // 2. Chargement des membres depuis la base de données
 async function loadTeamMembers() {
