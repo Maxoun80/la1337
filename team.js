@@ -2,51 +2,12 @@
 // 1. CONFIGURATION GENERALE & RESSOURCES
 // =============================================================================
 
-// const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS0a8y_ZHF2WsnBHMbrUKL8p-CH1SJI_6US5bc2Iv-IZRWWo8NiGJEtRjNZfwWSctJBjokRKZruvexz/pub?gid=1526030464&single=true&output=csv";
-
-
 // 1. Initialisation de la connexion Supabase
 const SUPABASE_URL = 'https://appepchfrfghfulirckz.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_wjpCqcbmlEnHvYhJRziUGQ_SIubrlSg';
 
-// Remise en conformité avec le SDK chargé dans le navigateur
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-
-// 2. Chargement des membres depuis la base de données
-async function loadTeamMembers() {
-    const { data: membres, error } = await supabaseClient
-        .from('membres')
-        .select('*')
-        .order('nom', { ascending: true });
-
-    if (error) {
-        console.error('Erreur Supabase :', error.message);
-        return;
-    }
-
-    const select = document.getElementById('inMemberSelect') || document.getElementById('member-select');
-    if (!select) return;
-
-    select.innerHTML = '<option value="">-- Sélectionner un membre --</option>';
-
-    membres.forEach(membre => {
-        const option = document.createElement('option');
-        option.value = membre.id;
-        option.textContent = `${membre.prenom} ${membre.nom}`;
-        
-        // Données injectées dans l'élément pour pré-remplir les champs au clic
-        option.dataset.prenom = membre.prenom || '';
-        option.dataset.nom = membre.nom || '';
-        option.dataset.role = membre.role || '';
-        option.dataset.email = membre.email || '';
-
-        select.appendChild(option);
-    });
-}
-
-// Lancement automatique de la fonction au chargement de la page
-document.addEventListener('DOMContentLoaded', loadTeamMembers);
-
+// Client Supabase connecté au SDK global du navigateur
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Dictionnaire officiel des 15 rôles LA 1337
 const ROLE_MAP = {
@@ -99,7 +60,68 @@ window.TEAM_DATABASE = [];
 const imageCache = {};
 
 // =============================================================================
-// 2. PARSER CSV & CHARGEMENT DES MEMBRES
+// 2. CHARGEMENT SUPABASE & INITIALISATION DU SELECTEUR
+// =============================================================================
+
+async function loadTeamMembers() {
+    try {
+        const { data: membres, error } = await supabaseClient
+            .from('membres')
+            .select('*')
+            .order('nom', { ascending: true });
+
+        if (error) {
+            console.error('Erreur Supabase :', error.message);
+            return;
+        }
+
+        // Adapter la structure de la base pour le reste de l'application
+        const formattedMembers = membres.map(m => {
+            const fullName = `${m.prenom || ''} ${(m.nom || '').toUpperCase()}`.trim();
+            return {
+                id: String(m.id),
+                name: fullName,
+                mail: m.email || '',
+                phone: m.telephone || '',
+                roles: m.roles ? (Array.isArray(m.roles) ? m.roles : String(m.roles).split(',').map(Number)) : [],
+                roleName: m.role || '',
+                prenom: m.prenom || '',
+                nom: m.nom || ''
+            };
+        });
+
+        TEAM_DATA = formattedMembers;
+        window.TEAM_DATABASE = formattedMembers;
+
+        initMemberSelector();
+
+    } catch (err) {
+        console.error("Erreur lors du chargement des membres :", err);
+    }
+}
+
+function initMemberSelector() {
+    const select = document.getElementById('inMemberSelect') || document.getElementById('member-select');
+    if (!select) return;
+
+    select.innerHTML = '<option value="">-- Sélectionner un membre --</option>';
+
+    window.TEAM_DATABASE.forEach(membre => {
+        const option = document.createElement('option');
+        option.value = membre.id;
+        option.textContent = membre.name;
+        
+        option.dataset.prenom = membre.prenom;
+        option.dataset.nom = membre.nom;
+        option.dataset.role = membre.roleName;
+        option.dataset.email = membre.mail;
+
+        select.appendChild(option);
+    });
+}
+
+// =============================================================================
+// 3. FONCTION DE SECOURS (PARSER CSV)
 // =============================================================================
 
 function parseCSVRow(row) {
@@ -116,98 +138,38 @@ function parseCSVRow(row) {
 }
 
 async function loadTeamData() {
-    try {
-        // Paramètre anti-cache (Horodatage exact) pour forcer la synchronisation instantanée
-        const antiCacheUrl = GOOGLE_SHEET_CSV_URL + '&t=' + new Date().getTime();
-        
-        const res = await fetch(antiCacheUrl, { cache: "no-store" });
-        const text = await res.text();
-        const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-        
-        const members = [];
-        for (let i = 1; i < lines.length; i++) {
-            const cols = parseCSVRow(lines[i]);
-            
-            let rawLastName = (cols[0] || '').trim();
-            let rawFirstName = (cols[1] || '').trim();
-            
-            // Nettoyage des emails parasites si présents dans les colonnes nom/prénom
-            rawFirstName = rawFirstName.replace(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\s*/, '');
-            rawLastName = rawLastName.replace(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\s*/, '');
-
-            // Si la ligne n'a pas de nom/prénom, on affiche un libellé de stock clair
-            let fullName = `${rawFirstName} ${rawLastName.toUpperCase()}`.trim();
-            if (!fullName) {
-                fullName = `📦 Ligne libre #${i}`;
-            }
-            
-            let email = '';
-            let phone = '';
-            let rolesRaw = '';
-
-            // Détection automatique des colonnes
-            cols.forEach(col => {
-                const val = col.trim();
-                if (val.includes('@')) {
-                    email = val;
-                } else if (/^[0-9\s\.\-\+]{9,}$/.test(val) && !val.includes('0365170063')) {
-                    phone = val;
-                } else if (val.includes(',') || /^[0-9\s,]+$/.test(val)) {
-                    if (val.toUpperCase() !== 'FALSE' && val.toUpperCase() !== 'TRUE') {
-                        rolesRaw = val;
-                    }
-                }
-            });
-
-            // Sécurisations et valeurs par défaut
-            if (!email) email = cols[2]?.includes('@') ? cols[2] : (cols[3]?.includes('@') ? cols[3] : 'contact@la1337.com');
-            if (!phone) {
-                const candidatePhone = cols[3] || cols[4] || '';
-                phone = (candidatePhone.toUpperCase() === 'FALSE' || candidatePhone.toUpperCase() === 'TRUE') ? '' : candidatePhone;
-            }
-            if (!rolesRaw) rolesRaw = cols[4] || cols[5] || '';
-
-            // Extraction des IDs des rôles
-            const roles = rolesRaw
-                .split(',')
-                .map(r => parseInt(r.trim(), 10))
-                .filter(r => !isNaN(r));
-
-            members.push({
-                id: fullName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, '_'),
-                name: fullName,
-                mail: email,
-                phone: phone,
-                roles: roles
-            });
-        }
-        
-        TEAM_DATA = members;
-        window.TEAM_DATABASE = members;
-        
-        if (typeof initMemberSelector === "function") {
-            initMemberSelector();
-        }
-    } catch (e) {
-        console.warn("⚠️ Sheet non disponible :", e);
+    // Si la base Supabase est déjà chargée, on privilégie Supabase
+    if (window.TEAM_DATABASE && window.TEAM_DATABASE.length > 0) {
+        return;
     }
+    await loadTeamMembers();
 }
 
 // =============================================================================
-// 3. SÉLECTION ET MAJ DES RÔLES
+// 4. SÉLECTION ET MAJ DES RÔLES / CHAMPS
 // =============================================================================
 
 function selectMember(memberId) {
-    const member = window.TEAM_DATABASE.find(m => m.id === memberId);
+    const member = window.TEAM_DATABASE.find(m => String(m.id) === String(memberId));
     if (!member) return;
 
-    // Décocher tout
+    // 1. Remplissage des champs simples s'ils existent dans la page
+    const inputName = document.getElementById('inName');
+    const inputEmail = document.getElementById('inEmail');
+    const inputPhone = document.getElementById('inPhone');
+    const inputRole = document.getElementById('inRole');
+
+    if (inputName) inputName.value = member.name;
+    if (inputEmail) inputEmail.value = member.mail;
+    if (inputPhone) inputPhone.value = member.phone;
+    if (inputRole) inputRole.value = member.roleName;
+
+    // 2. Gestion des cases à cocher de rôles (Checkbox)
     const checkboxes = document.getElementsByName('roleCheck');
     for (let i = 0; i < checkboxes.length; i++) {
         checkboxes[i].checked = false;
     }
 
-    // Cocher les rôles du membre
     if (member.roles && Array.isArray(member.roles)) {
         for (let i = 0; i < checkboxes.length; i++) {
             const val = parseInt(checkboxes[i].value, 10);
@@ -217,20 +179,22 @@ function selectMember(memberId) {
         }
     }
 
-    // Réinitialiser le rôle custom
+    // 3. Réinitialiser le rôle sur-mesure
     const chkCustom = document.getElementById('chkCustomRole');
     if (chkCustom) chkCustom.checked = false;
     const customZone = document.getElementById('customRoleInputZone');
     if (customZone) customZone.style.display = 'none';
 
-    // Mettre à jour le visuel
+    // 4. Mettre à jour le rendu visuel de la signature
     if (typeof updateSig === "function") updateSig();
 }
 
-// Interception de l'événement HTML
+// Interception de l'événement de changement dans le <select>
 const originalHandleMemberChange = window.handleMemberChange;
 window.handleMemberChange = function() {
-    const choice = document.getElementById('inMemberSelect')?.value;
+    const select = document.getElementById('inMemberSelect') || document.getElementById('member-select');
+    const choice = select?.value;
+
     if (choice && choice !== 'custom' && choice !== '') {
         selectMember(choice);
     } else if (typeof originalHandleMemberChange === 'function') {
@@ -239,9 +203,9 @@ window.handleMemberChange = function() {
 };
 
 // =============================================================================
-// 4. INITIALISATION
+// 5. INITIALISATION
 // =============================================================================
 
 document.addEventListener("DOMContentLoaded", () => {
-    loadTeamData();
+    loadTeamMembers();
 });
