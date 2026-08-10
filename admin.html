@@ -26,10 +26,10 @@
 
     <h2>➕ Ajouter un membre</h2>
     <form id="form-ajout">
-        <input type="text" id="add-prenom" placeholder="Prénom" required>
-        <input type="text" id="add-nom" placeholder="Nom" required>
-        <input type="email" id="add-email" placeholder="E-mail (@la1337.com)" required>
-        <input type="text" id="add-phone" placeholder="Téléphone (ex: 06 00 00 00 00)">
+        <input type="text" id="add-prenom" placeholder="Prénom" required oninput="genererEmailAuto()">
+        <input type="text" id="add-nom" placeholder="Nom" required oninput="genererEmailAuto()">
+        <input type="email" id="add-email" placeholder="maxence.r@la1337.com" required>
+        <input type="text" id="add-phone" value="03 65 17 00 63" placeholder="Téléphone">
 
         <label style="font-weight: bold; font-size: 13px; color: #ff3366; margin-top: 5px;">Rôles dans l'équipe :</label>
         <div class="roles-grid" id="admin-roles-container">
@@ -69,6 +69,35 @@
         const SUPABASE_ANON_KEY = 'sb_publishable_wjpCqcbmlEnHvYhJRziUGQ_SIubrlSg';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+        // Génération automatique de l'email : prenom.initialedunom@la1337.com
+        function genererEmailAuto() {
+            const prenom = document.getElementById('add-prenom').value.trim();
+            const nom = document.getElementById('add-nom').value.trim();
+            const emailInput = document.getElementById('add-email');
+
+            if (!prenom) {
+                emailInput.value = '';
+                return;
+            }
+
+            // Nettoyage des accents, espaces et caractères spéciaux
+            const prenomClean = prenom.toLowerCase()
+                .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                .replace(/[^a-z0-9]/g, '');
+
+            let initialNom = '';
+            if (nom) {
+                const nomClean = nom.toLowerCase()
+                    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                    .replace(/[^a-z0-9]/g, '');
+                if (nomClean.length > 0) {
+                    initialNom = '.' + nomClean.charAt(0);
+                }
+            }
+
+            emailInput.value = `${prenomClean}${initialNom}@la1337.com`;
+        }
+
         // Remplissage des cases à cocher dans l'admin
         function afficherCheckboxesRoles() {
             const container = document.getElementById('admin-roles-container');
@@ -102,7 +131,6 @@
                 }
 
                 membres.forEach(m => {
-                    // Conversion des IDs de rôles en noms lisibles
                     const rolesArray = m.roles ? (Array.isArray(m.roles) ? m.roles : String(m.roles).split(',').map(Number)) : [];
                     const namesRoles = rolesArray.map(id => ROLE_MAP[id]).filter(Boolean).join(' / ') || 'Sans rôle';
 
@@ -122,7 +150,6 @@
         document.getElementById('form-ajout').addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            // Récupérer les cases cochées
             const checkboxes = document.querySelectorAll('input[name="adminRole"]:checked');
             const selectedRoles = Array.from(checkboxes).map(cb => parseInt(cb.value, 10));
 
@@ -130,9 +157,14 @@
                 prenom: document.getElementById('add-prenom').value.trim(),
                 nom: document.getElementById('add-nom').value.trim(),
                 email: document.getElementById('add-email').value.trim(),
-                telephone: document.getElementById('add-phone').value.trim(),
-                roles: selectedRoles // Envoi du tableau de numéros [1, 10...]
+                roles: selectedRoles
             };
+
+            // Ajoute le téléphone seulement s'il est renseigné
+            const phoneValue = document.getElementById('add-phone').value.trim();
+            if (phoneValue) {
+                nouveauMembre.telephone = phoneValue;
+            }
 
             const { error } = await supabaseClient
                 .from('membres')
@@ -143,6 +175,7 @@
             } else {
                 alert('✅ Membre ajouté avec succès !');
                 document.getElementById('form-ajout').reset();
+                document.getElementById('add-phone').value = '03 65 17 00 63';
                 afficherMembres();
             }
         });
