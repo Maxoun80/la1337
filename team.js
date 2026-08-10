@@ -159,10 +159,23 @@ function selectMember(memberId) {
     const inputPhone = document.getElementById('inPhone');
     const inputRole = document.getElementById('inRole');
 
-    if (inputName) inputName.value = member.name;
-    if (inputEmail) inputEmail.value = member.mail;
-    if (inputPhone) inputPhone.value = member.phone;
-    if (inputRole) inputRole.value = member.roleName;
+    // Déclenchement de l'événement 'input' pour mise à jour visuelle instantanée
+    if (inputName) {
+        inputName.value = member.name;
+        inputName.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+    if (inputEmail) {
+        inputEmail.value = member.mail;
+        inputEmail.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+    if (inputPhone) {
+        inputPhone.value = member.phone;
+        inputPhone.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+    if (inputRole) {
+        inputRole.value = member.roleName;
+        inputRole.dispatchEvent(new Event('input', { bubbles: true }));
+    }
 
     // 2. Gestion des cases à cocher de rôles (Checkbox)
     const checkboxes = document.getElementsByName('roleCheck');
