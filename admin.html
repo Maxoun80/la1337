@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Administration - Membres Association</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <h1>Gestion des membres de l'association</h1>
+
+    <h2>Ajouter un membre</h2>
+    <form id="add-member-form">
+        <input type="text" id="prenom" placeholder="Prénom" required>
+        <input type="text" id="nom" placeholder="Nom" required>
+        <input type="text" id="role" placeholder="Rôle / Fonction" required>
+        <input type="email" id="email" placeholder="E-mail">
+        <input type="text" id="telephone" placeholder="Téléphone">
+        <button type="submit">Ajouter</button>
+    </form>
+
+    <script>
+        const SUPABASE_URL = 'https://VOTRE_PROJET.supabase.co';
+        const SUPABASE_ANON_KEY = 'VOTRE_CLE_ANON_PUBLIQUE';
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        document.getElementById('add-member-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const nouveauMembre = {
+                prenom: document.getElementById('prenom').value,
+                nom: document.getElementById('nom').value,
+                role: document.getElementById('role').value,
+                email: document.getElementById('email').value,
+                telephone: document.getElementById('telephone').value
+            };
+
+            const { data, error } = await supabase.from('membres').insert([nouveauMembre]);
+
+            if (error) {
+                alert('Erreur lors de l\'ajout : ' + error.message);
+            } else {
+                alert('Membre ajouté avec succès !');
+                location.reload();
+            }
+        });
+    </script>
+</body>
+</html>
