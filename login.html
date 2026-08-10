@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Connexion Administration - LA 1337</title>
+</head>
+<body style="background: #0f0f12; color: #fff; font-family: Arial, sans-serif; text-align: center; padding-top: 100px;">
+    
+    <div style="max-width: 400px; margin: 0 auto; background: #1a1a22; padding: 30px; border-radius: 12px; border: 1px solid #2a2a35;">
+        <h2>🔐 Connexion Admin</h2>
+        <input type="email" id="loginEmail" placeholder="Email" style="width: 100%; padding: 10px; margin-bottom: 15px; background: #0d0d12; border: 1px solid #333; color: #fff; border-radius: 6px; box-sizing: border-box;"><br>
+        <input type="password" id="loginPassword" placeholder="Mot de passe" style="width: 100%; padding: 10px; margin-bottom: 20px; background: #0d0d12; border: 1px solid #333; color: #fff; border-radius: 6px; box-sizing: border-box;"><br>
+        <button onclick="handleLogin()" style="width: 100%; padding: 12px; background: #ff3366; color: #fff; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">Se connecter</button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const supabaseUrl = 'TON_URL_SUPABASE';
+        const supabaseKey = 'TA_CLE_ANON_SUPABASE';
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+        async function handleLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            // Demande à Supabase de connecter l'utilisateur
+            const { data, error } = await supabaseClient.auth.signInWithPassword({
+                email: email,
+                password: password,
+            });
+
+            if (error) {
+                alert('Erreur de connexion : ' + error.message);
+            } else {
+                alert('Connexion réussie ! Redirection...');
+                // Redirige vers le panneau d'administration après succès
+                window.location.href = 'admin.html';
+            }
+        }
+    </script>
+</body>
+</html>
