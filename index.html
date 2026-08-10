@@ -28,13 +28,13 @@
             color: #ff3366;
             text-transform: uppercase;
             letter-spacing: 3px;
-            margin: 0 0 5px 0;
-            font-size: 28px;
+            margin: 0;
+            font-size: 26px;
         }
         .subtitle {
             color: #aaa;
-            font-size: 14px;
-            margin-bottom: 25px;
+            font-size: 13px;
+            margin: 5px 0 0 0;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
@@ -323,34 +323,6 @@
             flex-wrap: wrap;
         }
 
-        details.changelog-archive {
-            background: #0d0d12;
-            border: 1px dashed #2a2a35;
-            border-radius: 12px;
-            padding: 15px 20px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        details.changelog-archive:hover {
-            border-color: #ff3366;
-        }
-        details.changelog-archive summary {
-            font-weight: bold;
-            color: #ff3366;
-            font-size: 13px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            outline: none;
-            user-select: none;
-        }
-        details.changelog-archive .archive-content {
-            margin-top: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            cursor: default;
-        }
-
         /* MODAL STYLES */
         .modal-overlay {
             display: none;
@@ -473,8 +445,16 @@
 <body>
 
 <div class="wrapper">
-    <h1>🎙️ LA 1337 RADIO 🎙️</h1>
-    <div class="subtitle">Studio de Création de Signatures Mail & BAweb</div>
+    <!-- EN-TÊTE AVEC BOUTON ADMIN -->
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2a2a35; padding-bottom: 20px; margin-bottom: 25px;">
+        <div style="text-align: left;">
+            <h1>🎙️ LA 1337 RADIO 🎙️</h1>
+            <div class="subtitle">Studio de Création de Signatures Mail & BAweb</div>
+        </div>
+        <a href="admin.html" style="background: #20202b; color: #ff3366; border: 1px solid #ff3366; padding: 10px 16px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; transition: all 0.2s;" onmouseover="this.style.background='#ff3366'; this.style.color='#fff';" onmouseout="this.style.background='#20202b'; this.style.color='#ff3366';">
+            ⚙️ Administration
+        </a>
+    </div>
     
     <!-- MENU DE NAVIGATION -->
     <div class="nav-tabs">
@@ -601,7 +581,7 @@
         </div>
     </div>
 
-    <!-- ONGLET 2 : HISTORIQUE DES MISES À JOUR -->
+    <!-- ONGLET 2 : HISTORIQUE DES MISES À JOUR (CHANGELOG RESTAURÉ) -->
     <div id="tab-changelog" class="tab-content">
         <div id="changelogContainer" class="changelog-container">
             <p style="color: #888;">Chargement des mises à jour...</p>
