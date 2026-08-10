@@ -28,7 +28,7 @@
     <form id="form-ajout">
         <input type="text" id="add-prenom" placeholder="Prénom" required oninput="genererEmailAuto()">
         <input type="text" id="add-nom" placeholder="Nom" required oninput="genererEmailAuto()">
-        <input type="email" id="add-email" placeholder="maxence.r@la1337.com" required>
+        <input type="email" id="add-email" value="@la1337.com" required>
         <input type="text" id="add-phone" value="03 65 17 00 63" placeholder="Téléphone">
 
         <label style="font-weight: bold; font-size: 13px; color: #ff3366; margin-top: 5px;">Rôles dans l'équipe :</label>
@@ -69,18 +69,18 @@
         const SUPABASE_ANON_KEY = 'sb_publishable_wjpCqcbmlEnHvYhJRziUGQ_SIubrlSg';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // Génération automatique de l'email : prenom.initialedunom@la1337.com
+        // Génération dynamique de l'email dans la vraie valeur du champ
         function genererEmailAuto() {
             const prenom = document.getElementById('add-prenom').value.trim();
             const nom = document.getElementById('add-nom').value.trim();
             const emailInput = document.getElementById('add-email');
 
             if (!prenom) {
-                emailInput.value = '';
+                emailInput.value = '@la1337.com';
                 return;
             }
 
-            // Nettoyage des accents, espaces et caractères spéciaux
+            // Nettoyage des accents et minuscules
             const prenomClean = prenom.toLowerCase()
                 .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
                 .replace(/[^a-z0-9]/g, '');
@@ -160,7 +160,6 @@
                 roles: selectedRoles
             };
 
-            // Ajoute le téléphone seulement s'il est renseigné
             const phoneValue = document.getElementById('add-phone').value.trim();
             if (phoneValue) {
                 nouveauMembre.telephone = phoneValue;
@@ -176,6 +175,7 @@
                 alert('✅ Membre ajouté avec succès !');
                 document.getElementById('form-ajout').reset();
                 document.getElementById('add-phone').value = '03 65 17 00 63';
+                document.getElementById('add-email').value = '@la1337.com';
                 afficherMembres();
             }
         });
