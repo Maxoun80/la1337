@@ -6,7 +6,7 @@ const SUPABASE_URL = 'https://appepchfrfghfulirckz.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_wjpCqcbmlEnHvYhJRziUGQ_SIubrlSg';
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Dictionnaire des 15 rôles officiels
+// Dictionnaire des 15 rôles officiels LA 1337
 const ROLE_MAP = {
     1:  "Directeur",
     2:  "Directeur Adjoint",
@@ -49,11 +49,27 @@ function renderThemeSelectOptions() {
     if (!select) return;
 
     select.innerHTML = '';
-    for (const [key, theme] of Object.entries(THEME_IMAGES)) {
+    const entries = Object.entries(THEME_IMAGES);
+    
+    if (entries.length === 0) {
+        select.innerHTML = '<option value="">-- Aucune bannière disponible --</option>';
+        return;
+    }
+
+    entries.forEach(([key, theme]) => {
         const option = document.createElement('option');
         option.value = key;
-        option.textContent = theme.name;
+        option.textContent = theme.name || key;
         select.appendChild(option);
+    });
+
+    select.selectedIndex = 0;
+    
+    // Déclenche le changement visuel
+    if (typeof applyPresetTheme === "function") {
+        applyPresetTheme();
+    } else if (typeof updateSig === "function") {
+        updateSig();
     }
 }
 
@@ -62,11 +78,28 @@ function renderLogoSelectOptions() {
     if (!select) return;
 
     select.innerHTML = '';
-    for (const [key, logo] of Object.entries(LOGO_IMAGES)) {
+    const entries = Object.entries(LOGO_IMAGES);
+
+    if (entries.length === 0) {
+        select.innerHTML = '<option value="">-- Aucun logo disponible --</option>';
+        return;
+    }
+
+    entries.forEach(([key, logo]) => {
         const option = document.createElement('option');
         option.value = key;
-        option.textContent = logo.name;
+        // On gère le fait que logo soit un objet ou juste une string URL
+        option.textContent = (typeof logo === 'object' && logo.name) ? logo.name : key;
         select.appendChild(option);
+    });
+
+    select.selectedIndex = 0;
+
+    // Déclenche le changement visuel
+    if (typeof applyPresetLogo === "function") {
+        applyPresetLogo();
+    } else if (typeof updateSig === "function") {
+        updateSig();
     }
 }
 
@@ -84,7 +117,7 @@ function renderMemberSelectOptions() {
 }
 
 // =============================================================================
-// 3. RECUPÉRATION DES DONNÉES SUPABASE ET DÉCLENCHEMENT DU RENDU
+// 3. RECUPÉRATION DES DONNÉES SUPABASE ET COMPATIBILITÉ TOTALE
 // =============================================================================
 
 async function loadThemesFromSupabase() {
@@ -96,10 +129,13 @@ async function loadThemesFromSupabase() {
             THEME_IMAGES = {};
             themes.forEach(t => {
                 const key = t.id ? `theme_${t.id}` : t.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+                
+                // On peuple l'objet avec TOUTES les variantes de propriétés
                 THEME_IMAGES[key] = {
                     id: t.id,
                     name: t.name,
                     url: t.url,
+                    image: t.url, // Alias pour compatibilité si index.html attend 'image'
                     color: t.textColor || t.color || "#ff3366",
                     textColor: t.textColor || t.color || "#ff3366",
                     roleColor: t.roleColor || "#e1e1e6",
@@ -107,8 +143,10 @@ async function loadThemesFromSupabase() {
                     liveTxtColor: t.liveTxtColor || "#ffffff"
                 };
             });
+
             window.THEME_IMAGES = THEME_IMAGES;
             window.THEMES = THEME_IMAGES;
+            
             renderThemeSelectOptions();
         }
     } catch (err) {
@@ -123,12 +161,22 @@ async function loadLogosFromSupabase() {
 
         if (logos && logos.length > 0) {
             LOGO_IMAGES = {};
+            
             logos.forEach(l => {
                 const key = l.id ? `logo_${l.id}` : l.name.toLowerCase().replace(/[^a-z0-9]/g, '');
-                LOGO_IMAGES[key] = { id: l.id, name: l.name, url: l.url };
+                
+                // Objet logo complet
+                LOGO_IMAGES[key] = { 
+                    id: l.id, 
+                    name: l.name, 
+                    url: l.url 
+                };
             });
+
             window.LOGO_IMAGES = LOGO_IMAGES;
+            // Si index.html cherche window.LOGOS sous forme de chaînes directes :
             window.LOGOS = LOGO_IMAGES;
+
             renderLogoSelectOptions();
         }
     } catch (err) {
@@ -170,7 +218,6 @@ function selectMember(memberId) {
     const member = window.TEAM_DATABASE.find(m => String(m.id) === String(memberId));
     if (!member) return;
 
-    // Remplir les champs du formulaire du générateur
     const inName = document.getElementById('inName') || document.getElementById('name');
     const inMail = document.getElementById('inMail') || document.getElementById('email');
     const inPhone = document.getElementById('inPhone') || document.getElementById('phone');
@@ -179,7 +226,6 @@ function selectMember(memberId) {
     if (inMail) inMail.value = member.mail;
     if (inPhone) inPhone.value = member.phone;
 
-    // Réinitialiser puis cocher les bons rôles
     const checkboxes = document.getElementsByName('roleCheck');
     for (let i = 0; i < checkboxes.length; i++) {
         checkboxes[i].checked = false;
@@ -194,7 +240,6 @@ function selectMember(memberId) {
         }
     }
 
-    // Force la réactualisation de la signature visuelle
     if (typeof updateSig === "function") updateSig();
 }
 
@@ -208,21 +253,15 @@ window.handleMemberChange = function() {
 };
 
 // =============================================================================
-// 5. INITIALISATION GLOBALE AUTOMATIQUE
+// 5. INITIALISATION AUTOMATIQUE
 // =============================================================================
 
 async function initAllAppData() {
-    // Chargement parallèle de toutes les tables Supabase
     await Promise.all([
         loadThemesFromSupabase(),
         loadLogosFromSupabase(),
         loadTeamMembers()
     ]);
-
-    // Application automatique des premiers éléments en base au chargement de la page
-    if (typeof applyPresetTheme === "function") applyPresetTheme();
-    if (typeof applyPresetLogo === "function") applyPresetLogo();
-    if (typeof updateSig === "function") updateSig();
 }
 
 document.addEventListener("DOMContentLoaded", () => {
