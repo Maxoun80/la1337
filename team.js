@@ -1,12 +1,12 @@
 // =============================================================================
-// 1. INITIALISATION DU CLIENT SUPABASE ET STRUCTURES GLOBALES
+// 1. CONFIGURATION & CLIENT SUPABASE
 // =============================================================================
 
 const SUPABASE_URL = 'https://appepchfrfghfulirckz.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_wjpCqcbmlEnHvYhJRziUGQ_SIubrlSg';
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Dictionnaire des 15 rôles officiels LA 1337
+// Dictionnaire officiel des 15 rôles LA 1337
 const ROLE_MAP = {
     1:  "Directeur",
     2:  "Directeur Adjoint",
@@ -25,117 +25,121 @@ const ROLE_MAP = {
     15: "Membre extérieur"
 };
 
+// Aliases globaux
 window.ROLE_MAP = ROLE_MAP;
 window.roleMap = ROLE_MAP;
 window.ROLES_LIST = ROLE_MAP;
 
-// Objets globaux dynamiques alimentés par Supabase
-let THEME_IMAGES = {};
-let LOGO_IMAGES = {};
-let TEAM_DATA = [];
-
-window.THEME_IMAGES = THEME_IMAGES;
-window.THEMES = THEME_IMAGES;
-window.LOGO_IMAGES = LOGO_IMAGES;
-window.LOGOS = LOGO_IMAGES;
+// Structures de données globales alimentées par Supabase
+window.THEME_IMAGES = {};
+window.THEMES = window.THEME_IMAGES;
+window.LOGO_IMAGES = {};
+window.LOGOS = window.LOGO_IMAGES;
 window.TEAM_DATABASE = [];
 
 // =============================================================================
-// 2. REMPLISSAGE DYNAMIQUE DES SÉLECTEURS (<select>) DANS INDEX.HTML
+// 2. FONCTIONS DE REMPLISSAGE DES SÉLECTEURS DU GÉNÉRATEUR
 // =============================================================================
 
-function renderThemeSelectOptions() {
-    const select = document.getElementById('inThemeSelect') || document.getElementById('theme-select');
+function populateThemeSelect() {
+    const select = document.getElementById('inPresetTheme');
     if (!select) return;
 
     select.innerHTML = '';
-    const entries = Object.entries(THEME_IMAGES);
-    
-    if (entries.length === 0) {
-        select.innerHTML = '<option value="">-- Aucune bannière disponible --</option>';
+    const keys = Object.keys(window.THEME_IMAGES);
+
+    if (keys.length === 0) {
+        select.innerHTML = '<option value="">-- Aucune bannière --</option>';
         return;
     }
 
-    entries.forEach(([key, theme]) => {
-        const option = document.createElement('option');
-        option.value = key;
-        option.textContent = theme.name || key;
-        select.appendChild(option);
-    });
+    for (const key in window.THEME_IMAGES) {
+        const opt = document.createElement('option');
+        opt.value = key;
+        opt.innerText = window.THEME_IMAGES[key].name;
+        select.appendChild(opt);
+    }
 
     select.selectedIndex = 0;
-    
-    // Déclenche le changement visuel
-    if (typeof applyPresetTheme === "function") {
-        applyPresetTheme();
-    } else if (typeof updateSig === "function") {
-        updateSig();
-    }
 }
 
-function renderLogoSelectOptions() {
-    const select = document.getElementById('inLogoSelect') || document.getElementById('logo-select');
+function populateLogoSelect() {
+    const select = document.getElementById('inPresetLogo');
     if (!select) return;
 
     select.innerHTML = '';
-    const entries = Object.entries(LOGO_IMAGES);
+    const keys = Object.keys(window.LOGO_IMAGES);
 
-    if (entries.length === 0) {
-        select.innerHTML = '<option value="">-- Aucun logo disponible --</option>';
+    if (keys.length === 0) {
+        select.innerHTML = '<option value="">-- Aucun logo --</option>';
         return;
     }
 
-    entries.forEach(([key, logo]) => {
-        const option = document.createElement('option');
-        option.value = key;
-        // On gère le fait que logo soit un objet ou juste une string URL
-        option.textContent = (typeof logo === 'object' && logo.name) ? logo.name : key;
-        select.appendChild(option);
-    });
+    for (const key in window.LOGO_IMAGES) {
+        const opt = document.createElement('option');
+        opt.value = key;
+        opt.innerText = window.LOGO_IMAGES[key].name;
+        select.appendChild(opt);
+    }
 
     select.selectedIndex = 0;
-
-    // Déclenche le changement visuel
-    if (typeof applyPresetLogo === "function") {
-        applyPresetLogo();
-    } else if (typeof updateSig === "function") {
-        updateSig();
-    }
 }
 
-function renderMemberSelectOptions() {
-    const select = document.getElementById('inMemberSelect') || document.getElementById('member-select');
+function populateMemberSelect() {
+    const select = document.getElementById('inMemberSelect');
     if (!select) return;
 
-    select.innerHTML = '<option value="custom">-- Choisir un membre pré-enregistré --</option>';
-    TEAM_DATA.forEach(m => {
-        const option = document.createElement('option');
-        option.value = m.id;
-        option.textContent = m.name;
-        select.appendChild(option);
+    select.innerHTML = '';
+
+    const optPlaceholder = document.createElement('option');
+    optPlaceholder.value = '';
+    optPlaceholder.innerText = '👥 Choisissez un membre';
+    optPlaceholder.selected = true;
+    optPlaceholder.disabled = true;
+    select.appendChild(optPlaceholder);
+
+    const optCustom = document.createElement('option');
+    optCustom.value = 'custom';
+    optCustom.innerText = '✍️ [NOUVEAU MEMBRE - Saisie libre]';
+    select.appendChild(optCustom);
+
+    window.TEAM_DATABASE.forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m.id;
+        opt.innerText = m.name;
+        select.appendChild(opt);
     });
 }
 
+// Redéfinition des fonctions d'initialisation pour index.html
+window.initThemeSelector = populateThemeSelect;
+window.initLogoSelector = populateLogoSelect;
+window.initMemberSelector = populateMemberSelect;
+
 // =============================================================================
-// 3. RECUPÉRATION DES DONNÉES SUPABASE ET COMPATIBILITÉ TOTALE
+// 3. CHARGEMENT DYNAMIQUE SUPABASE
 // =============================================================================
 
 async function loadThemesFromSupabase() {
     try {
-        const { data: themes, error } = await supabaseClient.from('themes').select('*').order('id', { ascending: true });
-        if (error) { console.error("Erreur thèmes Supabase:", error.message); return; }
+        const { data: themes, error } = await supabaseClient
+            .from('themes')
+            .select('*')
+            .order('id', { ascending: true });
+
+        if (error) {
+            console.error('Erreur thèmes Supabase :', error.message);
+            return;
+        }
 
         if (themes && themes.length > 0) {
-            THEME_IMAGES = {};
+            window.THEME_IMAGES = {};
             themes.forEach(t => {
                 const key = t.id ? `theme_${t.id}` : t.name.toLowerCase().replace(/[^a-z0-9]/g, '');
-                
-                // On peuple l'objet avec TOUTES les variantes de propriétés
-                THEME_IMAGES[key] = {
+                window.THEME_IMAGES[key] = {
                     id: t.id,
                     name: t.name,
                     url: t.url,
-                    image: t.url, // Alias pour compatibilité si index.html attend 'image'
                     color: t.textColor || t.color || "#ff3366",
                     textColor: t.textColor || t.color || "#ff3366",
                     roleColor: t.roleColor || "#e1e1e6",
@@ -144,10 +148,8 @@ async function loadThemesFromSupabase() {
                 };
             });
 
-            window.THEME_IMAGES = THEME_IMAGES;
-            window.THEMES = THEME_IMAGES;
-            
-            renderThemeSelectOptions();
+            window.THEMES = window.THEME_IMAGES;
+            populateThemeSelect();
         }
     } catch (err) {
         console.error("Erreur chargement thèmes :", err);
@@ -156,114 +158,91 @@ async function loadThemesFromSupabase() {
 
 async function loadLogosFromSupabase() {
     try {
-        const { data: logos, error } = await supabaseClient.from('logos').select('*').order('id', { ascending: true });
-        if (error) { console.error("Erreur logos Supabase:", error.message); return; }
+        const { data: logos, error } = await supabaseClient
+            .from('logos')
+            .select('*')
+            .order('id', { ascending: true });
+
+        if (error) {
+            console.error('Erreur logos Supabase :', error.message);
+            return;
+        }
 
         if (logos && logos.length > 0) {
-            LOGO_IMAGES = {};
-            
+            window.LOGO_IMAGES = {};
             logos.forEach(l => {
                 const key = l.id ? `logo_${l.id}` : l.name.toLowerCase().replace(/[^a-z0-9]/g, '');
-                
-                // Objet logo complet
-                LOGO_IMAGES[key] = { 
-                    id: l.id, 
-                    name: l.name, 
-                    url: l.url 
+                window.LOGO_IMAGES[key] = {
+                    id: l.id,
+                    name: l.name,
+                    url: l.url
                 };
             });
 
-            window.LOGO_IMAGES = LOGO_IMAGES;
-            // Si index.html cherche window.LOGOS sous forme de chaînes directes :
-            window.LOGOS = LOGO_IMAGES;
-
-            renderLogoSelectOptions();
+            window.LOGOS = window.LOGO_IMAGES;
+            populateLogoSelect();
         }
     } catch (err) {
         console.error("Erreur chargement logos :", err);
     }
 }
 
-async function loadTeamMembers() {
+async function loadTeamMembersFromSupabase() {
     try {
-        const { data: membres, error } = await supabaseClient.from('membres').select('*').order('nom', { ascending: true });
-        if (error) { console.error("Erreur membres Supabase:", error.message); return; }
+        const { data: membres, error } = await supabaseClient
+            .from('membres')
+            .select('*')
+            .order('nom', { ascending: true });
 
-        const formattedMembers = membres.map(m => {
-            const fullName = `${m.prenom || ''} ${(m.nom || '').toUpperCase()}`.trim();
-            return {
-                id: String(m.id),
-                name: fullName,
-                mail: m.email || '',
-                phone: m.telephone || '03 65 17 00 63',
-                roles: m.roles ? (Array.isArray(m.roles) ? m.roles : String(m.roles).split(',').map(Number)) : [],
-                prenom: m.prenom || '',
-                nom: m.nom || ''
-            };
-        });
+        if (error) {
+            console.error('Erreur membres Supabase :', error.message);
+            return;
+        }
 
-        TEAM_DATA = formattedMembers;
-        window.TEAM_DATABASE = formattedMembers;
-        renderMemberSelectOptions();
+        if (membres) {
+            window.TEAM_DATABASE = membres.map(m => {
+                const fullName = `${m.prenom || ''} ${(m.nom || '').toUpperCase()}`.trim();
+                return {
+                    id: String(m.id),
+                    name: fullName,
+                    mail: m.email || '',
+                    phone: m.telephone || '03 65 17 00 63',
+                    roles: m.roles ? (Array.isArray(m.roles) ? m.roles : String(m.roles).split(',').map(Number)) : []
+                };
+            });
+
+            populateMemberSelect();
+        }
     } catch (err) {
         console.error("Erreur chargement membres :", err);
     }
 }
 
 // =============================================================================
-// 4. SELECTION D'UN MEMBRE DANS LE GÉNÉRATEUR
+// 4. INITIALISATION AU DÉMARRAGE DU GÉNÉRATEUR
 // =============================================================================
 
-function selectMember(memberId) {
-    const member = window.TEAM_DATABASE.find(m => String(m.id) === String(memberId));
-    if (!member) return;
-
-    const inName = document.getElementById('inName') || document.getElementById('name');
-    const inMail = document.getElementById('inMail') || document.getElementById('email');
-    const inPhone = document.getElementById('inPhone') || document.getElementById('phone');
-
-    if (inName) inName.value = member.name;
-    if (inMail) inMail.value = member.mail;
-    if (inPhone) inPhone.value = member.phone;
-
-    const checkboxes = document.getElementsByName('roleCheck');
-    for (let i = 0; i < checkboxes.length; i++) {
-        checkboxes[i].checked = false;
-    }
-
-    if (member.roles && Array.isArray(member.roles)) {
-        for (let i = 0; i < checkboxes.length; i++) {
-            const val = parseInt(checkboxes[i].value, 10);
-            if (member.roles.includes(val)) {
-                checkboxes[i].checked = true;
-            }
-        }
-    }
-
-    if (typeof updateSig === "function") updateSig();
-}
-
-window.handleMemberChange = function() {
-    const select = document.getElementById('inMemberSelect') || document.getElementById('member-select');
-    const choice = select?.value;
-
-    if (choice && choice !== 'custom') {
-        selectMember(choice);
-    }
-};
-
-// =============================================================================
-// 5. INITIALISATION AUTOMATIQUE
-// =============================================================================
-
-async function initAllAppData() {
+async function initGeneratorData() {
+    // 1. Attente du chargement BDD Supabase
     await Promise.all([
         loadThemesFromSupabase(),
         loadLogosFromSupabase(),
-        loadTeamMembers()
+        loadTeamMembersFromSupabase()
     ]);
+
+    // 2. Application dynamique du premier thème et du premier logo présent en BDD
+    if (typeof applyPresetTheme === "function") {
+        applyPresetTheme();
+    }
+    if (typeof applyPresetLogo === "function") {
+        applyPresetLogo();
+    }
+    if (typeof updateSig === "function") {
+        updateSig();
+    }
 }
 
+// Déclenchement automatique dès que le DOM est prêt
 document.addEventListener("DOMContentLoaded", () => {
-    initAllAppData();
+    initGeneratorData();
 });
