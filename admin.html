@@ -2,47 +2,85 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Administration - Membres Association</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administration - Signature Mail</title>
+    <!-- SDK Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: system-ui, sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; }
+        form { display: flex; flex-direction: column; gap: 10px; margin-bottom: 30px; }
+        input, button { padding: 10px; font-size: 16px; }
+        button { background-color: #0070f3; color: white; border: none; cursor: pointer; border-radius: 4px; }
+        li { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding: 8px; background: #f4f4f4; border-radius: 4px; }
+        .btn-delete { background: #e00; padding: 5px 10px; font-size: 12px; }
+    </style>
 </head>
 <body>
-    <h1>Gestion des membres de l'association</h1>
 
-    <h2>Ajouter un membre</h2>
-    <form id="add-member-form">
-        <input type="text" id="prenom" placeholder="Prénom" required>
-        <input type="text" id="nom" placeholder="Nom" required>
-        <input type="text" id="role" placeholder="Rôle / Fonction" required>
-        <input type="email" id="email" placeholder="E-mail">
-        <input type="text" id="telephone" placeholder="Téléphone">
-        <button type="submit">Ajouter</button>
+    <h2>➕ Ajouter un membre</h2>
+    <form id="form-ajout">
+        <input type="text" id="add-prenom" placeholder="Prénom" required>
+        <input type="text" id="add-nom" placeholder="Nom" required>
+        <input type="text" id="add-role" placeholder="Rôle (ex: Responsable Com)" required>
+        <input type="email" id="add-email" placeholder="E-mail" required>
+        <button type="submit">Ajouter au générateur</button>
     </form>
+
+    <h2>📋 Liste des membres actuels</h2>
+    <ul id="liste-membres"></ul>
 
     <script>
         const SUPABASE_URL = 'https://VOTRE_PROJET.supabase.co';
         const SUPABASE_ANON_KEY = 'VOTRE_CLE_ANON_PUBLIQUE';
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        document.getElementById('add-member-form').addEventListener('submit', async (e) => {
+        // Afficher la liste des membres avec bouton de suppression
+        async function afficherMembres() {
+            const { data: membres, error } = await supabaseClient.from('membres').select('*').order('nom');
+            const ul = document.getElementById('liste-membres');
+            ul.innerHTML = '';
+
+            if (membres) {
+                membres.forEach(m => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                        <span><strong>${m.prenom} ${m.nom}</strong> - ${m.role} (${m.email})</span>
+                        <button class="btn-delete" onclick="supprimerMembre(${m.id})">Supprimer</button>
+                    `;
+                    ul.appendChild(li);
+                });
+            }
+        }
+
+        // Ajouter un membre
+        document.getElementById('form-ajout').addEventListener('submit', async (e) => {
             e.preventDefault();
-
-            const nouveauMembre = {
-                prenom: document.getElementById('prenom').value,
-                nom: document.getElementById('nom').value,
-                role: document.getElementById('role').value,
-                email: document.getElementById('email').value,
-                telephone: document.getElementById('telephone').value
+            const nouveau = {
+                prenom: document.getElementById('add-prenom').value,
+                nom: document.getElementById('add-nom').value,
+                role: document.getElementById('add-role').value,
+                email: document.getElementById('add-email').value
             };
 
-            const { data, error } = await supabase.from('membres').insert([nouveauMembre]);
-
+            const { error } = await supabaseClient.from('membres').insert([nouveau]);
             if (error) {
-                alert('Erreur lors de l\'ajout : ' + error.message);
+                alert('Erreur : ' + error.message);
             } else {
-                alert('Membre ajouté avec succès !');
-                location.reload();
+                alert('Membre ajouté !');
+                document.getElementById('form-ajout').reset();
+                afficherMembres();
             }
         });
+
+        // Supprimer un membre
+        async function supprimerMembre(id) {
+            if (confirm('Voulez-vous vraiment supprimer ce membre ?')) {
+                await supabaseClient.from('membres').delete().eq('id', id);
+                afficherMembres();
+            }
+        }
+
+        afficherMembres();
     </script>
 </body>
 </html>
