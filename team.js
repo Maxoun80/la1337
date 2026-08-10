@@ -24,7 +24,7 @@ async function loadTeamMembers() {
         return;
     }
 
-    const select = document.getElementById('member-select');
+    const select = document.getElementById('inMemberSelect') || document.getElementById('member-select');
     if (!select) return;
 
     select.innerHTML = '<option value="">-- Sélectionner un membre --</option>';
