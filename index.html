@@ -658,6 +658,7 @@
         var select = document.getElementById('inPresetTheme');
         if (!select) return;
 
+        // Récupération des thèmes depuis Supabase
         const { data: themes, error } = await supabaseClient
             .from('themes')
             .select('*');
@@ -670,13 +671,19 @@
         select.innerHTML = '';
 
         const filteredThemes = (themes || []).filter(t => (t.active === true || t.active === 'true' || t.active === 1));
-
         filteredThemes.sort((a, b) => (b.prioritaire === true) - (a.prioritaire === true));
 
         filteredThemes.forEach((theme, index) => {
             var opt = document.createElement('option');
             opt.value = theme.id; 
             opt.innerText = theme.name;
+            
+            // Stockage direct des données pour affichage
+            opt.dataset.url = theme.url || (typeof THEME_IMAGES !== 'undefined' && THEME_IMAGES[theme.id] ? THEME_IMAGES[theme.id].url : '');
+            opt.dataset.textColor = theme.text_color || theme.textColor || '#ffffff';
+            opt.dataset.roleColor = theme.role_color || theme.roleColor || '#e1e1e6';
+            opt.dataset.liveBg = theme.live_bg || theme.liveBgColor || '#ff3366';
+            opt.dataset.liveTxt = theme.live_txt || theme.liveTxtColor || '#ffffff';
 
             if (theme.prioritaire === true || (index === 0 && !filteredThemes.some(t => t.prioritaire === true))) {
                 opt.selected = true;
@@ -685,9 +692,7 @@
             select.appendChild(opt);
         });
 
-        if (typeof applyPresetTheme === 'function') {
-            applyPresetTheme();
-        }
+        applyPresetTheme();
     }
 
     function initLogoSelector() {
@@ -745,7 +750,6 @@
 
             if(firstThemeKey && THEME_IMAGES[firstThemeKey]) setSecureImage(THEME_IMAGES[firstThemeKey].url, 'sigPreview', true);
             if(firstLogoKey && LOGO_IMAGES[firstLogoKey]) setSecureImage(LOGO_IMAGES[firstLogoKey].url, 'logoPreview', false);
-            applyPresetTheme();
         }
     };
 
@@ -756,10 +760,24 @@
     }
     
     function applyPresetTheme() { 
-        var themeKey = document.getElementById('inPresetTheme').value; 
-        if (typeof THEME_IMAGES === 'undefined') return;
-        var themeData = THEME_IMAGES[themeKey];
-        if (themeData) {
+        var select = document.getElementById('inPresetTheme');
+        if (!select || !select.selectedOptions[0]) return;
+        
+        var selectedOpt = select.selectedOptions[0];
+        var themeKey = select.value;
+
+        // Récupération depuis THEME_IMAGES si existant, sinon depuis le dataset de Supabase
+        var themeData = (typeof THEME_IMAGES !== 'undefined' && THEME_IMAGES[themeKey]) 
+            ? THEME_IMAGES[themeKey] 
+            : {
+                url: selectedOpt.dataset.url,
+                textColor: selectedOpt.dataset.textColor,
+                roleColor: selectedOpt.dataset.roleColor,
+                liveBgColor: selectedOpt.dataset.liveBg,
+                liveTxtColor: selectedOpt.dataset.liveTxt
+            };
+
+        if (themeData && themeData.url) {
             setSecureImage(themeData.url, 'sigPreview', true);
             
             document.getElementById('outName').style.color = themeData.textColor;
