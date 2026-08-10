@@ -122,6 +122,31 @@
             cursor: pointer;
         }
 
+        /* Roles checkboxes grid */
+        .roles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 10px;
+            background-color: var(--bg-tertiary);
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            margin-bottom: 15px;
+        }
+
+        .role-checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            color: var(--text-main);
+            cursor: pointer;
+        }
+
+        .role-checkbox-item input {
+            cursor: pointer;
+        }
+
         .btn {
             padding: 10px 20px;
             border-radius: 4px;
@@ -186,7 +211,6 @@
             gap: 8px;
         }
 
-        /* Banner de modification */
         .editing-banner {
             background-color: rgba(251, 169, 76, 0.15);
             border: 1px solid var(--warning);
@@ -209,16 +233,14 @@
         </a>
     </div>
 
-    <!-- Onglets de Navigation -->
+    <!-- Onglets -->
     <div class="nav-tabs">
         <button class="tab-btn active" onclick="switchTab('themes-tab', event)"><i class="fa-solid fa-palette"></i> Bannières / Thèmes</button>
         <button class="tab-btn" onclick="switchTab('logos-tab', event)"><i class="fa-solid fa-image"></i> Logos</button>
         <button class="tab-btn" onclick="switchTab('members-tab', event)"><i class="fa-solid fa-users"></i> Membres</button>
     </div>
 
-    <!-- =================================================================== -->
-    <!-- TAB 1 : BANNIÈRES / THÈMES                                          -->
-    <!-- =================================================================== -->
+    <!-- TAB 1 : BANNIÈRES -->
     <div id="themes-tab" class="tab-content active">
         <h2 id="theme-form-title">Ajouter une Bannière / Thème</h2>
         
@@ -229,73 +251,35 @@
 
         <form id="theme-form" onsubmit="handleThemeSubmit(event)">
             <input type="hidden" id="theme-id">
-            
             <div class="form-grid">
                 <div class="form-group full-width">
                     <label for="theme-name">Nom du Thème / de la Bannière</label>
                     <input type="text" id="theme-name" required placeholder="Ex: Général, Événement spécial, etc.">
                 </div>
-
                 <div class="form-group full-width">
                     <label for="theme-url">URL de l'image (Bannière)</label>
                     <input type="url" id="theme-url" required placeholder="https://...">
                 </div>
-
-                <div class="form-group">
-                    <label for="theme-color">Couleur Principale</label>
-                    <input type="color" id="theme-color" value="#ff3366">
-                </div>
-
-                <div class="form-group">
-                    <label for="theme-textColor">Couleur Texte Nom</label>
-                    <input type="color" id="theme-textColor" value="#ff3366">
-                </div>
-
-                <div class="form-group">
-                    <label for="theme-roleColor">Couleur Texte Rôle</label>
-                    <input type="color" id="theme-roleColor" value="#e1e1e6">
-                </div>
-
-                <div class="form-group">
-                    <label for="theme-liveBgColor">Fond Tag LIVE</label>
-                    <input type="color" id="theme-liveBgColor" value="#ff3366">
-                </div>
-
-                <div class="form-group">
-                    <label for="theme-liveTxtColor">Texte Tag LIVE</label>
-                    <input type="color" id="theme-liveTxtColor" value="#ffffff">
-                </div>
+                <div class="form-group"><label for="theme-color">Couleur Principale</label><input type="color" id="theme-color" value="#ff3366"></div>
+                <div class="form-group"><label for="theme-textColor">Couleur Texte Nom</label><input type="color" id="theme-textColor" value="#ff3366"></div>
+                <div class="form-group"><label for="theme-roleColor">Couleur Texte Rôle</label><input type="color" id="theme-roleColor" value="#e1e1e6"></div>
+                <div class="form-group"><label for="theme-liveBgColor">Fond Tag LIVE</label><input type="color" id="theme-liveBgColor" value="#ff3366"></div>
+                <div class="form-group"><label for="theme-liveTxtColor">Texte Tag LIVE</label><input type="color" id="theme-liveTxtColor" value="#ffffff"></div>
             </div>
-
-            <button type="submit" id="theme-submit-btn" class="btn btn-primary">
-                <i class="fa-solid fa-plus"></i> Ajouter la bannière
-            </button>
+            <button type="submit" id="theme-submit-btn" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Ajouter la bannière</button>
         </form>
 
         <hr style="border-color: var(--border); margin: 30px 0;">
-
-        <h2>Bannières existantes dans Supabase</h2>
+        <h2>Bannières existantes</h2>
         <table>
-            <thead>
-                <tr>
-                    <th>Aperçu</th>
-                    <th>Nom</th>
-                    <th>Couleurs (Nom / Rôle / Live)</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody id="themes-list">
-                <tr><td colspan="4">Chargement des bannières...</td></tr>
-            </tbody>
+            <thead><tr><th>Aperçu</th><th>Nom</th><th>Couleurs</th><th>Actions</th></tr></thead>
+            <tbody id="themes-list"><tr><td colspan="4">Chargement...</td></tr></tbody>
         </table>
     </div>
 
-    <!-- =================================================================== -->
-    <!-- TAB 2 : LOGOS                                                       -->
-    <!-- =================================================================== -->
+    <!-- TAB 2 : LOGOS -->
     <div id="logos-tab" class="tab-content">
         <h2 id="logo-form-title">Ajouter un Logo</h2>
-
         <div id="logo-editing-notice" class="editing-banner" style="display: none;">
             <span><i class="fa-solid fa-pen-to-square"></i> Modification du logo en cours...</span>
             <button class="btn btn-cancel" onclick="resetLogoForm()">Annuler la modification</button>
@@ -303,48 +287,65 @@
 
         <form id="logo-form" onsubmit="handleLogoSubmit(event)">
             <input type="hidden" id="logo-id">
+            <div class="form-grid">
+                <div class="form-group"><label for="logo-name">Nom du Logo</label><input type="text" id="logo-name" required placeholder="Ex: Logo Blanc"></div>
+                <div class="form-group full-width"><label for="logo-url">URL du Logo</label><input type="url" id="logo-url" required placeholder="https://..."></div>
+            </div>
+            <button type="submit" id="logo-submit-btn" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Ajouter le logo</button>
+        </form>
+
+        <hr style="border-color: var(--border); margin: 30px 0;">
+        <h2>Logos existants</h2>
+        <table>
+            <thead><tr><th>Aperçu</th><th>Nom</th><th>URL</th><th>Actions</th></tr></thead>
+            <tbody id="logos-list"><tr><td colspan="4">Chargement...</td></tr></tbody>
+        </table>
+    </div>
+
+    <!-- TAB 3 : MEMBRES -->
+    <div id="members-tab" class="tab-content">
+        <h2 id="member-form-title">Ajouter / Modifier un Membre</h2>
+        
+        <div id="member-editing-notice" class="editing-banner" style="display: none;">
+            <span><i class="fa-solid fa-pen-to-square"></i> Modification du membre en cours...</span>
+            <button class="btn btn-cancel" onclick="resetMemberForm()">Annuler la modification</button>
+        </div>
+
+        <form id="member-form" onsubmit="handleMemberSubmit(event)">
+            <input type="hidden" id="member-id">
 
             <div class="form-grid">
                 <div class="form-group">
-                    <label for="logo-name">Nom du Logo</label>
-                    <input type="text" id="logo-name" required placeholder="Ex: Logo Principal, Variant Blanc...">
+                    <label for="member-prenom">Prénom</label>
+                    <input type="text" id="member-prenom" required placeholder="Ex: Jean">
                 </div>
-
-                <div class="form-group full-width">
-                    <label for="logo-url">URL du Logo (PNG / SVG transparent recommandé)</label>
-                    <input type="url" id="logo-url" required placeholder="https://...">
+                <div class="form-group">
+                    <label for="member-nom">Nom</label>
+                    <input type="text" id="member-nom" required placeholder="Ex: DUPONT">
+                </div>
+                <div class="form-group">
+                    <label for="member-email">Email</label>
+                    <input type="email" id="member-email" placeholder="contact@domaine.fr">
+                </div>
+                <div class="form-group">
+                    <label for="member-phone">Téléphone</label>
+                    <input type="text" id="member-phone" value="03 65 17 00 63" placeholder="03 65 17 00 63">
                 </div>
             </div>
 
-            <button type="submit" id="logo-submit-btn" class="btn btn-primary">
-                <i class="fa-solid fa-plus"></i> Ajouter le logo
+            <label style="margin-bottom: 8px; display: block;">Rôles attribués :</label>
+            <div class="roles-grid" id="roles-checkboxes-container">
+                <!-- Généré dynamiquement JS -->
+            </div>
+
+            <button type="submit" id="member-submit-btn" class="btn btn-primary">
+                <i class="fa-solid fa-user-plus"></i> Enregistrer le membre
             </button>
         </form>
 
         <hr style="border-color: var(--border); margin: 30px 0;">
 
-        <h2>Logos existants dans Supabase</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Aperçu</th>
-                    <th>Nom</th>
-                    <th>URL</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody id="logos-list">
-                <tr><td colspan="4">Chargement des logos...</td></tr>
-            </tbody>
-        </table>
-    </div>
-
-    <!-- =================================================================== -->
-    <!-- TAB 3 : MEMBRES                                                     -->
-    <!-- =================================================================== -->
-    <div id="members-tab" class="tab-content">
-        <h2>Gestion des Membres</h2>
-        <p style="color: var(--text-muted)">Les membres enregistrés dans la table <code>membres</code> de Supabase :</p>
+        <h2>Membres enregistrés</h2>
         <table>
             <thead>
                 <tr>
@@ -364,7 +365,7 @@
 
 <script>
 // =============================================================================
-// SUPABASE CLIENT & DICTIONNAIRE
+// SUPABASE CLIENT & CONFIG
 // =============================================================================
 const SUPABASE_URL = 'https://appepchfrfghfulirckz.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_wjpCqcbmlEnHvYhJRziUGQ_SIubrlSg';
@@ -378,51 +379,34 @@ const ROLE_MAP = {
 
 let loadedThemes = [];
 let loadedLogos = [];
+let loadedMembers = [];
 
-// Navigation entre onglets
 function switchTab(tabId, event) {
     document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-    
     document.getElementById(tabId).classList.add('active');
-    if (event && event.currentTarget) {
-        event.currentTarget.classList.add('active');
-    }
+    if (event && event.currentTarget) event.currentTarget.classList.add('active');
 }
 
 // =============================================================================
-// GESTION DES THÈMES / BANNIÈRES
+// GESTION DES BANNIÈRES / THÈMES
 // =============================================================================
 
 async function fetchThemes() {
     const { data, error } = await supabaseClient.from('themes').select('*').order('id', { ascending: true });
-    if (error) {
-        console.error("Erreur bannières :", error);
-        return;
-    }
-    loadedThemes = data || [];
-    renderThemes();
+    if (!error) { loadedThemes = data || []; renderThemes(); }
 }
 
 function renderThemes() {
     const tbody = document.getElementById('themes-list');
     tbody.innerHTML = '';
-
-    if (loadedThemes.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4">Aucune bannière enregistrée.</td></tr>';
-        return;
-    }
-
+    if (loadedThemes.length === 0) { tbody.innerHTML = '<tr><td colspan="4">Aucune bannière.</td></tr>'; return; }
     loadedThemes.forEach(t => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td><img src="${t.url}" class="preview-img" alt="Banner" onerror="this.src='https://via.placeholder.com/120x40?text=Erreur+Image'"></td>
+            <td><img src="${t.url}" class="preview-img" alt="Banner"></td>
             <td><strong>${t.name}</strong></td>
-            <td>
-                <span class="color-dot" style="background:${t.textColor || t.color}"></span> ${t.textColor || t.color} | 
-                <span class="color-dot" style="background:${t.roleColor}"></span> ${t.roleColor} | 
-                <span class="color-dot" style="background:${t.liveBgColor}"></span> Live: ${t.liveBgColor}
-            </td>
+            <td><span class="color-dot" style="background:${t.textColor || t.color}"></span> ${t.textColor || t.color}</td>
             <td class="actions-cell">
                 <button class="btn btn-edit" onclick="editTheme(${t.id})"><i class="fa-solid fa-pen"></i> Modifier</button>
                 <button class="btn btn-danger" onclick="deleteTheme(${t.id})"><i class="fa-solid fa-trash"></i></button>
@@ -435,7 +419,6 @@ function renderThemes() {
 function editTheme(id) {
     const theme = loadedThemes.find(t => t.id === id);
     if (!theme) return;
-
     document.getElementById('theme-id').value = theme.id;
     document.getElementById('theme-name').value = theme.name || '';
     document.getElementById('theme-url').value = theme.url || '';
@@ -444,11 +427,9 @@ function editTheme(id) {
     document.getElementById('theme-roleColor').value = theme.roleColor || '#e1e1e6';
     document.getElementById('theme-liveBgColor').value = theme.liveBgColor || '#ff3366';
     document.getElementById('theme-liveTxtColor').value = theme.liveTxtColor || '#ffffff';
-
     document.getElementById('theme-form-title').innerText = "Modifier la Bannière";
-    document.getElementById('theme-submit-btn').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Enregistrer les modifications';
+    document.getElementById('theme-submit-btn').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Enregistrer';
     document.getElementById('theme-editing-notice').style.display = 'flex';
-
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -463,7 +444,6 @@ function resetThemeForm() {
 async function handleThemeSubmit(e) {
     e.preventDefault();
     const id = document.getElementById('theme-id').value;
-
     const payload = {
         name: document.getElementById('theme-name').value,
         url: document.getElementById('theme-url').value,
@@ -473,27 +453,16 @@ async function handleThemeSubmit(e) {
         liveBgColor: document.getElementById('theme-liveBgColor').value,
         liveTxtColor: document.getElementById('theme-liveTxtColor').value
     };
-
-    let result;
-    if (id) {
-        result = await supabaseClient.from('themes').update(payload).eq('id', id);
-    } else {
-        result = await supabaseClient.from('themes').insert([payload]);
-    }
-
-    if (result.error) {
-        alert("Erreur enregistrement : " + result.error.message);
-    } else {
-        resetThemeForm();
-        fetchThemes();
-    }
+    const res = id ? await supabaseClient.from('themes').update(payload).eq('id', id) : await supabaseClient.from('themes').insert([payload]);
+    if (res.error) alert("Erreur : " + res.error.message);
+    else { resetThemeForm(); fetchThemes(); }
 }
 
 async function deleteTheme(id) {
-    if (!confirm("Voulez-vous vraiment supprimer cette bannière ?")) return;
-    const { error } = await supabaseClient.from('themes').delete().eq('id', id);
-    if (error) alert("Erreur suppression : " + error.message);
-    else fetchThemes();
+    if (confirm("Supprimer cette bannière ?")) {
+        await supabaseClient.from('themes').delete().eq('id', id);
+        fetchThemes();
+    }
 }
 
 // =============================================================================
@@ -502,27 +471,17 @@ async function deleteTheme(id) {
 
 async function fetchLogos() {
     const { data, error } = await supabaseClient.from('logos').select('*').order('id', { ascending: true });
-    if (error) {
-        console.error("Erreur logos :", error);
-        return;
-    }
-    loadedLogos = data || [];
-    renderLogos();
+    if (!error) { loadedLogos = data || []; renderLogos(); }
 }
 
 function renderLogos() {
     const tbody = document.getElementById('logos-list');
     tbody.innerHTML = '';
-
-    if (loadedLogos.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4">Aucun logo enregistré.</td></tr>';
-        return;
-    }
-
+    if (loadedLogos.length === 0) { tbody.innerHTML = '<tr><td colspan="4">Aucun logo.</td></tr>'; return; }
     loadedLogos.forEach(l => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td><img src="${l.url}" class="preview-logo" alt="Logo" onerror="this.src='https://via.placeholder.com/35?text=?';"></td>
+            <td><img src="${l.url}" class="preview-logo" alt="Logo"></td>
             <td><strong>${l.name}</strong></td>
             <td style="max-width:300px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${l.url}</td>
             <td class="actions-cell">
@@ -537,15 +496,12 @@ function renderLogos() {
 function editLogo(id) {
     const logo = loadedLogos.find(l => l.id === id);
     if (!logo) return;
-
     document.getElementById('logo-id').value = logo.id;
     document.getElementById('logo-name').value = logo.name || '';
     document.getElementById('logo-url').value = logo.url || '';
-
     document.getElementById('logo-form-title').innerText = "Modifier le Logo";
-    document.getElementById('logo-submit-btn').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Enregistrer les modifications';
+    document.getElementById('logo-submit-btn').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Enregistrer';
     document.getElementById('logo-editing-notice').style.display = 'flex';
-
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -560,92 +516,150 @@ function resetLogoForm() {
 async function handleLogoSubmit(e) {
     e.preventDefault();
     const id = document.getElementById('logo-id').value;
-
-    const payload = {
-        name: document.getElementById('logo-name').value,
-        url: document.getElementById('logo-url').value
-    };
-
-    let result;
-    if (id) {
-        result = await supabaseClient.from('logos').update(payload).eq('id', id);
-    } else {
-        result = await supabaseClient.from('logos').insert([payload]);
-    }
-
-    if (result.error) {
-        alert("Erreur enregistrement : " + result.error.message);
-    } else {
-        resetLogoForm();
-        fetchLogos();
-    }
+    const payload = { name: document.getElementById('logo-name').value, url: document.getElementById('logo-url').value };
+    const res = id ? await supabaseClient.from('logos').update(payload).eq('id', id) : await supabaseClient.from('logos').insert([payload]);
+    if (res.error) alert("Erreur : " + res.error.message);
+    else { resetLogoForm(); fetchLogos(); }
 }
 
 async function deleteLogo(id) {
-    if (!confirm("Voulez-vous vraiment supprimer ce logo ?")) return;
-    const { error } = await supabaseClient.from('logos').delete().eq('id', id);
-    if (error) alert("Erreur suppression : " + error.message);
-    else fetchLogos();
+    if (confirm("Supprimer ce logo ?")) {
+        await supabaseClient.from('logos').delete().eq('id', id);
+        fetchLogos();
+    }
 }
 
 // =============================================================================
 // GESTION DES MEMBRES
 // =============================================================================
 
+function renderRoleCheckboxes() {
+    const container = document.getElementById('roles-checkboxes-container');
+    container.innerHTML = '';
+    for (const [id, name] of Object.entries(ROLE_MAP)) {
+        const label = document.createElement('label');
+        label.className = 'role-checkbox-item';
+        label.innerHTML = `<input type="checkbox" name="adminRoleCheck" value="${id}"> ${name}`;
+        container.appendChild(label);
+    }
+}
+
 async function fetchMembers() {
     const tbody = document.getElementById('members-list');
-    if (!tbody) return;
+    const { data: membres, error } = await supabaseClient.from('membres').select('*').order('nom', { ascending: true });
+    
+    if (error) {
+        tbody.innerHTML = `<tr><td colspan="5" style="color:var(--danger)">Erreur : ${error.message}</td></tr>`;
+        return;
+    }
 
-    try {
-        const { data: membres, error } = await supabaseClient
-            .from('membres')
-            .select('*')
-            .order('nom', { ascending: true });
+    loadedMembers = membres || [];
+    tbody.innerHTML = '';
 
-        if (error) {
-            tbody.innerHTML = `<tr><td colspan="5" style="color:var(--danger)">Erreur : ${error.message}</td></tr>`;
-            return;
-        }
+    if (loadedMembers.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5">Aucun membre enregistré.</td></tr>';
+        return;
+    }
 
-        if (!membres || membres.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5">Aucun membre enregistré dans Supabase.</td></tr>';
-            return;
-        }
+    loadedMembers.forEach(m => {
+        const rolesArray = m.roles ? (Array.isArray(m.roles) ? m.roles : String(m.roles).split(',').map(Number)) : [];
+        const namesRoles = rolesArray.map(id => ROLE_MAP[id]).filter(Boolean).join(' / ') || 'Sans rôle';
 
-        tbody.innerHTML = '';
-        membres.forEach(m => {
-            const rolesArray = m.roles ? (Array.isArray(m.roles) ? m.roles : String(m.roles).split(',').map(Number)) : [];
-            const namesRoles = rolesArray.map(id => ROLE_MAP[id]).filter(Boolean).join(' / ') || 'Sans rôle';
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><strong>${m.prenom || ''} ${(m.nom || '').toUpperCase()}</strong></td>
+            <td>${m.email || ''}</td>
+            <td>${m.telephone || '03 65 17 00 63'}</td>
+            <td><span style="color:var(--accent); font-weight:600;">${namesRoles}</span></td>
+            <td class="actions-cell">
+                <button class="btn btn-edit" onclick="editMember('${m.id}')"><i class="fa-solid fa-pen"></i> Modifier</button>
+                <button class="btn btn-danger" onclick="deleteMember('${m.id}')"><i class="fa-solid fa-trash"></i></button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
 
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td><strong>${m.prenom || ''} ${(m.nom || '').toUpperCase()}</strong></td>
-                <td>${m.email || ''}</td>
-                <td>${m.telephone || '03 65 17 00 63'}</td>
-                <td><span style="color:var(--accent); font-weight:600;">${namesRoles}</span></td>
-                <td class="actions-cell">
-                    <button class="btn btn-danger" onclick="deleteMember('${m.id}')"><i class="fa-solid fa-trash"></i></button>
-                </td>
-            `;
-            tbody.appendChild(tr);
-        });
-    } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="5" style="color:var(--danger)">Erreur : ${err.message}</td></tr>`;
+function editMember(id) {
+    const member = loadedMembers.find(m => String(m.id) === String(id));
+    if (!member) return;
+
+    document.getElementById('member-id').value = member.id;
+    document.getElementById('member-prenom').value = member.prenom || '';
+    document.getElementById('member-nom').value = member.nom || '';
+    document.getElementById('member-email').value = member.email || '';
+    document.getElementById('member-phone').value = member.telephone || '03 65 17 00 63';
+
+    // Rôles
+    const rolesArray = member.roles ? (Array.isArray(member.roles) ? member.roles : String(member.roles).split(',').map(Number)) : [];
+    const checkboxes = document.getElementsByName('adminRoleCheck');
+    checkboxes.forEach(cb => {
+        cb.checked = rolesArray.includes(parseInt(cb.value, 10));
+    });
+
+    document.getElementById('member-form-title').innerText = "Modifier le Membre";
+    document.getElementById('member-submit-btn').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Enregistrer les modifications';
+    document.getElementById('member-editing-notice').style.display = 'flex';
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function resetMemberForm() {
+    document.getElementById('member-form').reset();
+    document.getElementById('member-id').value = '';
+    document.getElementById('member-form-title').innerText = "Ajouter / Modifier un Membre";
+    document.getElementById('member-submit-btn').innerHTML = '<i class="fa-solid fa-user-plus"></i> Enregistrer le membre';
+    document.getElementById('member-editing-notice').style.display = 'none';
+
+    document.getElementsByName('adminRoleCheck').forEach(cb => cb.checked = false);
+}
+
+async function handleMemberSubmit(e) {
+    e.preventDefault();
+    const id = document.getElementById('member-id').value;
+
+    // Récupère les rôles cochés sous forme de tableau de nombres ex: [1, 10]
+    const selectedRoles = Array.from(document.getElementsByName('adminRoleCheck'))
+        .filter(cb => cb.checked)
+        .map(cb => parseInt(cb.value, 10));
+
+    const payload = {
+        prenom: document.getElementById('member-prenom').value,
+        nom: document.getElementById('member-nom').value.toUpperCase(),
+        email: document.getElementById('member-email').value,
+        telephone: document.getElementById('member-phone').value,
+        roles: selectedRoles
+    };
+
+    let result;
+    if (id) {
+        result = await supabaseClient.from('membres').update(payload).eq('id', id);
+    } else {
+        result = await supabaseClient.from('membres').insert([payload]);
+    }
+
+    if (result.error) {
+        alert("Erreur enregistrement membre : " + result.error.message);
+    } else {
+        resetMemberForm();
+        fetchMembers();
     }
 }
 
 async function deleteMember(id) {
-    if (!confirm("Voulez-vous vraiment supprimer ce membre ?")) return;
-    const { error } = await supabaseClient.from('membres').delete().eq('id', id);
-    if (error) alert("Erreur suppression : " + error.message);
-    else fetchMembers();
+    if (confirm("Voulez-vous vraiment supprimer ce membre ?")) {
+        const { error } = await supabaseClient.from('membres').delete().eq('id', id);
+        if (error) alert("Erreur suppression : " + error.message);
+        else fetchMembers();
+    }
 }
 
 // =============================================================================
-// CHARGEMENT INITIAL
+// INITIALISATION
 // =============================================================================
 
 document.addEventListener('DOMContentLoaded', () => {
+    renderRoleCheckboxes();
     fetchThemes();
     fetchLogos();
     fetchMembers();
