@@ -308,19 +308,11 @@
             font-size: 12px;
             font-weight: 600;
         }
-        .changelog-list {
-            margin: 0;
-            padding: 0;
-            list-style: none;
+        .changelog-text {
             color: #d1d1e0;
-            font-size: 13px;
-            line-height: 1.8;
-        }
-        .changelog-list li {
-            margin-bottom: 6px;
-            display: flex;
-            align-items: baseline;
-            flex-wrap: wrap;
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
         }
 
         /* MODAL STYLES */
@@ -451,7 +443,7 @@
             <h1>🎙️ LA 1337 RADIO 🎙️</h1>
             <div class="subtitle">Studio de Création de Signatures Mail & BAweb</div>
         </div>
-        <a href="login.html" style="background: #20202b; color: #ff3366; border: 1px solid #ff3366; padding: 10px 16px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; transition: all 0.2s;" onmouseover="this.style.background='#ff3366'; this.style.color='#fff';" onmouseout="this.style.background='#20202b'; this.style.color='#ff3366';">
+        <a href="admin.html" style="background: #20202b; color: #ff3366; border: 1px solid #ff3366; padding: 10px 16px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 8px; transition: all 0.2s;" onmouseover="this.style.background='#ff3366'; this.style.color='#fff';" onmouseout="this.style.background='#20202b'; this.style.color='#ff3366';">
             ⚙️ Administration
         </a>
     </div>
@@ -581,7 +573,7 @@
         </div>
     </div>
 
-    <!-- ONGLET 2 : HISTORIQUE DES MISES À JOUR (CHANGELOG RESTAURÉ) -->
+    <!-- ONGLET 2 : HISTORIQUE DES MISES À JOUR (DYNAMIQUE SUPABASE) -->
     <div id="tab-changelog" class="tab-content">
         <div id="changelogContainer" class="changelog-container">
             <p style="color: #888;">Chargement des mises à jour...</p>
@@ -645,6 +637,11 @@
 <script src="team.js"></script>
 
 <script>
+    // Configuration client Supabase (Remplace si besoin par tes propres clés)
+    const SUPABASE_URL = 'https://appepchfrfghfulirckz.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_wjpCqcbmlEnHvYhJRziUGQ_SIubrlSg';
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
     const base64Cache = {};
 
     /* FONCTION DE GÉNÉRATION DES SIGNATURES SIMPLES / BAWEB */
@@ -732,64 +729,55 @@
         select.appendChild(optCustom);
         
         TEAM_DATABASE.forEach(function(member) {
-        var opt = document.createElement('option');
-        opt.value = member.id;
-        
-        // On sépare le nom et le prénom pour inverser l'ordre
-        var parts = member.name.split(' ');
-        var prenom = parts[0];
-        var nom = parts.slice(1).join(' ');
-        
-        // Affichage : NOM Prénom (avec le nom en majuscules)
-        opt.innerText = `${nom.toUpperCase()} ${prenom}`;
-        
-        select.appendChild(opt);
-    });
+            var opt = document.createElement('option');
+            opt.value = member.id;
+            
+            var parts = member.name.split(' ');
+            var prenom = parts[0];
+            var nom = parts.slice(1).join(' ');
+            
+            opt.innerText = `${nom.toUpperCase()} ${prenom}`;
+            select.appendChild(opt);
+        });
     }
 
-   async function initThemeSelector() {
-    var select = document.getElementById('inPresetTheme');
-    if (!select) return;
+    async function initThemeSelector() {
+        var select = document.getElementById('inPresetTheme');
+        if (!select) return;
 
-    const { data: themes, error } = await supabaseClient
-        .from('themes')
-        .select('*');
+        const { data: themes, error } = await supabaseClient
+            .from('themes')
+            .select('*');
 
-    if (error) {
-        console.error("Erreur Supabase :", error);
-        return;
-    }
-
-    select.innerHTML = '';
-
-    // On ne garde que les éléments où 'active' est explicitement true (ou non défini pour éviter de tout bloquer)
-    // On remplace le filtre par une version qui "force" la conversion en booléen
-const filteredThemes = (themes || []).filter(t => {
-    // Force la conversion : si la valeur est 'true', 1, ou true, ça passe.
-    const isActive = (t.active === true || t.active === 'true' || t.active === 1);
-    return isActive;
-});
-
-    // Tri : les prioritaires en premier
-    filteredThemes.sort((a, b) => (b.prioritaire === true) - (a.prioritaire === true));
-
-    filteredThemes.forEach((theme, index) => {
-        var opt = document.createElement('option');
-        opt.value = theme.id; 
-        opt.innerText = theme.name;
-
-        // Sélectionne le prioritaire par défaut, ou le premier par défaut
-        if (theme.prioritaire === true || (index === 0 && !filteredThemes.some(t => t.prioritaire === true))) {
-            opt.selected = true;
+        if (error) {
+            console.error("Erreur Supabase :", error);
+            return;
         }
 
-        select.appendChild(opt);
-    });
+        select.innerHTML = '';
 
-    if (typeof applyPresetTheme === 'function') {
-        applyPresetTheme();
+        const filteredThemes = (themes || []).filter(t => {
+            return (t.active === true || t.active === 'true' || t.active === 1);
+        });
+
+        filteredThemes.sort((a, b) => (b.prioritaire === true) - (a.prioritaire === true));
+
+        filteredThemes.forEach((theme, index) => {
+            var opt = document.createElement('option');
+            opt.value = theme.id; 
+            opt.innerText = theme.name;
+
+            if (theme.prioritaire === true || (index === 0 && !filteredThemes.some(t => t.prioritaire === true))) {
+                opt.selected = true;
+            }
+
+            select.appendChild(opt);
+        });
+
+        if (typeof applyPresetTheme === 'function') {
+            applyPresetTheme();
+        }
     }
-}
 
     function initLogoSelector() {
         var select = document.getElementById('inPresetLogo');
@@ -970,7 +958,7 @@ const filteredThemes = (themes || []).filter(t => {
             document.getElementById('outRole').innerText = rolesString || 'Votre Rôle / Poste';
         } else {
             groupTheme.style.display = 'none';
-            groupLogo.style.display = 'flex'; // Logos conservés pour le style BAweb
+            groupLogo.style.display = 'flex';
             radioPreview.style.display = 'none';
             banalPreview.style.display = 'block';
             banalPreview.innerHTML = generateBanalSignature(name, rolesString, mail, phone, sigStyle);
@@ -1188,42 +1176,42 @@ const filteredThemes = (themes || []).filter(t => {
         initModalRoles();
     });
 
-    function loadChangelog() {
-        fetch('changelog.json')
-            .then(response => response.json())
-            .then(data => {
-                const container = document.getElementById('changelogContainer');
-                if(!container) return;
-                container.innerHTML = '';
+    /* CHARGEMENT DYNAMIQUE DU CHANGELOG DEPUIS SUPABASE */
+    async function loadChangelog() {
+        const container = document.getElementById('changelogContainer');
+        if(!container) return;
 
-                const renderChanges = (changes) => {
-                    return changes.map(change => {
-                        if (typeof change === 'object' && change.category) {
-                            return `<li><span style="display:inline-block; font-size:10px; font-weight:bold; background:#222233; color:#ff3366; border:1px solid #ff3366; padding:2px 7px; border-radius:4px; margin-right:8px;">${change.category}</span> <span>${change.text}</span></li>`;
-                        }
-                        return `<li>${change}</li>`;
-                    }).join('');
-                };
+        const { data: logs, error } = await supabaseClient
+            .from('changelog')
+            .select('*')
+            .order('created_at', { ascending: false });
 
-                const recentLogs = data.slice(0, 3);
-                recentLogs.forEach((item, index) => {
-                    const isLatest = index === 0;
-                    const card = document.createElement('div');
-                    card.className = `changelog-card ${isLatest ? 'latest' : ''}`;
-                    card.innerHTML = `
-                        <div class="changelog-header">
-                            <span class="version-badge">${item.version}</span>
-                            <span class="version-date">${item.date}</span>
-                        </div>
-                        <ul class="changelog-list">${renderChanges(item.changes)}</ul>
-                    `;
-                    container.appendChild(card);
-                });
-            })
-            .catch(err => {
-                const container = document.getElementById('changelogContainer');
-                if(container) container.innerHTML = "<p style='color:#888;'>Projet configuré pour BAweb.</p>";
-            });
+        if (error) {
+            console.error("Erreur de chargement du changelog :", error);
+            container.innerHTML = "<p style='color:#888;'>Impossible de charger les notes de version.</p>";
+            return;
+        }
+
+        if (!logs || logs.length === 0) {
+            container.innerHTML = "<p style='color:#888;'>Aucune mise à jour enregistrée.</p>";
+            return;
+        }
+
+        container.innerHTML = '';
+        logs.forEach((item, index) => {
+            const isLatest = index === 0;
+            const dateStr = item.created_at ? new Date(item.created_at).toLocaleDateString('fr-FR') : '';
+            const card = document.createElement('div');
+            card.className = `changelog-card ${isLatest ? 'latest' : ''}`;
+            card.innerHTML = `
+                <div class="changelog-header">
+                    <span class="version-badge">${item.version || 'v1.0'}</span>
+                    <span class="version-date">${dateStr}</span>
+                </div>
+                <div class="changelog-text">${item.description || ''}</div>
+            `;
+            container.appendChild(card);
+        });
     }
 </script>
 
