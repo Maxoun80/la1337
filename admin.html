@@ -3,303 +3,595 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Administration - Signature Mail & Studio LA 1337</title>
-    <!-- SDK Supabase -->
+    <title>Administration LA 1337 - Gestion Complète BDD</title>
+    <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Font Awesome pour les icônes -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: system-ui, -apple-system, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; background: #0f0f12; color: #fff; }
-        h1 { color: #ff3366; text-align: center; margin-bottom: 30px; text-transform: uppercase; letter-spacing: 2px; }
-        h2 { border-bottom: 2px solid #ff3366; padding-bottom: 8px; margin-top: 40px; color: #ff3366; font-size: 20px; }
-        
-        .admin-section { background: #1a1a22; padding: 20px; border-radius: 12px; border: 1px solid #2a2a35; margin-bottom: 30px; }
-        form { display: flex; flex-direction: column; gap: 12px; }
-        .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .form-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-        
-        label { font-size: 12px; color: #aaa; font-weight: bold; text-transform: uppercase; }
-        input[type="text"], input[type="email"], input[type="url"], select { padding: 12px; font-size: 14px; background: #0d0d12; color: #fff; border: 1px solid #333344; border-radius: 6px; box-sizing: border-box; width: 100%; }
-        input[type="color"] { padding: 2px; height: 42px; background: #0d0d12; border: 1px solid #333344; border-radius: 6px; cursor: pointer; width: 100%; }
-        
-        button { background: linear-gradient(135deg, #ff3366, #ff66cc); color: white; border: none; padding: 12px 20px; font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: all 0.2s; margin-top: 10px; }
-        button:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(255, 51, 102, 0.4); }
-        
-        .roles-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; background: #0d0d12; padding: 12px; border-radius: 6px; border: 1px solid #333344; }
-        .role-item { display: flex; align-items: center; gap: 8px; font-size: 12px; cursor: pointer; color: #ddd; }
-        .role-item input { width: 16px; height: 16px; accent-color: #ff3366; cursor: pointer; }
-        
-        ul { list-style: none; padding: 0; margin: 15px 0 0 0; }
-        li { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 12px; background: #0d0d12; border-radius: 6px; border: 1px solid #2a2a35; }
-        
-        .btn-delete { background: #dc3545; color: white; border: none; padding: 6px 12px; font-size: 12px; border-radius: 4px; cursor: pointer; margin-top: 0; }
-        .btn-delete:hover { background: #bd2130; box-shadow: none; transform: none; }
-        
-        .color-preview-box { display: inline-block; width: 14px; height: 14px; border-radius: 50%; border: 1px solid #fff; margin-right: 4px; vertical-align: middle; }
-        .item-thumb { width: 40px; height: 25px; object-fit: cover; border-radius: 4px; vertical-align: middle; margin-right: 10px; border: 1px solid #444; }
+        :root {
+            --bg-primary: #121214;
+            --bg-secondary: #202024;
+            --bg-tertiary: #29292e;
+            --accent: #ff3366;
+            --text-main: #e1e1e6;
+            --text-muted: #a8a8b3;
+            --border: #323238;
+            --success: #04d361;
+            --warning: #fba94c;
+            --danger: #f75a68;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1, h2, h3 {
+            color: #fff;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            background-color: var(--bg-secondary);
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active, .tab-btn:hover {
+            background-color: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+
+        .tab-content {
+            display: none;
+            background-color: var(--bg-secondary);
+            padding: 25px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Formulaires */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        input, select {
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 0.95rem;
+        }
+
+        input[type="color"] {
+            height: 40px;
+            padding: 2px;
+            cursor: pointer;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 4px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary { background-color: var(--accent); color: #fff; }
+        .btn-primary:hover { opacity: 0.9; }
+        .btn-cancel { background-color: #4d4d57; color: #fff; }
+        .btn-danger { background-color: var(--danger); color: #fff; padding: 6px 12px; font-size: 0.85rem; }
+        .btn-edit { background-color: var(--warning); color: #000; padding: 6px 12px; font-size: 0.85rem; }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background-color: var(--bg-tertiary);
+            color: var(--text-muted);
+        }
+
+        .preview-img {
+            max-height: 40px;
+            max-width: 120px;
+            object-fit: contain;
+            border-radius: 4px;
+        }
+
+        .preview-logo {
+            max-height: 35px;
+            max-width: 35px;
+            object-fit: contain;
+        }
+
+        .color-dot {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 1px solid #fff;
+            vertical-align: middle;
+            margin-right: 5px;
+        }
+
+        .actions-cell {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* Notice de modification */
+        .editing-banner {
+            background-color: rgba(251, 169, 76, 0.15);
+            border: 1px solid var(--warning);
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
     </style>
 </head>
 <body>
 
-    <h1>🎙️ Admin - LA 1337 Studio 🎙️</h1>
-
-    <!-- 1. GESTION DES MEMBRES -->
-    <div class="admin-section">
-        <h2>👤 Gestion des Membres</h2>
-        <form id="form-membre">
-            <div class="form-grid-2">
-                <div>
-                    <label>Prénom</label>
-                    <input type="text" id="add-prenom" placeholder="Ex: Maxence" required oninput="genererEmailAuto()">
-                </div>
-                <div>
-                    <label>Nom</label>
-                    <input type="text" id="add-nom" placeholder="Ex: Rocmont" required oninput="genererEmailAuto()">
-                </div>
-            </div>
-            
-            <div class="form-grid-2">
-                <div>
-                    <label>Email Radio</label>
-                    <input type="email" id="add-email" value="@la1337.com" required>
-                </div>
-                <div>
-                    <label>Téléphone</label>
-                    <input type="text" id="add-phone" value="03 65 17 00 63" placeholder="03 65 17 00 63">
-                </div>
-            </div>
-
-            <div>
-                <label>Rôles / Fonctions :</label>
-                <div class="roles-grid" id="admin-roles-container"></div>
-            </div>
-
-            <button type="submit">➕ Ajouter le membre</button>
-        </form>
-
-        <ul id="liste-membres"><li>Chargement des membres...</li></ul>
+<div class="container">
+    <div class="header">
+        <h1><i class="fa-solid fa-gears"></i> Administration LA 1337</h1>
+        <a href="index.html" style="color: var(--accent); text-decoration: none; font-weight: bold;">
+            <i class="fa-solid fa-arrow-left"></i> Retour au Générateur
+        </a>
     </div>
 
-    <!-- 2. GESTION DES BANNIÈRES / THÈMES -->
-    <div class="admin-section">
-        <h2>🎭 Gestion des Bannières & Thèmes</h2>
-        <form id="form-theme">
-            <div class="form-grid-2">
-                <div>
-                    <label>Nom du thème</label>
-                    <input type="text" id="theme-name" placeholder="Ex: ⚡ Généraliste / ☀️ Été" required>
-                </div>
-                <div>
-                    <label>URL de l'image (PostImg / Hôte)</label>
-                    <input type="url" id="theme-url" placeholder="https://i.postimg.cc/..." required>
-                </div>
-            </div>
+    <!-- Onglets de Navigation -->
+    <div class="nav-tabs">
+        <button class="tab-btn active" onclick="switchTab('themes-tab')"><i class="fa-solid fa-palette"></i> Bannières / Thèmes</button>
+        <button class="tab-btn" onclick="switchTab('logos-tab')"><i class="fa-solid fa-image"></i> Logos</button>
+        <button class="tab-btn" onclick="switchTab('members-tab')"><i class="fa-solid fa-users"></i> Membres</button>
+    </div>
 
-            <div class="form-grid-3">
-                <div>
-                    <label>Couleur Nom / Titre</label>
+    <!-- =================================================================== -->
+    <!-- TAB 1 : BANNIÈRES / THÈMES                                          -->
+    <!-- =================================================================== -->
+    <div id="themes-tab" class="tab-content active">
+        <h2 id="theme-form-title">Ajouter une Bannière / Thème</h2>
+        
+        <div id="theme-editing-notice" class="editing-banner" style="display: none;">
+            <span><i class="fa-solid fa-pen-to-square"></i> Modification du thème en cours...</span>
+            <button class="btn btn-cancel" onclick="resetThemeForm()">Annuler la modification</button>
+        </div>
+
+        <form id="theme-form" onsubmit="handleThemeSubmit(event)">
+            <input type="hidden" id="theme-id">
+            
+            <div class="form-grid">
+                <div class="form-group full-width">
+                    <label for="theme-name">Nom du Thème / de la Bannière</label>
+                    <input type="text" id="theme-name" required placeholder="Ex: Général, Événement spécial, etc.">
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="theme-url">URL de l'image (Bannière)</label>
+                    <input type="url" id="theme-url" required placeholder="https://..." onchange="previewThemeUrl(this.value)">
+                </div>
+
+                <div class="form-group">
+                    <label for="theme-color">Couleur Principale</label>
+                    <input type="color" id="theme-color" value="#ff3366">
+                </div>
+
+                <div class="form-group">
+                    <label for="theme-textColor">Couleur Texte Nom</label>
                     <input type="color" id="theme-textColor" value="#ff3366">
                 </div>
-                <div>
-                    <label>Couleur Rôle / Poste</label>
+
+                <div class="form-group">
+                    <label for="theme-roleColor">Couleur Texte Rôle</label>
                     <input type="color" id="theme-roleColor" value="#e1e1e6">
                 </div>
-                <div>
-                    <label>Fond Badge LIVE</label>
+
+                <div class="form-group">
+                    <label for="theme-liveBgColor">Fond Tag LIVE</label>
                     <input type="color" id="theme-liveBgColor" value="#ff3366">
                 </div>
-            </div>
 
-            <button type="submit">🎨 Ajouter la bannière</button>
-        </form>
-
-        <ul id="liste-themes"><li>Chargement des thèmes...</li></ul>
-    </div>
-
-    <!-- 3. GESTION DES LOGOS -->
-    <div class="admin-section">
-        <h2>💿 Gestion des Logos</h2>
-        <form id="form-logo">
-            <div class="form-grid-2">
-                <div>
-                    <label>Nom du Logo</label>
-                    <input type="text" id="logo-name" placeholder="Ex: 💿 Logo Blanc Officiel" required>
-                </div>
-                <div>
-                    <label>URL de l'image (PNG Transparent)</label>
-                    <input type="url" id="logo-url" placeholder="https://i.postimg.cc/..." required>
+                <div class="form-group">
+                    <label for="theme-liveTxtColor">Texte Tag LIVE</label>
+                    <input type="color" id="theme-liveTxtColor" value="#ffffff">
                 </div>
             </div>
-            <button type="submit">💿 Ajouter le logo</button>
+
+            <button type="submit" id="theme-submit-btn" class="btn btn-primary">
+                <i class="fa-solid fa-plus"></i> Ajouter la bannière
+            </button>
         </form>
 
-        <ul id="liste-logos"><li>Chargement des logos...</li></ul>
+        <hr style="border-color: var(--border); margin: 30px 0;">
+
+        <h2>Bannières existantes dans Supabase</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Aperçu</th>
+                    <th>Nom</th>
+                    <th>Couleurs (Nom / Rôle / Live)</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="themes-list">
+                <tr><td colspan="4">Chargement des bannières...</td></tr>
+            </tbody>
+        </table>
     </div>
 
-    <script>
-        const ROLE_MAP = {
-            1: "Directeur", 2: "Directeur Adjoint", 3: "Président", 4: "Vice-Président", 5: "Secrétaire",
-            6: "Trésorière", 7: "Animateur", 8: "Animatrice", 9: "Programmation", 10: "Technique",
-            11: "RH", 12: "Événementiel", 13: "Communication", 14: "Journaliste", 15: "Membre extérieur"
-        };
+    <!-- =================================================================== -->
+    <!-- TAB 2 : LOGOS                                                       -->
+    <!-- =================================================================== -->
+    <div id="logos-tab" class="tab-content">
+        <h2 id="logo-form-title">Ajouter un Logo</h2>
 
-        const SUPABASE_URL = 'https://appepchfrfghfulirckz.supabase.co';
-        const SUPABASE_ANON_KEY = 'sb_publishable_wjpCqcbmlEnHvYhJRziUGQ_SIubrlSg';
-        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        <div id="logo-editing-notice" class="editing-banner" style="display: none;">
+            <span><i class="fa-solid fa-pen-to-square"></i> Modification du logo en cours...</span>
+            <button class="btn btn-cancel" onclick="resetLogoForm()">Annuler la modification</button>
+        </div>
 
-        // --- EMAIL AUTOMATIQUE ---
-        function genererEmailAuto() {
-            const prenom = document.getElementById('add-prenom').value.trim();
-            const nom = document.getElementById('add-nom').value.trim();
-            const emailInput = document.getElementById('add-email');
+        <form id="logo-form" onsubmit="handleLogoSubmit(event)">
+            <input type="hidden" id="logo-id">
 
-            if (!prenom) { emailInput.value = '@la1337.com'; return; }
-            const prenomClean = prenom.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, '');
-            let initialNom = '';
-            if (nom) {
-                const nomClean = nom.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, '');
-                if (nomClean.length > 0) initialNom = '.' + nomClean.charAt(0);
-            }
-            emailInput.value = `${prenomClean}${initialNom}@la1337.com`;
-        }
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="logo-name">Nom du Logo</label>
+                    <input type="text" id="logo-name" required placeholder="Ex: Logo Principal, Variant Blanc...">
+                </div>
 
-        // --- CHARGEMENT ROLES EN CHECKBOXES ---
-        function afficherCheckboxesRoles() {
-            const container = document.getElementById('admin-roles-container');
-            container.innerHTML = '';
-            for (const [id, nom] of Object.entries(ROLE_MAP)) {
-                container.innerHTML += `<label class="role-item"><input type="checkbox" name="adminRole" value="${id}"> ${nom}</label>`;
-            }
-        }
+                <div class="form-group full-width">
+                    <label for="logo-url">URL du Logo (PNG / SVG transparent recommandé)</label>
+                    <input type="url" id="logo-url" required placeholder="https://...">
+                </div>
+            </div>
 
-        // --- MEMBRES ---
-        async function afficherMembres() {
-            const ul = document.getElementById('liste-membres');
-            const { data: membres, error } = await supabaseClient.from('membres').select('*').order('nom', { ascending: true });
-            if (error) { ul.innerHTML = `<li style="color:red">Erreur: ${error.message}</li>`; return; }
-            
-            ul.innerHTML = membres.length === 0 ? '<li>Aucun membre.</li>' : '';
-            membres.forEach(m => {
-                const rolesArray = m.roles ? (Array.isArray(m.roles) ? m.roles : String(m.roles).split(',').map(Number)) : [];
-                const namesRoles = rolesArray.map(id => ROLE_MAP[id]).filter(Boolean).join(' / ') || 'Sans rôle';
-                ul.innerHTML += `
-                    <li>
-                        <span><strong>${m.prenom || ''} ${(m.nom || '').toUpperCase()}</strong> — <span style="color:#ff3366;">${namesRoles}</span> <em>(${m.email || ''})</em></span>
-                        <button class="btn-delete" onclick="supprimerItem('membres', '${m.id}', afficherMembres)">Supprimer</button>
-                    </li>`;
-            });
-        }
+            <button type="submit" id="logo-submit-btn" class="btn btn-primary">
+                <i class="fa-solid fa-plus"></i> Ajouter le logo
+            </button>
+        </form>
 
-        document.getElementById('form-membre').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const selectedRoles = Array.from(document.querySelectorAll('input[name="adminRole"]:checked')).map(cb => parseInt(cb.value, 10));
-            const nouveau = {
-                prenom: document.getElementById('add-prenom').value.trim(),
-                nom: document.getElementById('add-nom').value.trim(),
-                email: document.getElementById('add-email').value.trim(),
-                telephone: document.getElementById('add-phone').value.trim() || '03 65 17 00 63',
-                roles: selectedRoles
-            };
-            const { error } = await supabaseClient.from('membres').insert([nouveau]);
-            if (error) alert('Erreur : ' + error.message);
-            else {
-                alert('✅ Membre ajouté !');
-                document.getElementById('form-membre').reset();
-                document.getElementById('add-phone').value = '03 65 17 00 63';
-                document.getElementById('add-email').value = '@la1337.com';
-                afficherMembres();
-            }
-        });
+        <hr style="border-color: var(--border); margin: 30px 0;">
 
-        // --- BANNIÈRES / THÈMES ---
-        async function afficherThemes() {
-            const ul = document.getElementById('liste-themes');
-            const { data: themes, error } = await supabaseClient.from('themes').select('*').order('id', { ascending: true });
-            if (error) { ul.innerHTML = `<li>Gérez vos thèmes dans Supabase. (${error.message})</li>`; return; }
-            
-            ul.innerHTML = themes.length === 0 ? '<li>Aucun thème.</li>' : '';
-            themes.forEach(t => {
-                ul.innerHTML += `
-                    <li>
-                        <span>
-                            <img src="${t.url}" class="item-thumb" alt="bg">
-                            <strong>${t.name}</strong> 
-                            <span class="color-preview-box" style="background:${t.textColor}" title="Texte"></span>
-                            <span class="color-preview-box" style="background:${t.roleColor}" title="Rôle"></span>
-                        </span>
-                        <button class="btn-delete" onclick="supprimerItem('themes', '${t.id}', afficherThemes)">Supprimer</button>
-                    </li>`;
-            });
-        }
+        <h2>Logos existants dans Supabase</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Aperçu</th>
+                    <th>Nom</th>
+                    <th>URL</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="logos-list">
+                <tr><td colspan="4">Chargement des logos...</td></tr>
+            </tbody>
+        </table>
+    </div>
 
-        document.getElementById('form-theme').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const nouveau = {
-                name: document.getElementById('theme-name').value.trim(),
-                url: document.getElementById('theme-url').value.trim(),
-                color: document.getElementById('theme-textColor').value,
-                textColor: document.getElementById('theme-textColor').value,
-                roleColor: document.getElementById('theme-roleColor').value,
-                liveBgColor: document.getElementById('theme-liveBgColor').value,
-                liveTxtColor: '#ffffff'
-            };
-            const { error } = await supabaseClient.from('themes').insert([nouveau]);
-            if (error) alert('Erreur : ' + error.message);
-            else {
-                alert('✅ Bannière ajoutée !');
-                document.getElementById('form-theme').reset();
-                afficherThemes();
-            }
-        });
+    <!-- =================================================================== -->
+    <!-- TAB 3 : MEMBRES                                                     -->
+    <!-- =================================================================== -->
+    <div id="members-tab" class="tab-content">
+        <h2>Gestion des Membres</h2>
+        <p style="color: var(--text-muted)">Les membres sont gérés via la table <code>membres</code> dans Supabase.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Nom / Prénom</th>
+                    <th>Email</th>
+                    <th>Téléphone</th>
+                    <th>Rôles</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="members-list">
+                <tr><td colspan="5">Chargement des membres...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
 
-        // --- LOGOS ---
-        async function afficherLogos() {
-            const ul = document.getElementById('liste-logos');
-            const { data: logos, error } = await supabaseClient.from('logos').select('*').order('id', { ascending: true });
-            if (error) { ul.innerHTML = `<li>Gérez vos logos dans Supabase. (${error.message})</li>`; return; }
-            
-            ul.innerHTML = logos.length === 0 ? '<li>Aucun logo.</li>' : '';
-            logos.forEach(l => {
-                ul.innerHTML += `
-                    <li>
-                        <span>
-                            <img src="${l.url}" class="item-thumb" style="object-fit:contain;" alt="logo">
-                            <strong>${l.name}</strong>
-                        </span>
-                        <button class="btn-delete" onclick="supprimerItem('logos', '${l.id}', afficherLogos)">Supprimer</button>
-                    </li>`;
-            });
-        }
+<script>
+// =============================================================================
+// SUPABASE CLIENT CONFIG
+// =============================================================================
+const SUPABASE_URL = 'https://appepchfrfghfulirckz.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_wjpCqcbmlEnHvYhJRziUGQ_SIubrlSg';
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        document.getElementById('form-logo').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const nouveau = {
-                name: document.getElementById('logo-name').value.trim(),
-                url: document.getElementById('logo-url').value.trim()
-            };
-            const { error } = await supabaseClient.from('logos').insert([nouveau]);
-            if (error) alert('Erreur : ' + error.message);
-            else {
-                alert('✅ Logo ajouté !');
-                document.getElementById('form-logo').reset();
-                afficherLogos();
-            }
-        });
+// Stockage local
+let loadedThemes = [];
+let loadedLogos = [];
 
-        // --- FONCTION SUPPRESSION GENERIQUE ---
-        async function supprimerItem(table, id, callback) {
-            if (confirm(`Voulez-vous vraiment supprimer cet élément de ${table} ?`)) {
-                const { error } = await supabaseClient.from(table).delete().eq('id', id);
-                if (error) alert('Erreur : ' + error.message);
-                else callback();
-            }
-        }
+// Navigation entre onglets
+function switchTab(tabId) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    
+    document.getElementById(tabId).classList.add('active');
+    event.currentTarget.classList.add('active');
+}
 
-        // --- INIT ---
-        document.addEventListener('DOMContentLoaded', () => {
-            afficherCheckboxesRoles();
-            afficherMembres();
-            afficherThemes();
-            afficherLogos();
-        });
-    </script>
+// =============================================================================
+// GESTION DES THÈMES / BANNIÈRES
+// =============================================================================
+
+async function fetchThemes() {
+    const { data, error } = await supabaseClient.from('themes').select('*').order('id', { ascending: true });
+    if (error) {
+        console.error("Erreur bannières :", error);
+        return;
+    }
+    loadedThemes = data || [];
+    renderThemes();
+}
+
+function renderThemes() {
+    const tbody = document.getElementById('themes-list');
+    tbody.innerHTML = '';
+
+    if (loadedThemes.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4">Aucune bannière enregistrée.</td></tr>';
+        return;
+    }
+
+    loadedThemes.forEach(t => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><img src="${t.url}" class="preview-img" alt="Banner" onerror="this.src='https://via.placeholder.com/120x40?text=Erreur+Image'"></td>
+            <td><strong>${t.name}</strong></td>
+            <td>
+                <span class="color-dot" style="background:${t.textColor || t.color}"></span> ${t.textColor || t.color} | 
+                <span class="color-dot" style="background:${t.roleColor}"></span> ${t.roleColor} | 
+                <span class="color-dot" style="background:${t.liveBgColor}"></span> Live: ${t.liveBgColor}
+            </td>
+            <td class="actions-cell">
+                <button class="btn btn-edit" onclick="editTheme(${t.id})"><i class="fa-solid fa-pen"></i> Modifier</button>
+                <button class="btn btn-danger" onclick="deleteTheme(${t.id})"><i class="fa-solid fa-trash"></i></button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function editTheme(id) {
+    const theme = loadedThemes.find(t => t.id === id);
+    if (!theme) return;
+
+    document.getElementById('theme-id').value = theme.id;
+    document.getElementById('theme-name').value = theme.name || '';
+    document.getElementById('theme-url').value = theme.url || '';
+    document.getElementById('theme-color').value = theme.color || '#ff3366';
+    document.getElementById('theme-textColor').value = theme.textColor || '#ff3366';
+    document.getElementById('theme-roleColor').value = theme.roleColor || '#e1e1e6';
+    document.getElementById('theme-liveBgColor').value = theme.liveBgColor || '#ff3366';
+    document.getElementById('theme-liveTxtColor').value = theme.liveTxtColor || '#ffffff';
+
+    document.getElementById('theme-form-title').innerText = "Modifier la Bannière";
+    document.getElementById('theme-submit-btn').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Enregistrer les modifications';
+    document.getElementById('theme-editing-notice').style.display = 'flex';
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function resetThemeForm() {
+    document.getElementById('theme-form').reset();
+    document.getElementById('theme-id').value = '';
+    document.getElementById('theme-form-title').innerText = "Ajouter une Bannière / Thème";
+    document.getElementById('theme-submit-btn').innerHTML = '<i class="fa-solid fa-plus"></i> Ajouter la bannière';
+    document.getElementById('theme-editing-notice').style.display = 'none';
+}
+
+async function handleThemeSubmit(e) {
+    e.preventDefault();
+    const id = document.getElementById('theme-id').value;
+
+    const payload = {
+        name: document.getElementById('theme-name').value,
+        url: document.getElementById('theme-url').value,
+        color: document.getElementById('theme-color').value,
+        textColor: document.getElementById('theme-textColor').value,
+        roleColor: document.getElementById('theme-roleColor').value,
+        liveBgColor: document.getElementById('theme-liveBgColor').value,
+        liveTxtColor: document.getElementById('theme-liveTxtColor').value
+    };
+
+    let result;
+    if (id) {
+        // UPDATE (Modification)
+        result = await supabaseClient.from('themes').update(payload).eq('id', id);
+    } else {
+        // INSERT (Création)
+        result = await supabaseClient.from('themes').insert([payload]);
+    }
+
+    if (result.error) {
+        alert("Erreur enregistrement : " + result.error.message);
+    } else {
+        resetThemeForm();
+        fetchThemes();
+    }
+}
+
+async function deleteTheme(id) {
+    if (!confirm("Voulez-vous vraiment supprimer cette bannière ?")) return;
+    const { error } = await supabaseClient.from('themes').delete().eq('id', id);
+    if (error) alert("Erreur suppression : " + error.message);
+    else fetchThemes();
+}
+
+// =============================================================================
+// GESTION DES LOGOS
+// =============================================================================
+
+async function fetchLogos() {
+    const { data, error } = await supabaseClient.from('logos').select('*').order('id', { ascending: true });
+    if (error) {
+        console.error("Erreur logos :", error);
+        return;
+    }
+    loadedLogos = data || [];
+    renderLogos();
+}
+
+function renderLogos() {
+    const tbody = document.getElementById('logos-list');
+    tbody.innerHTML = '';
+
+    if (loadedLogos.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4">Aucun logo enregistré.</td></tr>';
+        return;
+    }
+
+    loadedLogos.forEach(l => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><img src="${l.url}" class="preview-logo" alt="Logo" onerror="this.src='https://via.placeholder.com/35?text=?';"></td>
+            <td><strong>${l.name}</strong></td>
+            <td style="max-width:300px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${l.url}</td>
+            <td class="actions-cell">
+                <button class="btn btn-edit" onclick="editLogo(${l.id})"><i class="fa-solid fa-pen"></i> Modifier</button>
+                <button class="btn btn-danger" onclick="deleteLogo(${l.id})"><i class="fa-solid fa-trash"></i></button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function editLogo(id) {
+    const logo = loadedLogos.find(l => l.id === id);
+    if (!logo) return;
+
+    document.getElementById('logo-id').value = logo.id;
+    document.getElementById('logo-name').value = logo.name || '';
+    document.getElementById('logo-url').value = logo.url || '';
+
+    document.getElementById('logo-form-title').innerText = "Modifier le Logo";
+    document.getElementById('logo-submit-btn').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Enregistrer les modifications';
+    document.getElementById('logo-editing-notice').style.display = 'flex';
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function resetLogoForm() {
+    document.getElementById('logo-form').reset();
+    document.getElementById('logo-id').value = '';
+    document.getElementById('logo-form-title').innerText = "Ajouter un Logo";
+    document.getElementById('logo-submit-btn').innerHTML = '<i class="fa-solid fa-plus"></i> Ajouter le logo';
+    document.getElementById('logo-editing-notice').style.display = 'none';
+}
+
+async function handleLogoSubmit(e) {
+    e.preventDefault();
+    const id = document.getElementById('logo-id').value;
+
+    const payload = {
+        name: document.getElementById('logo-name').value,
+        url: document.getElementById('logo-url').value
+    };
+
+    let result;
+    if (id) {
+        result = await supabaseClient.from('logos').update(payload).eq('id', id);
+    } else {
+        result = await supabaseClient.from('logos').insert([payload]);
+    }
+
+    if (result.error) {
+        alert("Erreur enregistrement : " + result.error.message);
+    } else {
+        resetLogoForm();
+        fetchLogos();
+    }
+}
+
+async function deleteLogo(id) {
+    if (!confirm("Voulez-vous vraiment supprimer ce logo ?")) return;
+    const { error } = await supabaseClient.from('logos').delete().eq('id', id);
+    if (error) alert("Erreur suppression : " + error.message);
+    else fetchLogos();
+}
+
+// =============================================================================
+// CHARGEMENT INITIAL
+// =============================================================================
+
+document.addEventListener('DOMContentLoaded', () => {
+    fetchThemes();
+    fetchLogos();
+});
+</script>
+
 </body>
 </html>
