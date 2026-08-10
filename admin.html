@@ -586,7 +586,7 @@ async function fetchMembers() {
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td><strong>${m.prenom || ''} ${(m.nom || '').toUpperCase()}</strong></td>
+            <td><strong>${(m.nom || '').toUpperCase()} ${m.prenom || ''}</strong></td>
             <td>${m.email || ''}</td>
             <td>${m.telephone || '03 65 17 00 63'}</td>
             <td><span style="color:var(--accent); font-weight:600;">${namesRoles}</span></td>
