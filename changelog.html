@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>LA 1337 - Mises à jour & Nouveautés</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #0f0f12;
+            color: #fff;
+            text-align: center;
+            padding: 40px 20px;
+            margin: 0;
+        }
+        .wrapper {
+            max-width: 850px;
+            margin: 0 auto;
+            background: #1a1a22;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+            border: 1px solid #2a2a35;
+        }
+        h1 {
+            color: #ff3366;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin: 0;
+            font-size: 26px;
+        }
+        .subtitle {
+            color: #aaa;
+            font-size: 13px;
+            margin: 5px 0 0 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #2a2a35;
+            padding-bottom: 15px;
+        }
+        .tab-btn {
+            background: #0d0d12;
+            color: #888899;
+            border: 1px solid #2a2a35;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+        .tab-btn:hover {
+            color: #fff;
+            border-color: #ff3366;
+        }
+        .tab-btn.active {
+            background: linear-gradient(135deg, #ff3366, #ff66cc);
+            color: #fff;
+            border-color: transparent;
+            box-shadow: 0 4px 15px rgba(255, 51, 102, 0.3);
+        }
+        .changelog-container {
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .changelog-card {
+            background: #0d0d12;
+            border: 1px solid #2a2a35;
+            border-radius: 12px;
+            padding: 20px 25px;
+        }
+        .changelog-card.latest {
+            border-color: #ff3366;
+            box-shadow: 0 0 15px rgba(255, 51, 102, 0.15);
+        }
+        .changelog-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            border-bottom: 1px solid #1a1a22;
+            padding-bottom: 10px;
+        }
+        .version-badge {
+            background: #ff3366;
+            color: #fff;
+            font-weight: bold;
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .version-date {
+            color: #888899;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .changelog-text {
+            color: #d1d1e0;
+            font-size: 14px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+
+<div class="wrapper">
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #2a2a35; padding-bottom: 20px; margin-bottom: 25px;">
+        <div style="text-align: left;">
+            <h1>🎙️ LA 1337 RADIO 🎙️</h1>
+            <div class="subtitle">Historique des Mises à jour</div>
+        </div>
+        <a href="login.html" style="background: #20202b; color: #ff3366; border: 1px solid #ff3366; padding: 10px 16px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 8px;">
+            ⚙️ Administration
+        </a>
+    </div>
+
+    <div class="nav-tabs">
+        <a href="index.html" class="tab-btn">🎨 Générateur</a>
+        <a href="changelog.html" class="tab-btn active">📜 Mises à jour & Nouveautés</a>
+    </div>
+
+    <div id="changelogContainer" class="changelog-container">
+        <p style="color: #888;">Chargement des mises à jour...</p>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    const SUPABASE_URL = 'https://appepchfrfghfulirckz.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_wjpCqcbmlEnHvYhJRziUGQ_SIubrlSg';
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    async function loadChangelog() {
+        const container = document.getElementById('changelogContainer');
+        if(!container) return;
+
+        const { data: logs, error } = await supabaseClient
+            .from('changelog')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.error("Erreur Supabase changelog :", error);
+            container.innerHTML = "<p style='color:#888;'>Impossible de charger les notes de version.</p>";
+            return;
+        }
+
+        if (!logs || logs.length === 0) {
+            container.innerHTML = "<p style='color:#888;'>Aucune mise à jour enregistrée.</p>";
+            return;
+        }
+
+        container.innerHTML = '';
+        logs.forEach((item, index) => {
+            const isLatest = index === 0;
+            const dateStr = item.created_at ? new Date(item.created_at).toLocaleDateString('fr-FR') : (item.date || '');
+            const card = document.createElement('div');
+            card.className = `changelog-card ${isLatest ? 'latest' : ''}`;
+            card.innerHTML = `
+                <div class="changelog-header">
+                    <span class="version-badge">${item.version || 'v1.0'}</span>
+                    <span class="version-date">${dateStr}</span>
+                </div>
+                <div class="changelog-text">${item.description || item.text || ''}</div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    window.onload = loadChangelog;
+</script>
+
+</body>
+</html>
