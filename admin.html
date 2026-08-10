@@ -586,7 +586,7 @@ async function fetchMembers() {
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td><strong>${(m.nom || '').toUpperCase()} ${m.prenom || ''}</strong></td>
+            <td><strong>${m.prenom || ''} ${(m.nom || '').toUpperCase()}</strong></td>
             <td>${m.email || ''}</td>
             <td>${m.telephone || '03 65 17 00 63'}</td>
             <td><span style="color:var(--accent); font-weight:600;">${namesRoles}</span></td>
@@ -670,30 +670,6 @@ async function deleteMember(id) {
         else fetchMembers();
     }
 }
-
-// =============================================================================
-// ajout changelog
-// =============================================================================
-<!-- Exemple de formulaire admin -->
-<div id="admin-changelog">
-    <h3>Ajouter une note de version</h3>
-    <input type="text" id="versionInput" placeholder="Ex: v1.5">
-    <textarea id="descInput" placeholder="Description des nouveautés..."></textarea>
-    <button onclick="saveChangelog()">Publier</button>
-</div>
-
-<script>
-async function saveChangelog() {
-    const version = document.getElementById('versionInput').value;
-    const description = document.getElementById('descInput').value;
-    
-    const { data, error } = await supabaseClient
-        .from('changelog')
-        .insert([{ version, description }]);
-        
-    if (!error) alert("Changelog mis à jour !");
-}
-</script>
 
 // =============================================================================
 // INITIALISATION
