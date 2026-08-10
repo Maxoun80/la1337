@@ -637,12 +637,27 @@
 <script src="team.js"></script>
 
 <script>
-    // Configuration client Supabase (Remplace si besoin par tes propres clés)
+    // Configuration client Supabase
     const SUPABASE_URL = 'https://appepchfrfghfulirckz.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_wjpCqcbmlEnHvYhJRziUGQ_SIubrlSg';
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     const base64Cache = {};
+
+    /* GESTION DES ONGLETS (CORRIGÉE) */
+    function switchTab(tabId, btnElement) {
+        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        
+        const targetTab = document.getElementById(tabId);
+        if (targetTab) targetTab.classList.add('active');
+        if (btnElement) btnElement.classList.add('active');
+
+        // Si on passe sur l'onglet changelog, on force le chargement des données
+        if (tabId === 'tab-changelog') {
+            loadChangelog();
+        }
+    }
 
     /* FONCTION DE GÉNÉRATION DES SIGNATURES SIMPLES / BAWEB */
     function generateBanalSignature(name, role, mail, phone, style) {
@@ -659,7 +674,6 @@
                 </div>
             `;
         } else {
-            // Style BAweb Line
             return `
                 <div style="font-family: Arial, sans-serif; color: #111; text-align: left; background: #fff; padding: 15px 20px; border-radius: 6px; border-left: 3px solid #ff3366;">
                     <strong style="font-size: 15px; text-transform: uppercase;">${name}</strong> — 
@@ -668,15 +682,6 @@
                 </div>
             `;
         }
-    }
-
-    /* GESTION DU MENU ET ONGLETS */
-    function switchTab(tabId, btnElement) {
-        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-        
-        document.getElementById(tabId).classList.add('active');
-        btnElement.classList.add('active');
     }
 
     function initRolesCheckboxes() {
