@@ -122,7 +122,7 @@
             cursor: pointer;
         }
 
-        /* Roles checkboxes grid */
+        /* Grille des rôles */
         .roles-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -324,8 +324,8 @@
                     <input type="text" id="member-nom" required placeholder="Ex: DUPONT">
                 </div>
                 <div class="form-group">
-                    <label for="member-email">Email</label>
-                    <input type="email" id="member-email" placeholder="contact@domaine.fr">
+                    <label for="member-email">Email (Auto-généré)</label>
+                    <input type="email" id="member-email" placeholder="prenom.n@la1337.com">
                 </div>
                 <div class="form-group">
                     <label for="member-phone">Téléphone</label>
@@ -335,7 +335,7 @@
 
             <label style="margin-bottom: 8px; display: block;">Rôles attribués :</label>
             <div class="roles-grid" id="roles-checkboxes-container">
-                <!-- Généré dynamiquement JS -->
+                <!-- Généré dynamiquement en JS -->
             </div>
 
             <button type="submit" id="member-submit-btn" class="btn btn-primary">
@@ -386,6 +386,25 @@ function switchTab(tabId, event) {
     document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
     document.getElementById(tabId).classList.add('active');
     if (event && event.currentTarget) event.currentTarget.classList.add('active');
+}
+
+// Génération automatique de l'email : prenom.initialeDuNom@la1337.com
+function autoGenerateEmail() {
+    // Ne génère automatiquement que si on est en création (pas de membre-id défini)
+    const memberId = document.getElementById('member-id').value;
+    if (memberId) return;
+
+    const prenom = document.getElementById('member-prenom').value.trim().toLowerCase();
+    const nom = document.getElementById('member-nom').value.trim().toLowerCase();
+    const emailInput = document.getElementById('member-email');
+
+    if (prenom && nom) {
+        const cleanPrenom = prenom.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '');
+        const cleanNom = nom.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '');
+        const initialNom = cleanNom.charAt(0);
+
+        emailInput.value = `${cleanPrenom}.${initialNom}@la1337.com`;
+    }
 }
 
 // =============================================================================
@@ -590,7 +609,6 @@ function editMember(id) {
     document.getElementById('member-email').value = member.email || '';
     document.getElementById('member-phone').value = member.telephone || '03 65 17 00 63';
 
-    // Rôles
     const rolesArray = member.roles ? (Array.isArray(member.roles) ? member.roles : String(member.roles).split(',').map(Number)) : [];
     const checkboxes = document.getElementsByName('adminRoleCheck');
     checkboxes.forEach(cb => {
@@ -618,7 +636,6 @@ async function handleMemberSubmit(e) {
     e.preventDefault();
     const id = document.getElementById('member-id').value;
 
-    // Récupère les rôles cochés sous forme de tableau de nombres ex: [1, 10]
     const selectedRoles = Array.from(document.getElementsByName('adminRoleCheck'))
         .filter(cb => cb.checked)
         .map(cb => parseInt(cb.value, 10));
@@ -663,6 +680,10 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchThemes();
     fetchLogos();
     fetchMembers();
+
+    // Écouteurs pour auto-générer l'email à la frappe du prénom / nom
+    document.getElementById('member-prenom')?.addEventListener('input', autoGenerateEmail);
+    document.getElementById('member-nom')?.addEventListener('input', autoGenerateEmail);
 });
 </script>
 
