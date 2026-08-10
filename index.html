@@ -766,7 +766,8 @@
 
     // 1. Filtrer pour ne garder que ceux qui sont actifs (si la colonne existe)
     // 2. Trier pour mettre les prioritaires en premier
-    const filteredThemes = (themes || []).filter(t => t.active !== false).sort((a, b) => {
+    console.log("Données reçues de Supabase :", themes);
+const filteredThemes = (themes || []).sort((a, b) => {
         return (b.prioritaire === true) - (a.prioritaire === true);
     });
 
