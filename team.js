@@ -2,7 +2,50 @@
 // 1. CONFIGURATION GENERALE & RESSOURCES
 // =============================================================================
 
-const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS0a8y_ZHF2WsnBHMbrUKL8p-CH1SJI_6US5bc2Iv-IZRWWo8NiGJEtRjNZfwWSctJBjokRKZruvexz/pub?gid=1526030464&single=true&output=csv";
+// const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vS0a8y_ZHF2WsnBHMbrUKL8p-CH1SJI_6US5bc2Iv-IZRWWo8NiGJEtRjNZfwWSctJBjokRKZruvexz/pub?gid=1526030464&single=true&output=csv";
+
+
+// 1. Initialisation de la connexion Supabase
+const SUPABASE_URL = 'https://VOTRE_PROJET.supabase.co';
+const SUPABASE_ANON_KEY = 'VOTRE_CLE_ANON_PUBLIQUE';
+
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// 2. Chargement des membres depuis la base de données
+async function loadTeamMembers() {
+    const { data: membres, error } = await supabaseClient
+        .from('membres')
+        .select('*')
+        .order('nom', { ascending: true });
+
+    if (error) {
+        console.error('Erreur Supabase :', error.message);
+        return;
+    }
+
+    const select = document.getElementById('member-select');
+    if (!select) return;
+
+    select.innerHTML = '<option value="">-- Sélectionner un membre --</option>';
+
+    membres.forEach(membre => {
+        const option = document.createElement('option');
+        option.value = membre.id;
+        option.textContent = `${membre.prenom} ${membre.nom}`;
+        
+        // Données injectées dans l'élément pour pré-remplir les champs au clic
+        option.dataset.prenom = membre.prenom || '';
+        option.dataset.nom = membre.nom || '';
+        option.dataset.role = membre.role || '';
+        option.dataset.email = membre.email || '';
+
+        select.appendChild(option);
+    });
+}
+
+// Lancement automatique de la fonction au chargement de la page
+document.addEventListener('DOMContentLoaded', loadTeamMembers);
+
 
 // Dictionnaire officiel des 15 rôles LA 1337
 const ROLE_MAP = {
