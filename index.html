@@ -708,15 +708,31 @@
     }
 
     function setSecureImage(url, targetId, isBackground, callback) {
-        if (!url) return;
-        if (base64Cache[url]) { 
-            applyImageToTarget(base64Cache[url], targetId, isBackground); 
-            if(callback) callback();
-            return; 
+    if (!url) return;
+    
+    // Si c'est un placeholder temporaire (ne commence pas par http/https/data)
+    if (!url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('data:')) {
+        console.warn("URL temporaire ou invalide ignorée :", url);
+        // On efface l'ancienne image pour éviter les résidus
+        const element = document.getElementById(targetId);
+        if (element) {
+            if (isBackground) element.style.backgroundImage = 'none';
+            else element.src = '';
         }
-        const img = new Image(); 
-        img.crossOrigin = "Anonymous";
-        img.onload = function() {
+        return;
+    }
+
+    if (base64Cache[url]) { 
+        applyImageToTarget(base64Cache[url], targetId, isBackground); 
+        if(callback) callback();
+        return; 
+    }
+
+    const img = new Image(); 
+    img.crossOrigin = "Anonymous";
+    
+    img.onload = function() {
+        try {
             const canvas = document.createElement("canvas"); 
             canvas.width = img.width; 
             canvas.height = img.height;
@@ -724,9 +740,23 @@
             base64Cache[url] = canvas.toDataURL("image/png");
             applyImageToTarget(base64Cache[url], targetId, isBackground);
             if(callback) callback();
-        }; 
-        img.src = url;
-    }
+        } catch(e) {
+            // En cas de sécurité CORS, on applique directement l'URL
+            applyImageToTarget(url, targetId, isBackground);
+        }
+    }; 
+
+    // Sécurité anti-crash en cas de 404
+    img.onerror = function() {
+        console.warn("Impossible de charger l'image (404) :", url);
+        const element = document.getElementById(targetId);
+        if (element && isBackground) {
+            element.style.backgroundImage = 'none';
+        }
+    };
+
+    img.src = url;
+}
 
     function applyImageToTarget(dataUrl, targetId, isBackground) {
         const element = document.getElementById(targetId);
