@@ -568,7 +568,6 @@ async function fetchPresenceList() {
         const isPresent = m.present === true;
         if (isActif && isPresent) actifsPresents++;
 
-        // Couleur du badge de statut
         let badgeColor = 'var(--success)';
         if (statut === 'Essai') badgeColor = 'var(--warning)';
         if (statut === 'Retrait' || statut === 'Inactif' || statut === 'Membre extérieur') badgeColor = 'var(--text-muted)';
@@ -589,7 +588,6 @@ async function fetchPresenceList() {
         tbody.appendChild(tr);
     });
 
-    // Calcul du Quorum (exigé à partir de la moitié des actifs + 1)
     document.getElementById('quorum-count').innerText = `${actifsPresents} / ${totalActifs}`;
     const quorumStatusEl = document.getElementById('quorum-status');
     const quorumMin = Math.floor(totalActifs / 2) + 1;
@@ -614,7 +612,7 @@ async function updatePresence(memberId, val) {
 }
 
 // =============================================================================
-// EXPORT PDF OFFICIEL (CALQUÉ SUR LE MODÈLE OFFICIEL LA 1337)
+// EXPORT PDF OFFICIEL
 // =============================================================================
 
 async function exportPresencePDF() {
@@ -624,7 +622,6 @@ async function exportPresencePDF() {
     
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     const dateFormatted = new Date(dateReunion).toLocaleDateString('fr-FR', options);
-    // Format court pour le bas de page
     const dateCourte = new Date(dateReunion).toLocaleDateString('fr-FR');
 
     const { data: membres, error } = await supabaseClient.from('membres').select('*').order('nom', { ascending: true });
@@ -633,7 +630,6 @@ async function exportPresencePDF() {
         return;
     }
 
-    // Calculs statistiques
     let totalMembres = membres.length;
     let actifsCount = membres.filter(m => m.statut === 'Actif').length;
     let essaiCount = membres.filter(m => m.statut === 'Essai').length;
@@ -641,10 +637,10 @@ async function exportPresencePDF() {
 
     let presentsCount = membres.filter(m => m.statut === 'Actif' && m.present === true).length;
     let absentsCount = totalMembres - membres.filter(m => m.present === true || m.etat_presence === 'excuse').length;
+    let excusesCount = membres.filter(m => m.etat_presence === 'excuse').length;
 
-    // Création du conteneur PDF
     const element = document.createElement('div');
-    element.style.padding = '25px';
+    element.style.padding = '20px';
     element.style.background = '#ffffff';
     element.style.color = '#111111';
     element.style.fontFamily = 'Helvetica, Arial, sans-serif';
@@ -662,7 +658,7 @@ async function exportPresencePDF() {
             </div>
         </div>
 
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; page-break-inside: auto;">
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
             <thead>
                 <tr style="background: #202024; color: #ffffff;">
                     <th style="padding: 8px; border: 1px solid #ddd; text-align: left; width: 45%;">NOM et Prénom</th>
@@ -677,7 +673,6 @@ async function exportPresencePDF() {
         const nomComplet = `${(m.nom || '').toUpperCase()} ${m.prenom || ''}`;
         const statut = m.statut || 'Actif';
         
-        // Récupération des rôles si existants
         const rolesArray = m.roles ? (Array.isArray(m.roles) ? m.roles : String(m.roles).split(',').map(Number)) : [];
         const namesRoles = rolesArray.map(id => ROLE_MAP[id]).filter(Boolean).join(' / ');
         
@@ -698,9 +693,9 @@ async function exportPresencePDF() {
 
         htmlContent += `
             <tr style="page-break-inside: avoid;">
-                <td style="padding: 7px 8px; border: 1px solid #ddd; font-weight: bold;">${nomComplet}</td>
-                <td style="padding: 7px 8px; border: 1px solid #ddd; color: #333;">${fonctionTxt}</td>
-                <td style="padding: 7px 8px; border: 1px solid #ddd; text-align: center; color: ${pointageColor}; font-weight: bold;">${pointageTxt}</td>
+                <td style="padding: 6px 8px; border: 1px solid #ddd; font-weight: bold;">${nomComplet}</td>
+                <td style="padding: 6px 8px; border: 1px solid #ddd; color: #333;">${fonctionTxt}</td>
+                <td style="padding: 6px 8px; border: 1px solid #ddd; text-align: center; color: ${pointageColor}; font-weight: bold;">${pointageTxt}</td>
             </tr>
         `;
     });
@@ -710,26 +705,26 @@ async function exportPresencePDF() {
         </table>
 
         <!-- Bloc Statistiques & Quorum -->
-        <div style="background: #f8f9fa; border: 1px solid #ddd; padding: 12px; border-radius: 4px; margin-bottom: 25px; font-size: 11px; page-break-inside: avoid;">
+        <div style="background: #f8f9fa; border: 1px solid #ddd; padding: 12px; border-radius: 4px; margin-bottom: 20px; font-size: 11px; page-break-inside: avoid;">
             <div><strong>Total des membres :</strong> ${actifsCount} actifs / ${essaiCount} à l'essai SANS DROIT DE VOTE (${totalMembres} au total)</div>
             <div style="margin-top: 4px;"><strong>Quorum :</strong> ${quorumRequis} (avec droit de vote = ne prend en compte que les actifs)</div>
             <div style="margin-top: 4px;"><strong>Membres présents :</strong> ${presentsCount} (${presentsCount} actifs + 0 à l'essai)</div>
-            <div style="margin-top: 4px;"><strong>Membres absents :</strong> ${absentsCount}</div>
+            <div style="margin-top: 4px;"><strong>Membres absents :</strong> ${absentsCount} (dont ${excusesCount} excusés)</div>
         </div>
 
         <!-- Signatures & Pied de page officiel -->
-        <div style="display: flex; justify-content: space-between; margin-top: 30px; font-size: 11px; page-break-inside: avoid;">
+        <div style="display: flex; justify-content: space-between; margin-top: 25px; font-size: 11px; page-break-inside: avoid;">
             <div>
                 Fait le ${dateCourte}, à ARRAS (62)<br><br><br>
-                <strong>VAN-KETS Guillaume,</strong><br>Le président
+                <strong>MOREL Enzo,</strong><br>Le président
             </div>
             <div style="text-align: right;">
                 <br><br><br>
-                <strong>MOREL Enzo,</strong><br>Le secrétaire
+                <strong>ROCQUEMONT Maxence,</strong><br>Le secrétaire
             </div>
         </div>
 
-        <div style="margin-top: 40px; border-top: 1px solid #ccc; padding-top: 8px; text-align: center; font-size: 9px; color: #666; page-break-inside: avoid;">
+        <div style="margin-top: 30px; border-top: 1px solid #ccc; padding-top: 8px; text-align: center; font-size: 9px; color: #666; page-break-inside: avoid;">
             <strong>La1337</strong> — Webradio Associative (Loi 1901) | 19 rue Lavoisier, 27000 ÉVREUX | SIRET: 852 512 789 00011 | Site Internet: www.la1337.com
         </div>
     `;
@@ -1112,9 +1107,8 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchLogos();
     fetchMembers();
     fetchChangelog();
-    fetchPresenceList(); // Charge directement les présences au démarrage
+    fetchPresenceList();
 
-    // Écouteurs pour auto-générer l'email à la frappe du prénom / nom
     document.getElementById('member-prenom')?.addEventListener('input', autoGenerateEmail);
     document.getElementById('member-nom')?.addEventListener('input', autoGenerateEmail);
 });
