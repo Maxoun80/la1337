@@ -157,7 +157,7 @@
         <button class="tab-btn" onclick="switchTab('changelog-tab', this)"><i class="fa-solid fa-clock-rotate-left"></i> Changelog</button>
     </div>
 
-    <!-- ONGLET 1 : ÉMARGEMENT & PRÉSENCES (NOUVEAU) -->
+    <!-- ONGLET 1 : ÉMARGEMENT & PRÉSENCES -->
     <div id="presence-tab" class="tab-content active">
         <h2><i class="fa-solid fa-clipboard-user"></i> Feuille de Présence & Quorum (AGO / AGE)</h2>
         <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">
@@ -194,20 +194,55 @@
     <!-- ONGLET 2 : MEMBRES -->
     <div id="membres-tab" class="tab-content">
         <h2>Gestion des Membres</h2>
-        <p style="color: var(--text-muted);">Interface de gestion de la base des membres de l'équipe.</p>
-        <!-- Tu peux retrouver ton code de gestion de membres habituel ici -->
+        <p style="color: var(--text-muted);">Liste des membres de l'équipe chargés depuis Supabase.</p>
+        <table style="margin-top:20px;">
+            <thead>
+                <tr>
+                    <th>Nom Prénom</th>
+                    <th>Email</th>
+                    <th>Téléphone</th>
+                </tr>
+            </thead>
+            <tbody id="membres-db-list">
+                <tr><td colspan="3" style="text-align: center; color: var(--text-muted);">Chargement...</td></tr>
+            </tbody>
+        </table>
     </div>
 
     <!-- ONGLET 3 : THÈMES -->
     <div id="themes-tab" class="tab-content">
         <h2>Gestion des Bannières</h2>
-        <p style="color: var(--text-muted);">Interface de gestion des bannières graphiques.</p>
+        <p style="color: var(--text-muted);">Bannières thématiques enregistrées dans Supabase.</p>
+        <table style="margin-top:20px;">
+            <thead>
+                <tr>
+                    <th>Nom de la bannière</th>
+                    <th>Statut</th>
+                    <th>Prioritaire</th>
+                </tr>
+            </thead>
+            <tbody id="themes-db-list">
+                <tr><td colspan="3" style="text-align: center; color: var(--text-muted);">Chargement...</td></tr>
+            </tbody>
+        </table>
     </div>
 
     <!-- ONGLET 4 : CHANGELOG -->
     <div id="changelog-tab" class="tab-content">
         <h2>Gestion du Changelog</h2>
-        <p style="color: var(--text-muted);">Interface de publication des notes de version.</p>
+        <p style="color: var(--text-muted);">Historique des notes de version.</p>
+        <table style="margin-top:20px;">
+            <thead>
+                <tr>
+                    <th>Version</th>
+                    <th>Date</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody id="changelog-db-list">
+                <tr><td colspan="3" style="text-align: center; color: var(--text-muted);">Chargement...</td></tr>
+            </tbody>
+        </table>
     </div>
 </div>
 
@@ -224,12 +259,13 @@
         document.getElementById(tabId).classList.add('active');
         btnElement.classList.add('active');
 
-        if (tabId === 'presence-tab') {
-            loadPresenceList();
-        }
+        if (tabId === 'presence-tab') loadPresenceList();
+        if (tabId === 'membres-tab') loadMembresAdmin();
+        if (tabId === 'themes-tab') loadThemesAdmin();
+        if (tabId === 'changelog-tab') loadChangelogAdmin();
     }
 
-    // Chargement dynamique de la liste de présence depuis Supabase
+    // 1. Chargement de l'émargement & présences
     async function loadPresenceList() {
         const tbody = document.getElementById('presence-list');
         tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Chargement des membres...</td></tr>`;
@@ -241,12 +277,12 @@
 
         if (error) {
             console.error("Erreur chargement membres :", error);
-            tbody.innerHTML = `<tr><td colspan="4" style="color: var(--danger);">Erreur de chargement de la base.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="4" style="color: var(--danger);">Erreur de chargement (Vérifie les colonnes de la table membres).</td></tr>`;
             return;
         }
 
         if (!membres || membres.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Aucun membre trouvé.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Aucun membre trouvé dans Supabase.</td></tr>`;
             return;
         }
 
@@ -255,7 +291,6 @@
         let actifsPresents = 0;
 
         membres.forEach(m => {
-            // Statut par défaut "Actif" si non renseigné
             let statut = m.statut || 'Actif';
             let isActif = (statut === 'Actif');
             if (isActif) totalActifs++;
@@ -263,59 +298,4 @@
             let isPresent = m.present === true;
             if (isActif && isPresent) actifsPresents++;
 
-            // Couleur du badge de statut
-            let badgeColor = 'var(--success)';
-            if (statut === 'Essai') badgeColor = 'var(--warning)';
-            if (statut === 'Retrait' || statut === 'Inactif') badgeColor = 'var(--text-muted)';
-
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td><strong>${m.name || 'Nom inconnu'}</strong><br><span style="font-size:11px; color:var(--text-muted);">${m.mail || ''}</span></td>
-                <td><span style="color: ${badgeColor}; font-weight: bold;">${statut}</span></td>
-                <td>${isActif ? '✅ Oui (Comptabilisé)' : '❌ Non (Invité / Retrait)'}</td>
-                <td>
-                    <select onchange="updatePresence('${m.id}', this.value)" style="background: var(--bg-primary); padding: 8px; border-radius: 6px; color: #fff; border: 1px solid var(--border); cursor: pointer;">
-                        <option value="absent" ${!isPresent ? 'selected' : ''}>🔴 Absent / Non excusé</option>
-                        <option value="present" ${isPresent ? 'selected' : ''}>🟢 Présent</option>
-                        <option value="excuse" ${m.etat_presence === 'excuse' ? 'selected' : ''}>🟡 Excusé</option>
-                    </select>
-                </td>
-            `;
-            tbody.appendChild(tr);
-        });
-
-        // Calcul du Quorum (ex: exigé à partir de la moitié des actifs, ou règle personnalisable)
-        document.getElementById('quorum-count').innerText = `${actifsPresents} / ${totalActifs}`;
-        const quorumStatusEl = document.getElementById('quorum-status');
-        
-        // Supposons un quorum de la moitié des actifs + 1 (règle associative classique)
-        const quorumMin = Math.floor(totalActifs / 2) + 1;
-        if (actifsPresents >= quorumMin) {
-            quorumStatusEl.innerHTML = `<span style="color: var(--success);">🟢 QUORUM ATTEINT (${actifsPresents}/${quorumMin} requis)</span>`;
-        } else {
-            quorumStatusEl.innerHTML = `<span style="color: var(--danger);">🔴 QUORUM NON ATTEINT (${actifsPresents}/${quorumMin} requis)</span>`;
-        }
-    }
-
-    async function updatePresence(memberId, val) {
-        const isPresent = (val === 'present');
-        const { error } = await supabaseClient
-            .from('membres')
-            .update({ present: isPresent, etat_presence: val })
-            .eq('id', memberId);
-
-        if (error) {
-            alert("Erreur lors de la mise à jour de la présence : " + error.message);
-        } else {
-            loadPresenceList(); // Recalcule automatiquement le quorum
-        }
-    }
-
-    // Charger la liste des présences au démarrage si on ouvre directement sur l'onglet
-    window.addEventListener('DOMContentLoaded', () => {
-        loadPresenceList();
-    });
-</script>
-
-</body>
-</html>
+            let
