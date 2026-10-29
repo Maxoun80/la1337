@@ -1,3 +1,5 @@
+admin.html
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -761,7 +763,7 @@ function exportPresencePDF() {
 
         <div style="display: flex; justify-content: space-between; margin-top: 15px; font-size: 10px; page-break-inside: avoid; color: #111827;">
             <div style="text-align: left;">
-                Fait le ${dateFormatted}, à ÉVREUX (27)<br><br>
+                Fait le ${dateFormatted}, à ${(typeReunion.includes('AGO') || typeReunion.includes('AGE')) ? 'ARRAS (62)' : 'ÉVREUX (27)'}<br><br>
                 <strong>MOREL Enzo,</strong><br>
                 Le président
             </div>
