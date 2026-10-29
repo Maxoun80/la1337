@@ -6,7 +6,7 @@
     <title>Administration LA 1337 - Gestion Complète BDD</title>
     <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- html2pdf Library for PDF export -->
+    <!-- html2pdf.js pour l'export officiel -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <!-- Font Awesome pour les icônes -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -263,8 +263,8 @@
             <div class="form-group">
                 <label for="reunion-type">Type de Réunion</label>
                 <select id="reunion-type" style="background: var(--bg-primary); padding: 10px; border-radius: 4px; color: #fff; border: 1px solid var(--border);">
-                    <option value="Assemblée Générale Ordinaire (AGO)">Assemblée Générale Ordinaire (AGO)</option>
-                    <option value="Assemblée Générale Extraordinaire (AGE)">Assemblée Générale Extraordinaire (AGE)</option>
+                    <option value="AGO (Assemblée Générale Ordinaire)">AGO (Assemblée Générale Ordinaire)</option>
+                    <option value="AGE (Assemblée Générale Extraordinaire)">AGE (Assemblée Générale Extraordinaire)</option>
                     <option value="Réunion du Conseil d'Administration">Réunion du Conseil d'Administration</option>
                 </select>
             </div>
@@ -278,7 +278,7 @@
             </div>
             <div>
                 <button class="btn btn-primary" onclick="exportPresencePDF()" style="width: 100%; justify-content: center; padding: 11px;">
-                    <i class="fa-solid fa-file-pdf"></i> Exporter la Feuille (PDF)
+                    <i class="fa-solid fa-file-pdf"></i> Exporter la Feuille (PDF Officiel)
                 </button>
             </div>
         </div>
@@ -535,7 +535,7 @@ function autoGenerateEmail() {
 }
 
 // =============================================================================
-// GESTION DES PRÉSENCES & ÉMARGEMENT (AVEC EXPORT PDF)
+// GESTION DES PRÉSENCES & ÉMARGEMENT
 // =============================================================================
 
 async function fetchPresenceList() {
@@ -571,7 +571,7 @@ async function fetchPresenceList() {
         // Couleur du badge de statut
         let badgeColor = 'var(--success)';
         if (statut === 'Essai') badgeColor = 'var(--warning)';
-        if (statut === 'Retrait' || statut === 'Inactif') badgeColor = 'var(--text-muted)';
+        if (statut === 'Retrait' || statut === 'Inactif' || statut === 'Membre extérieur') badgeColor = 'var(--text-muted)';
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
@@ -580,7 +580,7 @@ async function fetchPresenceList() {
             <td>${isActif ? '✅ Actif (Votant / Quorum)' : '❌ Non obligatoire / Invité'}</td>
             <td>
                 <select onchange="updatePresence('${m.id}', this.value)" style="background: var(--bg-primary); padding: 8px; border-radius: 6px; color: #fff; border: 1px solid var(--border); cursor: pointer;">
-                    <option value="absent" ${!isPresent ? 'selected' : ''}>🔴 Absent / Non excusé</option>
+                    <option value="absent" ${!isPresent && m.etat_presence !== 'excuse' ? 'selected' : ''}>🔴 Absent / Non excusé</option>
                     <option value="present" ${isPresent ? 'selected' : ''}>🟢 Présent</option>
                     <option value="excuse" ${m.etat_presence === 'excuse' ? 'selected' : ''}>🟡 Excusé</option>
                 </select>
@@ -613,79 +613,124 @@ async function updatePresence(memberId, val) {
     }
 }
 
-// Fonction d'export PDF de la feuille de présence
-function exportPresencePDF() {
+// =============================================================================
+// EXPORT PDF OFFICIEL (CALQUÉ SUR LE MODÈLE OFFICIEL LA 1337)
+// =============================================================================
+
+async function exportPresencePDF() {
     const typeReunion = document.getElementById('reunion-type').value;
     const dateReunion = document.getElementById('reunion-date').value || new Date().toISOString().split('T')[0];
     const heureReunion = document.getElementById('reunion-heure').value || '18:00';
     
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     const dateFormatted = new Date(dateReunion).toLocaleDateString('fr-FR', options);
+    // Format court pour le bas de page
+    const dateCourte = new Date(dateReunion).toLocaleDateString('fr-FR');
 
-    const rows = document.querySelectorAll('#presence-list tr');
-    if (rows.length === 0 || rows[0].innerText.includes('Chargement')) {
-        alert("Veuillez attendre le chargement complet des membres.");
+    const { data: membres, error } = await supabaseClient.from('membres').select('*').order('nom', { ascending: true });
+    if (error || !membres) {
+        alert("Erreur lors de la récupération des membres pour l'export.");
         return;
     }
 
+    // Calculs statistiques
+    let totalMembres = membres.length;
+    let actifsCount = membres.filter(m => m.statut === 'Actif').length;
+    let essaiCount = membres.filter(m => m.statut === 'Essai').length;
+    let quorumRequis = Math.floor(actifsCount / 2) + 1;
+
+    let presentsCount = membres.filter(m => m.statut === 'Actif' && m.present === true).length;
+    let absentsCount = totalMembres - membres.filter(m => m.present === true || m.etat_presence === 'excuse').length;
+
+    // Création du conteneur PDF
     const element = document.createElement('div');
-    element.style.padding = '30px';
+    element.style.padding = '25px';
     element.style.background = '#ffffff';
     element.style.color = '#111111';
-    element.style.fontFamily = 'Segoe UI, Arial, sans-serif';
+    element.style.fontFamily = 'Helvetica, Arial, sans-serif';
+    element.style.fontSize = '11px';
 
     let htmlContent = `
-        <div style="text-align: center; border-bottom: 3px solid #ff3366; padding-bottom: 15px; margin-bottom: 25px;">
-            <h1 style="color: #ff3366; margin: 0; font-size: 22px; text-transform: uppercase;">LA 1337 RADIO</h1>
-            <div style="font-size: 12px; color: #555; text-transform: uppercase; margin-top: 5px;">Feuille de Présence & Émargement Officiel</div>
-        </div>
-        
-        <div style="background: #f4f4f6; padding: 15px; border-radius: 6px; margin-bottom: 25px; font-size: 13px;">
-            <strong>Type de réunion :</strong> ${typeReunion}<br>
-            <strong>Date :</strong> ${dateFormatted} à ${heureReunion}<br>
-            <strong>Lieu :</strong> Studio LA 1337 / Valines
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ff3366; padding-bottom: 10px; margin-bottom: 15px;">
+            <div>
+                <h1 style="color: #ff3366; margin: 0; font-size: 20px; font-weight: bold;">1337</h1>
+                <div style="font-size: 10px; color: #555; text-transform: uppercase;">Feuille de présence aux réunions</div>
+            </div>
+            <div style="text-align: right; font-size: 10px; color: #666;">
+                <strong>Type :</strong> ${typeReunion}<br>
+                <strong>Date :</strong> ${dateFormatted} à ${heureReunion.replace(':', 'H')}
+            </div>
         </div>
 
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 12px;">
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; page-break-inside: auto;">
             <thead>
                 <tr style="background: #202024; color: #ffffff;">
-                    <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Membre</th>
-                    <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Statut</th>
-                    <th style="padding: 10px; border: 1px solid #ddd; text-align: center;">Présence / Émargement</th>
+                    <th style="padding: 8px; border: 1px solid #ddd; text-align: left; width: 45%;">NOM et Prénom</th>
+                    <th style="padding: 8px; border: 1px solid #ddd; text-align: left; width: 35%;">Fonction / Statut</th>
+                    <th style="padding: 8px; border: 1px solid #ddd; text-align: center; width: 20%;">Pointage</th>
                 </tr>
             </thead>
             <tbody>
     `;
 
-    rows.forEach(tr => {
-        const cols = tr.querySelectorAll('td');
-        if (cols.length >= 4) {
-            const nomMembre = cols[0].innerText.split('\n')[0];
-            const statutMembre = cols[1].innerText;
-            const selectVal = cols[3].querySelector('select').value;
-            
-            let etatLabel = 'Absent(e)';
-            let etatColor = '#f75a68';
-            if (selectVal === 'present') { etatLabel = 'Présent(e)'; etatColor = '#04d361'; }
-            if (selectVal === 'excuse') { etatLabel = 'Excusé(e)'; etatColor = '#fba94c'; }
+    membres.forEach(m => {
+        const nomComplet = `${(m.nom || '').toUpperCase()} ${m.prenom || ''}`;
+        const statut = m.statut || 'Actif';
+        
+        // Récupération des rôles si existants
+        const rolesArray = m.roles ? (Array.isArray(m.roles) ? m.roles : String(m.roles).split(',').map(Number)) : [];
+        const namesRoles = rolesArray.map(id => ROLE_MAP[id]).filter(Boolean).join(' / ');
+        
+        let fonctionTxt = statut === 'Actif' ? 'Membre actif' : (statut === 'Essai' ? "Membre à l'essai" : statut);
+        if (namesRoles) fonctionTxt += ` (${namesRoles})`;
 
-            htmlContent += `
-                <tr>
-                    <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">${nomMembre}</td>
-                    <td style="padding: 8px; border: 1px solid #ddd;">${statutMembre}</td>
-                    <td style="padding: 8px; border: 1px solid #ddd; text-align: center; color: ${etatColor}; font-weight: bold;">${etatLabel}</td>
-                </tr>
-            `;
+        let pointageTxt = 'ABSENT';
+        let pointageColor = '#d9534f';
+        if (m.present === true) {
+            pointageTxt = 'PRÉSENT(E)';
+            pointageColor = '#28a745';
+        } else if (m.etat_presence === 'excuse') {
+            pointageTxt = statut === 'Essai' ? 'EXCUSÉ(E) (facultatif)' : 'EXCUSÉ(E)';
+            pointageColor = '#f0ad4e';
+        } else if (statut === 'Essai') {
+            pointageTxt = 'ABSENT (facultatif)';
         }
+
+        htmlContent += `
+            <tr style="page-break-inside: avoid;">
+                <td style="padding: 7px 8px; border: 1px solid #ddd; font-weight: bold;">${nomComplet}</td>
+                <td style="padding: 7px 8px; border: 1px solid #ddd; color: #333;">${fonctionTxt}</td>
+                <td style="padding: 7px 8px; border: 1px solid #ddd; text-align: center; color: ${pointageColor}; font-weight: bold;">${pointageTxt}</td>
+            </tr>
+        `;
     });
 
     htmlContent += `
             </tbody>
         </table>
 
-        <div style="margin-top: 40px; display: flex; justify-content: space-between; font-size: 12px;">
-            <div style="border-top: 1px solid #333; width: 200px; padding-top: 5px; text-align: center;">Signature du Président</div>
-            <div style="border-top: 1px solid #333; width: 200px; padding-top: 5px; text-align: center;">Signature du Secrétaire</div>
+        <!-- Bloc Statistiques & Quorum -->
+        <div style="background: #f8f9fa; border: 1px solid #ddd; padding: 12px; border-radius: 4px; margin-bottom: 25px; font-size: 11px; page-break-inside: avoid;">
+            <div><strong>Total des membres :</strong> ${actifsCount} actifs / ${essaiCount} à l'essai SANS DROIT DE VOTE (${totalMembres} au total)</div>
+            <div style="margin-top: 4px;"><strong>Quorum :</strong> ${quorumRequis} (avec droit de vote = ne prend en compte que les actifs)</div>
+            <div style="margin-top: 4px;"><strong>Membres présents :</strong> ${presentsCount} (${presentsCount} actifs + 0 à l'essai)</div>
+            <div style="margin-top: 4px;"><strong>Membres absents :</strong> ${absentsCount}</div>
+        </div>
+
+        <!-- Signatures & Pied de page officiel -->
+        <div style="display: flex; justify-content: space-between; margin-top: 30px; font-size: 11px; page-break-inside: avoid;">
+            <div>
+                Fait le ${dateCourte}, à ARRAS (62)<br><br><br>
+                <strong>VAN-KETS Guillaume,</strong><br>Le président
+            </div>
+            <div style="text-align: right;">
+                <br><br><br>
+                <strong>MOREL Enzo,</strong><br>Le secrétaire
+            </div>
+        </div>
+
+        <div style="margin-top: 40px; border-top: 1px solid #ccc; padding-top: 8px; text-align: center; font-size: 9px; color: #666; page-break-inside: avoid;">
+            <strong>La1337</strong> — Webradio Associative (Loi 1901) | 19 rue Lavoisier, 27000 ÉVREUX | SIRET: 852 512 789 00011 | Site Internet: www.la1337.com
         </div>
     `;
 
