@@ -6,7 +6,7 @@
     <title>Administration LA 1337 - Gestion Complète BDD</title>
     <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- html2pdf.js pour l'export officiel -->
+    <!-- html2pdf Client -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <!-- Font Awesome pour les icônes -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -173,6 +173,8 @@
         .btn-cancel { background-color: #4d4d57; color: #fff; }
         .btn-danger { background-color: var(--danger); color: #fff; padding: 6px 12px; font-size: 0.85rem; }
         .btn-edit { background-color: var(--warning); color: #000; padding: 6px 12px; font-size: 0.85rem; }
+        .btn-secondary { background-color: var(--bg-tertiary); color: var(--text-main); border: 1px solid var(--border); }
+        .btn-secondary:hover { background-color: var(--border); }
 
         /* Tables */
         table {
@@ -281,6 +283,14 @@
                     <i class="fa-solid fa-file-pdf"></i> Exporter la Feuille (PDF Officiel)
                 </button>
             </div>
+        </div>
+
+        <!-- Actions rapides de masse -->
+        <div style="margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+            <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Actions globales :</span>
+            <button class="btn btn-secondary" onclick="setAllPresence('absent')" style="font-size: 0.85rem; padding: 6px 12px;"><i class="fa-solid fa-circle-xmark" style="color: var(--danger);"></i> Tout mettre Absent</button>
+            <button class="btn btn-secondary" onclick="setAllPresence('present')" style="font-size: 0.85rem; padding: 6px 12px;"><i class="fa-solid fa-circle-check" style="color: var(--success);"></i> Tout mettre Présent</button>
+            <button class="btn btn-secondary" onclick="setAllPresence('excuse')" style="font-size: 0.85rem; padding: 6px 12px;"><i class="fa-solid fa-circle-exclamation" style="color: var(--warning);"></i> Tout mettre Excusé</button>
         </div>
 
         <!-- Widget Quorum -->
@@ -568,6 +578,7 @@ async function fetchPresenceList() {
         const isPresent = m.present === true;
         if (isActif && isPresent) actifsPresents++;
 
+        // Couleur du badge de statut
         let badgeColor = 'var(--success)';
         if (statut === 'Essai') badgeColor = 'var(--warning)';
         if (statut === 'Retrait' || statut === 'Inactif' || statut === 'Membre extérieur') badgeColor = 'var(--text-muted)';
@@ -579,7 +590,7 @@ async function fetchPresenceList() {
             <td>${isActif ? '✅ Actif (Votant / Quorum)' : '❌ Non obligatoire / Invité'}</td>
             <td>
                 <select onchange="updatePresence('${m.id}', this.value)" style="background: var(--bg-primary); padding: 8px; border-radius: 6px; color: #fff; border: 1px solid var(--border); cursor: pointer;">
-                    <option value="absent" ${!isPresent && m.etat_presence !== 'excuse' ? 'selected' : ''}>🔴 Absent / Non excusé</option>
+                    <option value="absent" ${(!isPresent && m.etat_presence !== 'excuse') ? 'selected' : ''}>🔴 Absent / Non excusé</option>
                     <option value="present" ${isPresent ? 'selected' : ''}>🟢 Présent</option>
                     <option value="excuse" ${m.etat_presence === 'excuse' ? 'selected' : ''}>🟡 Excusé</option>
                 </select>
@@ -588,6 +599,7 @@ async function fetchPresenceList() {
         tbody.appendChild(tr);
     });
 
+    // Calcul du Quorum (exigé à partir de la moitié des actifs + 1)
     document.getElementById('quorum-count').innerText = `${actifsPresents} / ${totalActifs}`;
     const quorumStatusEl = document.getElementById('quorum-status');
     const quorumMin = Math.floor(totalActifs / 2) + 1;
@@ -611,121 +623,143 @@ async function updatePresence(memberId, val) {
     }
 }
 
+async function setAllPresence(val) {
+    if (!confirm(`Voulez-vous vraiment définir l'état de présence de TOUS les membres à "${val.toUpperCase()}" ?`)) {
+        return;
+    }
+    const isPresent = (val === 'present');
+    const payload = { present: isPresent, etat_presence: val };
+
+    const { error } = await supabaseClient.from('membres').update(payload).neq('id', 0); // Met à jour tous les enregistrements
+    if (error) {
+        alert("Erreur lors de la mise à jour globale : " + error.message);
+    } else {
+        fetchPresenceList();
+    }
+}
+
 // =============================================================================
-// EXPORT PDF OFFICIEL
+// EXPORT PDF OFFICIEL DE LA FEUILLE DE PRÉSENCE
 // =============================================================================
 
-async function exportPresencePDF() {
+function exportPresencePDF() {
     const typeReunion = document.getElementById('reunion-type').value;
     const dateReunion = document.getElementById('reunion-date').value || new Date().toISOString().split('T')[0];
     const heureReunion = document.getElementById('reunion-heure').value || '18:00';
     
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    const dateFormatted = new Date(dateReunion).toLocaleDateString('fr-FR', options);
-    const dateCourte = new Date(dateReunion).toLocaleDateString('fr-FR');
+    const optionsDate = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const dateFormatted = new Date(dateReunion).toLocaleDateString('fr-FR', optionsDate);
 
-    const { data: membres, error } = await supabaseClient.from('membres').select('*').order('nom', { ascending: true });
-    if (error || !membres) {
-        alert("Erreur lors de la récupération des membres pour l'export.");
+    const rows = document.querySelectorAll('#presence-list tr');
+    if (rows.length === 0 || rows[0].innerText.includes('Chargement')) {
+        alert("Veuillez attendre le chargement complet des membres.");
         return;
     }
 
-    let totalMembres = membres.length;
-    let actifsCount = membres.filter(m => m.statut === 'Actif').length;
-    let essaiCount = membres.filter(m => m.statut === 'Essai').length;
-    let quorumRequis = Math.floor(actifsCount / 2) + 1;
-
-    let presentsCount = membres.filter(m => m.statut === 'Actif' && m.present === true).length;
-    let absentsCount = totalMembres - membres.filter(m => m.present === true || m.etat_presence === 'excuse').length;
-    let excusesCount = membres.filter(m => m.etat_presence === 'excuse').length;
-
     const element = document.createElement('div');
-    element.style.padding = '20px';
+    element.style.padding = '25px';
     element.style.background = '#ffffff';
     element.style.color = '#111111';
-    element.style.fontFamily = 'Helvetica, Arial, sans-serif';
-    element.style.fontSize = '11px';
+    element.style.fontFamily = 'Arial, sans-serif';
 
     let htmlContent = `
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ff3366; padding-bottom: 10px; margin-bottom: 15px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ff3366; padding-bottom: 15px; margin-bottom: 20px;">
             <div>
-                <h1 style="color: #ff3366; margin: 0; font-size: 20px; font-weight: bold;">1337</h1>
-                <div style="font-size: 10px; color: #555; text-transform: uppercase;">Feuille de présence aux réunions</div>
+                <h1 style="color: #ff3366; margin: 0; font-size: 24px;">1337</h1>
+                <div style="font-size: 14px; font-weight: bold; color: #333; margin-top: 5px;">Feuille de présence aux réunions</div>
             </div>
-            <div style="text-align: right; font-size: 10px; color: #666;">
-                <strong>Type :</strong> ${typeReunion}<br>
-                <strong>Date :</strong> ${dateFormatted} à ${heureReunion.replace(':', 'H')}
+            <div style="text-align: right; font-size: 11px; color: #555;">
+                <strong>Webradio Associative (Loi 1901)</strong><br>
+                19 rue Lavoisier, 27000 ÉVREUX<br>
+                SIRET: 852 512 789 00011 | www.la1337.com
             </div>
         </div>
 
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+        <div style="background: #f8f9fa; padding: 12px 15px; border-radius: 6px; margin-bottom: 20px; font-size: 13px; border: 1px solid #e2e8f0;">
+            <strong>Type de réunion :</strong> ${typeReunion}<br>
+            <strong>Date et heure de la réunion :</strong> ${dateFormatted} à ${heureReunion}
+        </div>
+
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 12px;">
             <thead>
-                <tr style="background: #202024; color: #ffffff;">
-                    <th style="padding: 8px; border: 1px solid #ddd; text-align: left; width: 45%;">NOM et Prénom</th>
-                    <th style="padding: 8px; border: 1px solid #ddd; text-align: left; width: 35%;">Fonction / Statut</th>
-                    <th style="padding: 8px; border: 1px solid #ddd; text-align: center; width: 20%;">Pointage</th>
+                <tr style="background: #202024; color: #fff;">
+                    <th style="padding: 10px; border: 1px solid #323238; text-align: left;">NOM et Prénom</th>
+                    <th style="padding: 10px; border: 1px solid #323238; text-align: left;">Fonction / Statut</th>
+                    <th style="padding: 10px; border: 1px solid #323238; text-align: center;">Pointage</th>
                 </tr>
             </thead>
             <tbody>
     `;
 
-    membres.forEach(m => {
-        const nomComplet = `${(m.nom || '').toUpperCase()} ${m.prenom || ''}`;
-        const statut = m.statut || 'Actif';
-        
-        const rolesArray = m.roles ? (Array.isArray(m.roles) ? m.roles : String(m.roles).split(',').map(Number)) : [];
-        const namesRoles = rolesArray.map(id => ROLE_MAP[id]).filter(Boolean).join(' / ');
-        
-        let fonctionTxt = statut === 'Actif' ? 'Membre actif' : (statut === 'Essai' ? "Membre à l'essai" : statut);
-        if (namesRoles) fonctionTxt += ` (${namesRoles})`;
+    let totalActifs = 0;
+    let actifsPresents = 0;
+    let totalEssai = 0;
+    let essaisPresents = 0;
+    let totalAbsents = 0;
+    let totalExcuses = 0;
 
-        let pointageTxt = 'ABSENT';
-        let pointageColor = '#d9534f';
-        if (m.present === true) {
-            pointageTxt = 'PRÉSENT(E)';
-            pointageColor = '#28a745';
-        } else if (m.etat_presence === 'excuse') {
-            pointageTxt = statut === 'Essai' ? 'EXCUSÉ(E) (facultatif)' : 'EXCUSÉ(E)';
-            pointageColor = '#f0ad4e';
-        } else if (statut === 'Essai') {
-            pointageTxt = 'ABSENT (facultatif)';
+    rows.forEach(tr => {
+        const cols = tr.querySelectorAll('td');
+        if (cols.length >= 4) {
+            const nomMembre = cols[0].innerText.split('\n')[0];
+            const statutMembre = cols[1].innerText;
+            const selectVal = cols[3].querySelector('select').value;
+            
+            const isActif = statutMembre.includes('Actif');
+            if (isActif) totalActifs++;
+            else totalEssai++;
+
+            let etatLabel = 'ABSENT (facultatif)';
+            let etatColor = '#f75a68';
+            if (selectVal === 'present') {
+                etatLabel = 'PRÉSENT(E)';
+                etatColor = '#04d361';
+                if (isActif) actifsPresents++;
+                else essaisPresents++;
+            } else if (selectVal === 'excuse') {
+                etatLabel = 'EXCUSÉ(E)';
+                etatColor = '#fba94c';
+                totalExcuses++;
+            } else {
+                totalAbsents++;
+            }
+
+            htmlContent += `
+                <tr style="page-break-inside: avoid;">
+                    <td style="padding: 8px 10px; border: 1px solid #ddd; font-weight: bold;">${nomMembre}</td>
+                    <td style="padding: 8px 10px; border: 1px solid #ddd;">${statutMembre}</td>
+                    <td style="padding: 8px 10px; border: 1px solid #ddd; text-align: center; color: ${etatColor}; font-weight: bold;">${etatLabel}</td>
+                </tr>
+            `;
         }
-
-        htmlContent += `
-            <tr style="page-break-inside: avoid;">
-                <td style="padding: 6px 8px; border: 1px solid #ddd; font-weight: bold;">${nomComplet}</td>
-                <td style="padding: 6px 8px; border: 1px solid #ddd; color: #333;">${fonctionTxt}</td>
-                <td style="padding: 6px 8px; border: 1px solid #ddd; text-align: center; color: ${pointageColor}; font-weight: bold;">${pointageTxt}</td>
-            </tr>
-        `;
     });
+
+    const totalMembres = totalActifs + totalEssai;
+    const totalPresents = actifsPresents + essaisPresents;
+    const quorumRequis = Math.floor(totalActifs / 2) + 1;
 
     htmlContent += `
             </tbody>
         </table>
 
-        <!-- Bloc Statistiques & Quorum -->
-        <div style="background: #f8f9fa; border: 1px solid #ddd; padding: 12px; border-radius: 4px; margin-bottom: 20px; font-size: 11px; page-break-inside: avoid;">
-            <div><strong>Total des membres :</strong> ${actifsCount} actifs / ${essaiCount} à l'essai SANS DROIT DE VOTE (${totalMembres} au total)</div>
-            <div style="margin-top: 4px;"><strong>Quorum :</strong> ${quorumRequis} (avec droit de vote = ne prend en compte que les actifs)</div>
-            <div style="margin-top: 4px;"><strong>Membres présents :</strong> ${presentsCount} (${presentsCount} actifs + 0 à l'essai)</div>
-            <div style="margin-top: 4px;"><strong>Membres absents :</strong> ${absentsCount} (dont ${excusesCount} excusés)</div>
+        <div style="background: #f1f5f9; padding: 12px 15px; border-radius: 6px; margin-bottom: 30px; font-size: 12px; line-height: 1.5; border: 1px solid #cbd5e1; page-break-inside: avoid;">
+            <strong>Total des membres :</strong> ${totalActifs} actifs / ${totalEssai} autres ou à l'essai SANS DROIT DE VOTE (${totalMembres} au total)<br>
+            <strong>Quorum :</strong> ${quorumRequis} (avec droit de vote = ne prend en compte que les actifs)<br>
+            <strong>Membres présents :</strong> ${totalPresents} (${actifsPresents} actifs + ${essaisPresents} autres)<br>
+            <strong>Membres absents :</strong> ${totalAbsents} (dont ${totalExcuses} excusés)
         </div>
 
-        <!-- Signatures & Pied de page officiel -->
-        <div style="display: flex; justify-content: space-between; margin-top: 25px; font-size: 11px; page-break-inside: avoid;">
-            <div>
-                Fait le ${dateCourte}, à ARRAS (62)<br><br><br>
-                <strong>MOREL Enzo,</strong><br>Le président
+        <div style="display: flex; justify-content: space-between; margin-top: 30px; font-size: 12px; page-break-inside: avoid;">
+            <div style="text-align: left;">
+                Fait le ${dateFormatted}, à ARRAS (62)<br><br><br>
+                <strong>MOREL Enzo,</strong><br>
+                Le président
             </div>
             <div style="text-align: right;">
                 <br><br><br>
-                <strong>ROCQUEMONT Maxence,</strong><br>Le secrétaire
+                <strong>ROCQUEMONT Maxence,</strong><br>
+                Le secrétaire
             </div>
-        </div>
-
-        <div style="margin-top: 30px; border-top: 1px solid #ccc; padding-top: 8px; text-align: center; font-size: 9px; color: #666; page-break-inside: avoid;">
-            <strong>La1337</strong> — Webradio Associative (Loi 1901) | 19 rue Lavoisier, 27000 ÉVREUX | SIRET: 852 512 789 00011 | Site Internet: www.la1337.com
         </div>
     `;
 
@@ -1107,8 +1141,9 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchLogos();
     fetchMembers();
     fetchChangelog();
-    fetchPresenceList();
+    fetchPresenceList(); // Charge directement les présences au démarrage
 
+    // Écouteurs pour auto-générer l'email à la frappe du prénom / nom
     document.getElementById('member-prenom')?.addEventListener('input', autoGenerateEmail);
     document.getElementById('member-nom')?.addEventListener('input', autoGenerateEmail);
 });
