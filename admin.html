@@ -6,10 +6,10 @@
     <title>Administration LA 1337 - Gestion Complète BDD</title>
     <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- html2pdf Client -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <!-- Font Awesome pour les icônes -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- html2pdf.js pour l'export de la feuille de présence -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         :root {
             --bg-primary: #121214;
@@ -173,6 +173,8 @@
         .btn-cancel { background-color: #4d4d57; color: #fff; }
         .btn-danger { background-color: var(--danger); color: #fff; padding: 6px 12px; font-size: 0.85rem; }
         .btn-edit { background-color: var(--warning); color: #000; padding: 6px 12px; font-size: 0.85rem; }
+        .btn-secondary { background-color: var(--bg-tertiary); color: var(--text-main); border: 1px solid var(--border); }
+        .btn-secondary:hover { background-color: var(--border); }
 
         /* Tables */
         table {
@@ -258,14 +260,14 @@
             Gère ici les présences pour l'assemblée. Seuls les <strong>membres actifs</strong> comptent pour le calcul officiel du quorum et des droits de vote. Les membres à l'essai n'ont pas de droit de vote, et les membres en inactivité ou retrait ne sont pas obligatoires.
         </p>
 
-        <!-- Configuration & Export PDF -->
+        <!-- Commandes Export PDF & Paramètres de Réunion -->
         <div style="background: var(--bg-tertiary); padding: 20px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 25px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; align-items: end;">
             <div class="form-group">
                 <label for="reunion-type">Type de Réunion</label>
                 <select id="reunion-type" style="background: var(--bg-primary); padding: 10px; border-radius: 4px; color: #fff; border: 1px solid var(--border);">
-                    <option value="Assemblée Générale Ordinaire (AGO)">Assemblée Générale Ordinaire (AGO)</option>
-                    <option value="Assemblée Générale Extraordinaire (AGE)">Assemblée Générale Extraordinaire (AGE)</option>
-                    <option value="Réunion d'équipe">Réunion d'équipe</option>
+                    <option value="AGO (Assemblée Générale Ordinaire)">AGO (Assemblée Générale Ordinaire)</option>
+                    <option value="AGE (Assemblée Générale Extraordinaire)">AGE (Assemblée Générale Extraordinaire)</option>
+                    <option value="Réunion du Conseil d'Administration">Réunion du Conseil d'Administration</option>
                 </select>
             </div>
             <div class="form-group">
@@ -278,16 +280,17 @@
             </div>
             <div>
                 <button class="btn btn-primary" onclick="exportPresencePDF()" style="width: 100%; justify-content: center; padding: 11px;">
-                    <i class="fa-solid fa-file-pdf"></i> Exporter la Feuille (PDF)
+                    <i class="fa-solid fa-file-pdf"></i> Exporter la Feuille (PDF Officiel)
                 </button>
             </div>
         </div>
 
-        <!-- Boutons d'action en masse -->
-        <div style="margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
-            <button class="btn btn-cancel" onclick="setAllPresence('absent')" style="background: #323238; border: 1px solid var(--border);"><i class="fa-solid fa-circle-xmark" style="color:var(--danger)"></i> Tout mettre en Absent</button>
-            <button class="btn btn-cancel" onclick="setAllPresence('present')" style="background: #323238; border: 1px solid var(--border);"><i class="fa-solid fa-circle-check" style="color:var(--success)"></i> Tout mettre en Présent</button>
-            <button class="btn btn-cancel" onclick="setAllPresence('excuse')" style="background: #323238; border: 1px solid var(--border);"><i class="fa-solid fa-circle-exclamation" style="color:var(--warning)"></i> Tout mettre en Excusé</button>
+        <!-- Actions rapides de masse -->
+        <div style="margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+            <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Actions globales :</span>
+            <button class="btn btn-secondary" onclick="setAllPresence('absent')" style="font-size: 0.85rem; padding: 6px 12px;"><i class="fa-solid fa-circle-xmark" style="color: var(--danger);"></i> Tout mettre Absent</button>
+            <button class="btn btn-secondary" onclick="setAllPresence('present')" style="font-size: 0.85rem; padding: 6px 12px;"><i class="fa-solid fa-circle-check" style="color: var(--success);"></i> Tout mettre Présent</button>
+            <button class="btn btn-secondary" onclick="setAllPresence('excuse')" style="font-size: 0.85rem; padding: 6px 12px;"><i class="fa-solid fa-circle-exclamation" style="color: var(--warning);"></i> Tout mettre Excusé</button>
         </div>
 
         <!-- Widget Quorum -->
@@ -415,7 +418,6 @@
                         <option value="Essai">Membre en Période d'Essai (Invité)</option>
                         <option value="Retrait">Membre en Retrait Provisoire</option>
                         <option value="Inactif">Membre en Inactivité Temporaire</option>
-                        <option value="Membre extérieur">Membre extérieur</option>
                     </select>
                 </div>
             </div>
@@ -495,6 +497,9 @@
 </div>
 
 <script>
+// =============================================================================
+// SUPABASE CLIENT & CONFIG
+// =============================================================================
 const SUPABASE_URL = 'https://appepchfrfghfulirckz.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_wjpCqcbmlEnHvYhJRziUGQ_SIubrlSg';
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -521,6 +526,7 @@ function switchTab(tabId, event) {
     }
 }
 
+// Génération automatique de l'email : prenom.initialeDuNom@la1337.com
 function autoGenerateEmail() {
     const memberId = document.getElementById('member-id').value;
     if (memberId) return;
@@ -538,10 +544,13 @@ function autoGenerateEmail() {
     }
 }
 
+// =============================================================================
+// GESTION DES PRÉSENCES & ÉMARGEMENT
+// =============================================================================
+
 async function fetchPresenceList() {
     const tbody = document.getElementById('presence-list');
-    if (!tbody) return;
-    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Chargement des présences...</td></tr>';
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Chargement des présences...</td></tr>`;
 
     const { data: membres, error } = await supabaseClient.from('membres').select('*').order('nom', { ascending: true });
 
@@ -569,31 +578,19 @@ async function fetchPresenceList() {
         const isPresent = m.present === true;
         if (isActif && isPresent) actifsPresents++;
 
+        // Couleur du badge de statut
         let badgeColor = 'var(--success)';
-        let roleText = '❌ Non obligatoire / Invité';
-
-        if (statut === 'Actif') {
-            badgeColor = 'var(--success)';
-            roleText = '✅ Actif (Votant / Quorum)';
-        } else if (statut === 'Essai') {
-            badgeColor = 'var(--warning)';
-            roleText = '⏳ Période d'essai (Non votant)';
-        } else if (statut === 'Membre extérieur') {
-            badgeColor = '#3399ff';
-            roleText = '🌐 Membre extérieur (Non obligatoire)';
-        } else {
-            badgeColor = 'var(--text-muted)';
-            roleText = '❌ Non obligatoire';
-        }
+        if (statut === 'Essai') badgeColor = 'var(--warning)';
+        if (statut === 'Retrait' || statut === 'Inactif' || statut === 'Membre extérieur') badgeColor = 'var(--text-muted)';
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td><strong>${m.prenom || ''} ${(m.nom || '').toUpperCase()}</strong><br><span style="font-size:11px; color:var(--text-muted);">${m.email || ''}</span></td>
             <td><span style="color: ${badgeColor}; font-weight: 600;">${statut}</span></td>
-            <td>${roleText}</td>
+            <td>${isActif ? '✅ Actif (Votant / Quorum)' : '❌ Non obligatoire / Invité'}</td>
             <td>
                 <select onchange="updatePresence('${m.id}', this.value)" style="background: var(--bg-primary); padding: 8px; border-radius: 6px; color: #fff; border: 1px solid var(--border); cursor: pointer;">
-                    <option value="absent" ${!isPresent && m.etat_presence !== 'excuse' ? 'selected' : ''}>🔴 Absent / Non excusé</option>
+                    <option value="absent" ${(!isPresent && m.etat_presence !== 'excuse') ? 'selected' : ''}>🔴 Absent / Non excusé</option>
                     <option value="present" ${isPresent ? 'selected' : ''}>🟢 Présent</option>
                     <option value="excuse" ${m.etat_presence === 'excuse' ? 'selected' : ''}>🟡 Excusé</option>
                 </select>
@@ -602,17 +599,15 @@ async function fetchPresenceList() {
         tbody.appendChild(tr);
     });
 
-    const quorumCountEl = document.getElementById('quorum-count');
-    if (quorumCountEl) quorumCountEl.innerText = `${actifsPresents} / ${totalActifs}`;
+    // Calcul du Quorum (exigé à partir de la moitié des actifs + 1)
+    document.getElementById('quorum-count').innerText = `${actifsPresents} / ${totalActifs}`;
     const quorumStatusEl = document.getElementById('quorum-status');
     const quorumMin = Math.floor(totalActifs / 2) + 1;
 
-    if (quorumStatusEl) {
-        if (actifsPresents >= quorumMin) {
-            quorumStatusEl.innerHTML = `<span style="color: var(--success);">🟢 QUORUM ATTEINT (${actifsPresents}/${quorumMin} requis)</span>`;
-        } else {
-            quorumStatusEl.innerHTML = `<span style="color: var(--danger);">🔴 QUORUM NON ATTEINT (${actifsPresents}/${quorumMin} requis)</span>`;
-        }
+    if (actifsPresents >= quorumMin) {
+        quorumStatusEl.innerHTML = `<span style="color: var(--success);">🟢 QUORUM ATTEINT (${actifsPresents}/${quorumMin} requis)</span>`;
+    } else {
+        quorumStatusEl.innerHTML = `<span style="color: var(--danger);">🔴 QUORUM NON ATTEINT (${actifsPresents}/${quorumMin} requis)</span>`;
     }
 }
 
@@ -629,147 +624,142 @@ async function updatePresence(memberId, val) {
 }
 
 async function setAllPresence(val) {
-    if (!confirm(`Voulez-vous vraiment définir l'état de présence de TOUS les membres à "${val === 'present' ? 'Présent' : val === 'excuse' ? 'Excusé' : 'Absent'}" ?`)) {
+    if (!confirm(`Voulez-vous vraiment définir l'état de présence de TOUS les membres à "${val.toUpperCase()}" ?`)) {
         return;
     }
-    
     const isPresent = (val === 'present');
-    const { data: membres, error: fetchError } = await supabaseClient.from('membres').select('id');
-    if (fetchError) {
-        alert("Erreur lors de la récupération des membres : " + fetchError.message);
-        return;
-    }
+    const payload = { present: isPresent, etat_presence: val };
 
-    for (const m of membres) {
-        await supabaseClient.from('membres').update({ present: isPresent, etat_presence: val }).eq('id', m.id);
+    const { error } = await supabaseClient.from('membres').update(payload).neq('id', 0); // Met à jour tous les enregistrements
+    if (error) {
+        alert("Erreur lors de la mise à jour globale : " + error.message);
+    } else {
+        fetchPresenceList();
     }
-
-    fetchPresenceList();
 }
 
-async function exportPresencePDF() {
+// =============================================================================
+// EXPORT PDF OFFICIEL DE LA FEUILLE DE PRÉSENCE
+// =============================================================================
+
+function exportPresencePDF() {
     const typeReunion = document.getElementById('reunion-type').value;
     const dateReunion = document.getElementById('reunion-date').value || new Date().toISOString().split('T')[0];
     const heureReunion = document.getElementById('reunion-heure').value || '18:00';
     
-    const optionsDate = { weekday: 'long', year: 'numeric', month: '2-digit', day: '2-digit' };
-    const dateObj = new Date(dateReunion);
-    const dateFormatted = dateObj.toLocaleDateString('fr-FR', optionsDate);
-    const dateCapitalized = dateFormatted.charAt(0).toUpperCase() + dateFormatted.slice(1);
+    const optionsDate = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const dateFormatted = new Date(dateReunion).toLocaleDateString('fr-FR', optionsDate);
 
-    const { data: membres, error } = await supabaseClient.from('membres').select('*').order('nom', { ascending: true });
-    if (error) {
-        alert("Erreur chargement membres pour PDF : " + error.message);
+    const rows = document.querySelectorAll('#presence-list tr');
+    if (rows.length === 0 || rows[0].innerText.includes('Chargement')) {
+        alert("Veuillez attendre le chargement complet des membres.");
         return;
     }
-
-    const list = membres || [];
-    let totalActifs = 0;
-    let actifsPresents = 0;
-    let totalEssai = 0;
-    let totalAbsents = 0;
-
-    list.forEach(m => {
-        const isActif = (m.statut === 'Actif');
-        if (isActif) totalActifs++;
-        if (m.statut === 'Essai') totalEssai++;
-        if (m.present) {
-            if (isActif) actifsPresents++;
-        } else {
-            totalAbsents++;
-        }
-    });
-
-    const quorumMin = Math.floor(totalActifs / 2) + 1;
 
     const element = document.createElement('div');
     element.style.padding = '25px';
     element.style.background = '#ffffff';
     element.style.color = '#111111';
     element.style.fontFamily = 'Arial, sans-serif';
-    element.style.fontSize = '12px';
 
     let htmlContent = `
-        <div style="font-weight: bold; font-size: 14px; margin-bottom: 5px;">1337</div>
-        <div style="font-size: 16px; font-weight: bold; margin-bottom: 10px;">Feuille de présence aux réunions</div>
-        <div style="margin-bottom: 4px;"><strong>Type de réunion:</strong> ${typeReunion}</div>
-        <div style="margin-bottom: 15px;"><strong>Date et heure de la réunion:</strong> ${dateCapitalized} à ${heureReunion.replace(':', 'H')}</div>
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ff3366; padding-bottom: 15px; margin-bottom: 20px;">
+            <div>
+                <h1 style="color: #ff3366; margin: 0; font-size: 24px;">1337</h1>
+                <div style="font-size: 14px; font-weight: bold; color: #333; margin-top: 5px;">Feuille de présence aux réunions</div>
+            </div>
+            <div style="text-align: right; font-size: 11px; color: #555;">
+                <strong>Webradio Associative (Loi 1901)</strong><br>
+                19 rue Lavoisier, 27000 ÉVREUX<br>
+                SIRET: 852 512 789 00011 | www.la1337.com
+            </div>
+        </div>
 
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; page-break-inside: auto;">
+        <div style="background: #f8f9fa; padding: 12px 15px; border-radius: 6px; margin-bottom: 20px; font-size: 13px; border: 1px solid #e2e8f0;">
+            <strong>Type de réunion :</strong> ${typeReunion}<br>
+            <strong>Date et heure de la réunion :</strong> ${dateFormatted} à ${heureReunion}
+        </div>
+
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 12px;">
             <thead>
-                <tr style="background-color: #f0f0f0; border-bottom: 2px solid #333;">
-                    <th style="padding: 8px; text-align: left; width: 40%; border: 1px solid #ddd;">NOM et Prénom</th>
-                    <th style="padding: 8px; text-align: left; width: 40%; border: 1px solid #ddd;">Fonction</th>
-                    <th style="padding: 8px; text-align: center; width: 20%; border: 1px solid #ddd;">Pointage</th>
+                <tr style="background: #202024; color: #fff;">
+                    <th style="padding: 10px; border: 1px solid #323238; text-align: left;">NOM et Prénom</th>
+                    <th style="padding: 10px; border: 1px solid #323238; text-align: left;">Fonction / Statut</th>
+                    <th style="padding: 10px; border: 1px solid #323238; text-align: center;">Pointage</th>
                 </tr>
             </thead>
             <tbody>
     `;
 
-    list.forEach(m => {
-        let statutLabel = "Membre actif";
-        if (m.statut === 'Essai') statutLabel = "Membre à l'essai";
-        else if (m.statut === 'Membre extérieur') statutLabel = "Membre extérieur";
-        else if (m.statut === 'Retrait') statutLabel = "Membre actif (retrait provisoire)";
+    let totalActifs = 0;
+    let actifsPresents = 0;
+    let totalEssai = 0;
+    let essaisPresents = 0;
+    let totalAbsents = 0;
+    let totalExcuses = 0;
 
-        const rolesArray = m.roles ? (Array.isArray(m.roles) ? m.roles : String(m.roles).split(',').map(Number)) : [];
-        const namesRoles = rolesArray.map(id => ROLE_MAP[id]).filter(Boolean).join(' / ');
-        
-        let fonctionTxt = statutLabel;
-        if (namesRoles) {
-            fonctionTxt += ` (${namesRoles})`;
+    rows.forEach(tr => {
+        const cols = tr.querySelectorAll('td');
+        if (cols.length >= 4) {
+            const nomMembre = cols[0].innerText.split('\n')[0];
+            const statutMembre = cols[1].innerText;
+            const selectVal = cols[3].querySelector('select').value;
+            
+            const isActif = statutMembre.includes('Actif');
+            if (isActif) totalActifs++;
+            else totalEssai++;
+
+            let etatLabel = 'ABSENT (facultatif)';
+            let etatColor = '#f75a68';
+            if (selectVal === 'present') {
+                etatLabel = 'PRÉSENT(E)';
+                etatColor = '#04d361';
+                if (isActif) actifsPresents++;
+                else essaisPresents++;
+            } else if (selectVal === 'excuse') {
+                etatLabel = 'EXCUSÉ(E)';
+                etatColor = '#fba94c';
+                totalExcuses++;
+            } else {
+                totalAbsents++;
+            }
+
+            htmlContent += `
+                <tr style="page-break-inside: avoid;">
+                    <td style="padding: 8px 10px; border: 1px solid #ddd; font-weight: bold;">${nomMembre}</td>
+                    <td style="padding: 8px 10px; border: 1px solid #ddd;">${statutMembre}</td>
+                    <td style="padding: 8px 10px; border: 1px solid #ddd; text-align: center; color: ${etatColor}; font-weight: bold;">${etatLabel}</td>
+                </tr>
+            `;
         }
-
-        let pointageTxt = "ABSENT";
-        let pointageColor = "#d9534f";
-        if (m.present) {
-            pointageTxt = "PRÉSENT(E)";
-            pointageColor = "#5cb85c";
-        } else if (m.etat_presence === 'excuse') {
-            pointageTxt = "EXCUSÉ(E)";
-            pointageColor = "#f0ad4e";
-        }
-
-        htmlContent += `
-            <tr style="page-break-inside: avoid; page-break-after: auto;">
-                <td style="padding: 6px 8px; border: 1px solid #ddd; font-weight: bold;">${(m.nom || '').toUpperCase()} ${m.prenom || ''}</td>
-                <td style="padding: 6px 8px; border: 1px solid #ddd; font-size: 11px;">${fonctionTxt}</td>
-                <td style="padding: 6px 8px; border: 1px solid #ddd; text-align: center; font-weight: bold; color: ${pointageColor};">
-                    ${pointageTxt}
-                    <div style="font-size: 9px; font-weight: normal; color: #666; margin-top: 2px;">(facultatif)</div>
-                </td>
-            </tr>
-        `;
     });
+
+    const totalMembres = totalActifs + totalEssai;
+    const totalPresents = actifsPresents + essaisPresents;
+    const quorumRequis = Math.floor(totalActifs / 2) + 1;
 
     htmlContent += `
             </tbody>
         </table>
 
-        <div style="font-size: 11px; line-height: 1.5; margin-top: 15px; border-top: 1px solid #ccc; padding-top: 10px; page-break-inside: avoid;">
-            <div>Total des membres: ${totalActifs} actifs / ${totalEssai} à l'essai SANS DROIT DE VOTE (${totalActifs + totalEssai} au total)</div>
-            <div>Quorum: ${quorumMin} (avec droit de vote = ne prend en compte que les actifs)</div>
-            <div>Membres présents: ${actifsPresents} (${actifsPresents} actifs + 0 à l'essai)</div>
-            <div>Membres absents: ${totalAbsents}</div>
-            <div style="margin-top: 8px;"><strong>Fait le ${dateReunion.split('-').reverse().join('/')}, à VALINES (80)</strong></div>
+        <div style="background: #f1f5f9; padding: 12px 15px; border-radius: 6px; margin-bottom: 30px; font-size: 12px; line-height: 1.5; border: 1px solid #cbd5e1; page-break-inside: avoid;">
+            <strong>Total des membres :</strong> ${totalActifs} actifs / ${totalEssai} autres ou à l'essai SANS DROIT DE VOTE (${totalMembres} au total)<br>
+            <strong>Quorum :</strong> ${quorumRequis} (avec droit de vote = ne prend en compte que les actifs)<br>
+            <strong>Membres présents :</strong> ${totalPresents} (${actifsPresents} actifs + ${essaisPresents} autres)<br>
+            <strong>Membres absents :</strong> ${totalAbsents} (dont ${totalExcuses} excusés)
         </div>
 
-        <div style="margin-top: 30px; display: flex; justify-content: space-between; font-size: 11px; page-break-inside: avoid;">
-            <div style="width: 220px; border-top: 1px solid #333; padding-top: 5px;">
-                <strong>MOREL Enzo,</strong><br>Le président
+        <div style="display: flex; justify-content: space-between; margin-top: 30px; font-size: 12px; page-break-inside: avoid;">
+            <div style="text-align: left;">
+                Fait le ${dateFormatted}, à ARRAS (62)<br><br><br>
+                <strong>MOREL Enzo,</strong><br>
+                Le président
             </div>
-            <div style="width: 220px; border-top: 1px solid #333; padding-top: 5px;">
-                <strong>ROCQUEMONT Maxence,</strong><br>Le secrétaire
+            <div style="text-align: right;">
+                <br><br><br>
+                <strong>ROCQUEMONT Maxence,</strong><br>
+                Le secrétaire
             </div>
-        </div>
-
-        <div style="margin-top: 40px; font-size: 9px; color: #555; border-top: 1px solid #eee; padding-top: 8px; page-break-inside: avoid;">
-            <strong>La1337</strong><br>
-            Webradio Associative (Loi 1901)<br>
-            19 rue Lavoisier<br>
-            27000 ÉVREUX<br>
-            SIRET: 852 512 789 00011<br>
-            Site Internet: www.la1337.com
         </div>
     `;
 
@@ -786,6 +776,10 @@ async function exportPresencePDF() {
     html2pdf().from(element).set(opt).save();
 }
 
+// =============================================================================
+// GESTION DES BANNIÈRES / THÈMES
+// =============================================================================
+
 async function fetchThemes() {
     const { data, error } = await supabaseClient.from('themes').select('*').order('id', { ascending: true });
     if (!error) { loadedThemes = data || []; renderThemes(); }
@@ -793,7 +787,6 @@ async function fetchThemes() {
 
 function renderThemes() {
     const tbody = document.getElementById('themes-list');
-    if (!tbody) return;
     tbody.innerHTML = '';
     if (loadedThemes.length === 0) { tbody.innerHTML = '<tr><td colspan="4">Aucune bannière.</td></tr>'; return; }
     loadedThemes.forEach(t => {
@@ -811,6 +804,59 @@ function renderThemes() {
     });
 }
 
+function editTheme(id) {
+    const theme = loadedThemes.find(t => t.id === id);
+    if (!theme) return;
+    document.getElementById('theme-id').value = theme.id;
+    document.getElementById('theme-name').value = theme.name || '';
+    document.getElementById('theme-url').value = theme.url || '';
+    document.getElementById('theme-color').value = theme.color || '#ff3366';
+    document.getElementById('theme-textColor').value = theme.textColor || '#ff3366';
+    document.getElementById('theme-roleColor').value = theme.roleColor || '#e1e1e6';
+    document.getElementById('theme-liveBgColor').value = theme.liveBgColor || '#ff3366';
+    document.getElementById('theme-liveTxtColor').value = theme.liveTxtColor || '#ffffff';
+    document.getElementById('theme-form-title').innerText = "Modifier la Bannière";
+    document.getElementById('theme-submit-btn').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Enregistrer';
+    document.getElementById('theme-editing-notice').style.display = 'flex';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function resetThemeForm() {
+    document.getElementById('theme-form').reset();
+    document.getElementById('theme-id').value = '';
+    document.getElementById('theme-form-title').innerText = "Ajouter une Bannière / Thème";
+    document.getElementById('theme-submit-btn').innerHTML = '<i class="fa-solid fa-plus"></i> Ajouter la bannière';
+    document.getElementById('theme-editing-notice').style.display = 'none';
+}
+
+async function handleThemeSubmit(e) {
+    e.preventDefault();
+    const id = document.getElementById('theme-id').value;
+    const payload = {
+        name: document.getElementById('theme-name').value,
+        url: document.getElementById('theme-url').value,
+        color: document.getElementById('theme-color').value,
+        textColor: document.getElementById('theme-textColor').value,
+        roleColor: document.getElementById('theme-roleColor').value,
+        liveBgColor: document.getElementById('theme-liveBgColor').value,
+        liveTxtColor: document.getElementById('theme-liveTxtColor').value
+    };
+    const res = id ? await supabaseClient.from('themes').update(payload).eq('id', id) : await supabaseClient.from('themes').insert([payload]);
+    if (res.error) alert("Erreur : " + res.error.message);
+    else { resetThemeForm(); fetchThemes(); }
+}
+
+async function deleteTheme(id) {
+    if (confirm("Supprimer cette bannière ?")) {
+        await supabaseClient.from('themes').delete().eq('id', id);
+        fetchThemes();
+    }
+}
+
+// =============================================================================
+// GESTION DES LOGOS
+// =============================================================================
+
 async function fetchLogos() {
     const { data, error } = await supabaseClient.from('logos').select('*').order('id', { ascending: true });
     if (!error) { loadedLogos = data || []; renderLogos(); }
@@ -818,7 +864,6 @@ async function fetchLogos() {
 
 function renderLogos() {
     const tbody = document.getElementById('logos-list');
-    if (!tbody) return;
     tbody.innerHTML = '';
     if (loadedLogos.length === 0) { tbody.innerHTML = '<tr><td colspan="4">Aucun logo.</td></tr>'; return; }
     loadedLogos.forEach(l => {
@@ -836,9 +881,48 @@ function renderLogos() {
     });
 }
 
+function editLogo(id) {
+    const logo = loadedLogos.find(l => l.id === id);
+    if (!logo) return;
+    document.getElementById('logo-id').value = logo.id;
+    document.getElementById('logo-name').value = logo.name || '';
+    document.getElementById('logo-url').value = logo.url || '';
+    document.getElementById('logo-form-title').innerText = "Modifier le Logo";
+    document.getElementById('logo-submit-btn').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Enregistrer';
+    document.getElementById('logo-editing-notice').style.display = 'flex';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function resetLogoForm() {
+    document.getElementById('logo-form').reset();
+    document.getElementById('logo-id').value = '';
+    document.getElementById('logo-form-title').innerText = "Ajouter un Logo";
+    document.getElementById('logo-submit-btn').innerHTML = '<i class="fa-solid fa-plus"></i> Ajouter le logo';
+    document.getElementById('logo-editing-notice').style.display = 'none';
+}
+
+async function handleLogoSubmit(e) {
+    e.preventDefault();
+    const id = document.getElementById('logo-id').value;
+    const payload = { name: document.getElementById('logo-name').value, url: document.getElementById('logo-url').value };
+    const res = id ? await supabaseClient.from('logos').update(payload).eq('id', id) : await supabaseClient.from('logos').insert([payload]);
+    if (res.error) alert("Erreur : " + res.error.message);
+    else { resetLogoForm(); fetchLogos(); }
+}
+
+async function deleteLogo(id) {
+    if (confirm("Supprimer ce logo ?")) {
+        await supabaseClient.from('logos').delete().eq('id', id);
+        fetchLogos();
+    }
+}
+
+// =============================================================================
+// GESTION DES MEMBRES
+// =============================================================================
+
 function renderRoleCheckboxes() {
     const container = document.getElementById('roles-checkboxes-container');
-    if (!container) return;
     container.innerHTML = '';
     for (const [id, name] of Object.entries(ROLE_MAP)) {
         const label = document.createElement('label');
@@ -850,7 +934,6 @@ function renderRoleCheckboxes() {
 
 async function fetchMembers() {
     const tbody = document.getElementById('members-list');
-    if (!tbody) return;
     const { data: membres, error } = await supabaseClient.from('membres').select('*').order('nom', { ascending: true });
     
     if (error) {
@@ -887,9 +970,87 @@ async function fetchMembers() {
     });
 }
 
+function editMember(id) {
+    const member = loadedMembers.find(m => String(m.id) === String(id));
+    if (!member) return;
+
+    document.getElementById('member-id').value = member.id;
+    document.getElementById('member-prenom').value = member.prenom || '';
+    document.getElementById('member-nom').value = member.nom || '';
+    document.getElementById('member-email').value = member.email || '';
+    document.getElementById('member-phone').value = member.telephone || '03 65 17 00 63';
+    document.getElementById('member-statut').value = member.statut || 'Actif';
+
+    const rolesArray = member.roles ? (Array.isArray(member.roles) ? member.roles : String(member.roles).split(',').map(Number)) : [];
+    const checkboxes = document.getElementsByName('adminRoleCheck');
+    checkboxes.forEach(cb => {
+        cb.checked = rolesArray.includes(parseInt(cb.value, 10));
+    });
+
+    document.getElementById('member-form-title').innerText = "Modifier le Membre";
+    document.getElementById('member-submit-btn').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Enregistrer les modifications';
+    document.getElementById('member-editing-notice').style.display = 'flex';
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function resetMemberForm() {
+    document.getElementById('member-form').reset();
+    document.getElementById('member-id').value = '';
+    document.getElementById('member-form-title').innerText = "Ajouter / Modifier un Membre";
+    document.getElementById('member-submit-btn').innerHTML = '<i class="fa-solid fa-user-plus"></i> Enregistrer le membre';
+    document.getElementById('member-editing-notice').style.display = 'none';
+    document.getElementById('member-statut').value = 'Actif';
+
+    document.getElementsByName('adminRoleCheck').forEach(cb => cb.checked = false);
+}
+
+async function handleMemberSubmit(e) {
+    e.preventDefault();
+    const id = document.getElementById('member-id').value;
+
+    const selectedRoles = Array.from(document.getElementsByName('adminRoleCheck'))
+        .filter(cb => cb.checked)
+        .map(cb => parseInt(cb.value, 10));
+
+    const payload = {
+        prenom: document.getElementById('member-prenom').value,
+        nom: document.getElementById('member-nom').value.toUpperCase(),
+        email: document.getElementById('member-email').value,
+        telephone: document.getElementById('member-phone').value,
+        statut: document.getElementById('member-statut').value,
+        roles: selectedRoles
+    };
+
+    let result;
+    if (id) {
+        result = await supabaseClient.from('membres').update(payload).eq('id', id);
+    } else {
+        result = await supabaseClient.from('membres').insert([payload]);
+    }
+
+    if (result.error) {
+        alert("Erreur enregistrement membre : " + result.error.message);
+    } else {
+        resetMemberForm();
+        fetchMembers();
+    }
+}
+
+async function deleteMember(id) {
+    if (confirm("Voulez-vous vraiment supprimer ce membre ?")) {
+        const { error } = await supabaseClient.from('membres').delete().eq('id', id);
+        if (error) alert("Erreur suppression : " + error.message);
+        else fetchMembers();
+    }
+}
+
+// =============================================================================
+// GESTION DU CHANGELOG
+// =============================================================================
+
 async function fetchChangelog() {
     const tbody = document.getElementById('changelog-list');
-    if (!tbody) return;
     const { data: logs, error } = await supabaseClient.from('changelog').select('*').order('created_at', { ascending: false });
 
     if (error) {
@@ -919,18 +1080,70 @@ async function fetchChangelog() {
     });
 }
 
+function editChangelog(id) {
+    const log = loadedChangelogs.find(l => String(l.id) === String(id));
+    if (!log) return;
+
+    document.getElementById('changelog-id').value = log.id;
+    document.getElementById('versionInput').value = log.version || '';
+    document.getElementById('descInput').value = log.description || '';
+
+    document.getElementById('changelog-form-title').innerText = "Modifier la note de version";
+    document.getElementById('changelog-submit-btn').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Enregistrer';
+    document.getElementById('changelog-editing-notice').style.display = 'flex';
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function resetChangelogForm() {
+    document.getElementById('changelog-form').reset();
+    document.getElementById('changelog-id').value = '';
+    document.getElementById('changelog-form-title').innerText = "Ajouter une note de version";
+    document.getElementById('changelog-submit-btn').innerHTML = '<i class="fa-solid fa-paper-plane"></i> Publier';
+    document.getElementById('changelog-editing-notice').style.display = 'none';
+}
+
+async function handleChangelogSubmit(e) {
+    e.preventDefault();
+    const id = document.getElementById('changelog-id').value;
+    const version = document.getElementById('versionInput').value;
+    const description = document.getElementById('descInput').value;
+
+    const payload = { version, description };
+
+    const res = id 
+        ? await supabaseClient.from('changelog').update(payload).eq('id', id)
+        : await supabaseClient.from('changelog').insert([payload]);
+
+    if (res.error) {
+        alert("Erreur enregistrement changelog : " + res.error.message);
+    } else {
+        resetChangelogForm();
+        fetchChangelog();
+    }
+}
+
+async function deleteChangelog(id) {
+    if (confirm("Voulez-vous vraiment supprimer cette note de version ?")) {
+        const { error } = await supabaseClient.from('changelog').delete().eq('id', id);
+        if (error) alert("Erreur suppression : " + error.message);
+        else fetchChangelog();
+    }
+}
+
+// =============================================================================
+// INITIALISATION
+// =============================================================================
+
 document.addEventListener('DOMContentLoaded', () => {
     renderRoleCheckboxes();
     fetchThemes();
     fetchLogos();
     fetchMembers();
     fetchChangelog();
-    fetchPresenceList();
+    fetchPresenceList(); // Charge directement les présences au démarrage
 
-    const today = new Date().toISOString().split('T')[0];
-    const dateInput = document.getElementById('reunion-date');
-    if (dateInput) dateInput.value = today;
-
+    // Écouteurs pour auto-générer l'email à la frappe du prénom / nom
     document.getElementById('member-prenom')?.addEventListener('input', autoGenerateEmail);
     document.getElementById('member-nom')?.addEventListener('input', autoGenerateEmail);
 });
