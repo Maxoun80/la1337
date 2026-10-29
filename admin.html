@@ -495,9 +495,6 @@
 </div>
 
 <script>
-// =============================================================================
-// SUPABASE CLIENT & CONFIG
-// =============================================================================
 const SUPABASE_URL = 'https://appepchfrfghfulirckz.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_wjpCqcbmlEnHvYhJRziUGQ_SIubrlSg';
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -524,7 +521,6 @@ function switchTab(tabId, event) {
     }
 }
 
-// Génération automatique de l'email : prenom.initialeDuNom@la1337.com
 function autoGenerateEmail() {
     const memberId = document.getElementById('member-id').value;
     if (memberId) return;
@@ -542,13 +538,10 @@ function autoGenerateEmail() {
     }
 }
 
-// =============================================================================
-// GESTION DES PRÉSENCES & ÉMARGEMENT
-// =============================================================================
-
 async function fetchPresenceList() {
     const tbody = document.getElementById('presence-list');
-    tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Chargement des présences...</td></tr>`;
+    if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Chargement des présences...</td></tr>';
 
     const { data: membres, error } = await supabaseClient.from('membres').select('*').order('nom', { ascending: true });
 
@@ -576,7 +569,6 @@ async function fetchPresenceList() {
         const isPresent = m.present === true;
         if (isActif && isPresent) actifsPresents++;
 
-        // Couleur du badge de statut
         let badgeColor = 'var(--success)';
         let roleText = '❌ Non obligatoire / Invité';
 
@@ -610,15 +602,17 @@ async function fetchPresenceList() {
         tbody.appendChild(tr);
     });
 
-    // Calcul du Quorum (exigé à partir de la moitié des actifs + 1)
-    document.getElementById('quorum-count').innerText = `${actifsPresents} / ${totalActifs}`;
+    const quorumCountEl = document.getElementById('quorum-count');
+    if (quorumCountEl) quorumCountEl.innerText = `${actifsPresents} / ${totalActifs}`;
     const quorumStatusEl = document.getElementById('quorum-status');
     const quorumMin = Math.floor(totalActifs / 2) + 1;
 
-    if (actifsPresents >= quorumMin) {
-        quorumStatusEl.innerHTML = `<span style="color: var(--success);">🟢 QUORUM ATTEINT (${actifsPresents}/${quorumMin} requis)</span>`;
-    } else {
-        quorumStatusEl.innerHTML = `<span style="color: var(--danger);">🔴 QUORUM NON ATTEINT (${actifsPresents}/${quorumMin} requis)</span>`;
+    if (quorumStatusEl) {
+        if (actifsPresents >= quorumMin) {
+            quorumStatusEl.innerHTML = `<span style="color: var(--success);">🟢 QUORUM ATTEINT (${actifsPresents}/${quorumMin} requis)</span>`;
+        } else {
+            quorumStatusEl.innerHTML = `<span style="color: var(--danger);">🔴 QUORUM NON ATTEINT (${actifsPresents}/${quorumMin} requis)</span>`;
+        }
     }
 }
 
@@ -653,10 +647,6 @@ async function setAllPresence(val) {
     fetchPresenceList();
 }
 
-// =============================================================================
-// EXPORT PDF OFFICIEL (CALQUÉ SUR LA MISE EN PAGE S15)
-// =============================================================================
-
 async function exportPresencePDF() {
     const typeReunion = document.getElementById('reunion-type').value;
     const dateReunion = document.getElementById('reunion-date').value || new Date().toISOString().split('T')[0];
@@ -665,7 +655,6 @@ async function exportPresencePDF() {
     const optionsDate = { weekday: 'long', year: 'numeric', month: '2-digit', day: '2-digit' };
     const dateObj = new Date(dateReunion);
     const dateFormatted = dateObj.toLocaleDateString('fr-FR', optionsDate);
-    // Capitalize first letter of weekday
     const dateCapitalized = dateFormatted.charAt(0).toUpperCase() + dateFormatted.slice(1);
 
     const { data: membres, error } = await supabaseClient.from('membres').select('*').order('nom', { ascending: true });
@@ -693,7 +682,6 @@ async function exportPresencePDF() {
 
     const quorumMin = Math.floor(totalActifs / 2) + 1;
 
-    // Création du conteneur PDF
     const element = document.createElement('div');
     element.style.padding = '25px';
     element.style.background = '#ffffff';
@@ -724,7 +712,6 @@ async function exportPresencePDF() {
         else if (m.statut === 'Membre extérieur') statutLabel = "Membre extérieur";
         else if (m.statut === 'Retrait') statutLabel = "Membre actif (retrait provisoire)";
 
-        // Récupération des rôles si existants
         const rolesArray = m.roles ? (Array.isArray(m.roles) ? m.roles : String(m.roles).split(',').map(Number)) : [];
         const namesRoles = rolesArray.map(id => ROLE_MAP[id]).filter(Boolean).join(' / ');
         
@@ -799,10 +786,6 @@ async function exportPresencePDF() {
     html2pdf().from(element).set(opt).save();
 }
 
-// =============================================================================
-// GESTION DES BANNIÈRES / THÈMES
-// =============================================================================
-
 async function fetchThemes() {
     const { data, error } = await supabaseClient.from('themes').select('*').order('id', { ascending: true });
     if (!error) { loadedThemes = data || []; renderThemes(); }
@@ -810,6 +793,7 @@ async function fetchThemes() {
 
 function renderThemes() {
     const tbody = document.getElementById('themes-list');
+    if (!tbody) return;
     tbody.innerHTML = '';
     if (loadedThemes.length === 0) { tbody.innerHTML = '<tr><td colspan="4">Aucune bannière.</td></tr>'; return; }
     loadedThemes.forEach(t => {
@@ -827,59 +811,6 @@ function renderThemes() {
     });
 }
 
-function editTheme(id) {
-    const theme = loadedThemes.find(t => t.id === id);
-    if (!theme) return;
-    document.getElementById('theme-id').value = theme.id;
-    document.getElementById('theme-name').value = theme.name || '';
-    document.getElementById('theme-url').value = theme.url || '';
-    document.getElementById('theme-color').value = theme.color || '#ff3366';
-    document.getElementById('theme-textColor').value = theme.textColor || '#ff3366';
-    document.getElementById('theme-roleColor').value = theme.roleColor || '#e1e1e6';
-    document.getElementById('theme-liveBgColor').value = theme.liveBgColor || '#ff3366';
-    document.getElementById('theme-liveTxtColor').value = theme.liveTxtColor || '#ffffff';
-    document.getElementById('theme-form-title').innerText = "Modifier la Bannière";
-    document.getElementById('theme-submit-btn').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Enregistrer';
-    document.getElementById('theme-editing-notice').style.display = 'flex';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-function resetThemeForm() {
-    document.getElementById('theme-form').reset();
-    document.getElementById('theme-id').value = '';
-    document.getElementById('theme-form-title').innerText = "Ajouter une Bannière / Thème";
-    document.getElementById('theme-submit-btn').innerHTML = '<i class="fa-solid fa-plus"></i> Ajouter la bannière';
-    document.getElementById('theme-editing-notice').style.display = 'none';
-}
-
-async function handleThemeSubmit(e) {
-    e.preventDefault();
-    const id = document.getElementById('theme-id').value;
-    const payload = {
-        name: document.getElementById('theme-name').value,
-        url: document.getElementById('theme-url').value,
-        color: document.getElementById('theme-color').value,
-        textColor: document.getElementById('theme-textColor').value,
-        roleColor: document.getElementById('theme-roleColor').value,
-        liveBgColor: document.getElementById('theme-liveBgColor').value,
-        liveTxtColor: document.getElementById('theme-liveTxtColor').value
-    };
-    const res = id ? await supabaseClient.from('themes').update(payload).eq('id', id) : await supabaseClient.from('themes').insert([payload]);
-    if (res.error) alert("Erreur : " + res.error.message);
-    else { resetThemeForm(); fetchThemes(); }
-}
-
-async function deleteTheme(id) {
-    if (confirm("Supprimer cette bannière ?")) {
-        await supabaseClient.from('themes').delete().eq('id', id);
-        fetchThemes();
-    }
-}
-
-// =============================================================================
-// GESTION DES LOGOS
-// =============================================================================
-
 async function fetchLogos() {
     const { data, error } = await supabaseClient.from('logos').select('*').order('id', { ascending: true });
     if (!error) { loadedLogos = data || []; renderLogos(); }
@@ -887,6 +818,7 @@ async function fetchLogos() {
 
 function renderLogos() {
     const tbody = document.getElementById('logos-list');
+    if (!tbody) return;
     tbody.innerHTML = '';
     if (loadedLogos.length === 0) { tbody.innerHTML = '<tr><td colspan="4">Aucun logo.</td></tr>'; return; }
     loadedLogos.forEach(l => {
@@ -904,48 +836,9 @@ function renderLogos() {
     });
 }
 
-function editLogo(id) {
-    const logo = loadedLogos.find(l => l.id === id);
-    if (!logo) return;
-    document.getElementById('logo-id').value = logo.id;
-    document.getElementById('logo-name').value = logo.name || '';
-    document.getElementById('logo-url').value = logo.url || '';
-    document.getElementById('logo-form-title').innerText = "Modifier le Logo";
-    document.getElementById('logo-submit-btn').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Enregistrer';
-    document.getElementById('logo-editing-notice').style.display = 'flex';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-function resetLogoForm() {
-    document.getElementById('logo-form').reset();
-    document.getElementById('logo-id').value = '';
-    document.getElementById('logo-form-title').innerText = "Ajouter un Logo";
-    document.getElementById('logo-submit-btn').innerHTML = '<i class="fa-solid fa-plus"></i> Ajouter le logo';
-    document.getElementById('logo-editing-notice').style.display = 'none';
-}
-
-async function handleLogoSubmit(e) {
-    e.preventDefault();
-    const id = document.getElementById('logo-id').value;
-    const payload = { name: document.getElementById('logo-name').value, url: document.getElementById('logo-url').value };
-    const res = id ? await supabaseClient.from('logos').update(payload).eq('id', id) : await supabaseClient.from('logos').insert([payload]);
-    if (res.error) alert("Erreur : " + res.error.message);
-    else { resetLogoForm(); fetchLogos(); }
-}
-
-async function deleteLogo(id) {
-    if (confirm("Supprimer ce logo ?")) {
-        await supabaseClient.from('logos').delete().eq('id', id);
-        fetchLogos();
-    }
-}
-
-// =============================================================================
-// GESTION DES MEMBRES
-// =============================================================================
-
 function renderRoleCheckboxes() {
     const container = document.getElementById('roles-checkboxes-container');
+    if (!container) return;
     container.innerHTML = '';
     for (const [id, name] of Object.entries(ROLE_MAP)) {
         const label = document.createElement('label');
@@ -957,6 +850,7 @@ function renderRoleCheckboxes() {
 
 async function fetchMembers() {
     const tbody = document.getElementById('members-list');
+    if (!tbody) return;
     const { data: membres, error } = await supabaseClient.from('membres').select('*').order('nom', { ascending: true });
     
     if (error) {
@@ -993,87 +887,9 @@ async function fetchMembers() {
     });
 }
 
-function editMember(id) {
-    const member = loadedMembers.find(m => String(m.id) === String(id));
-    if (!member) return;
-
-    document.getElementById('member-id').value = member.id;
-    document.getElementById('member-prenom').value = member.prenom || '';
-    document.getElementById('member-nom').value = member.nom || '';
-    document.getElementById('member-email').value = member.email || '';
-    document.getElementById('member-phone').value = member.telephone || '03 65 17 00 63';
-    document.getElementById('member-statut').value = member.statut || 'Actif';
-
-    const rolesArray = member.roles ? (Array.isArray(member.roles) ? member.roles : String(member.roles).split(',').map(Number)) : [];
-    const checkboxes = document.getElementsByName('adminRoleCheck');
-    checkboxes.forEach(cb => {
-        cb.checked = rolesArray.includes(parseInt(cb.value, 10));
-    });
-
-    document.getElementById('member-form-title').innerText = "Modifier le Membre";
-    document.getElementById('member-submit-btn').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Enregistrer les modifications';
-    document.getElementById('member-editing-notice').style.display = 'flex';
-
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-function resetMemberForm() {
-    document.getElementById('member-form').reset();
-    document.getElementById('member-id').value = '';
-    document.getElementById('member-form-title').innerText = "Ajouter / Modifier un Membre";
-    document.getElementById('member-submit-btn').innerHTML = '<i class="fa-solid fa-user-plus"></i> Enregistrer le membre';
-    document.getElementById('member-editing-notice').style.display = 'none';
-    document.getElementById('member-statut').value = 'Actif';
-
-    document.getElementsByName('adminRoleCheck').forEach(cb => cb.checked = false);
-}
-
-async function handleMemberSubmit(e) {
-    e.preventDefault();
-    const id = document.getElementById('member-id').value;
-
-    const selectedRoles = Array.from(document.getElementsByName('adminRoleCheck'))
-        .filter(cb => cb.checked)
-        .map(cb => parseInt(cb.value, 10));
-
-    const payload = {
-        prenom: document.getElementById('member-prenom').value,
-        nom: document.getElementById('member-nom').value.toUpperCase(),
-        email: document.getElementById('member-email').value,
-        telephone: document.getElementById('member-phone').value,
-        statut: document.getElementById('member-statut').value,
-        roles: selectedRoles
-    };
-
-    let result;
-    if (id) {
-        result = await supabaseClient.from('membres').update(payload).eq('id', id);
-    } else {
-        result = await supabaseClient.from('membres').insert([payload]);
-    }
-
-    if (result.error) {
-        alert("Erreur enregistrement membre : " + result.error.message);
-    } else {
-        resetMemberForm();
-        fetchMembers();
-    }
-}
-
-async function deleteMember(id) {
-    if (confirm("Voulez-vous vraiment supprimer ce membre ?")) {
-        const { error } = await supabaseClient.from('membres').delete().eq('id', id);
-        if (error) alert("Erreur suppression : " + error.message);
-        else fetchMembers();
-    }
-}
-
-// =============================================================================
-// GESTION DU CHANGELOG
-// =============================================================================
-
 async function fetchChangelog() {
     const tbody = document.getElementById('changelog-list');
+    if (!tbody) return;
     const { data: logs, error } = await supabaseClient.from('changelog').select('*').order('created_at', { ascending: false });
 
     if (error) {
@@ -1103,75 +919,18 @@ async function fetchChangelog() {
     });
 }
 
-function editChangelog(id) {
-    const log = loadedChangelogs.find(l => String(l.id) === String(id));
-    if (!log) return;
-
-    document.getElementById('changelog-id').value = log.id;
-    document.getElementById('versionInput').value = log.version || '';
-    document.getElementById('descInput').value = log.description || '';
-
-    document.getElementById('changelog-form-title').innerText = "Modifier la note de version";
-    document.getElementById('changelog-submit-btn').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Enregistrer';
-    document.getElementById('changelog-editing-notice').style.display = 'flex';
-
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-function resetChangelogForm() {
-    document.getElementById('changelog-form').reset();
-    document.getElementById('changelog-id').value = '';
-    document.getElementById('changelog-form-title').innerText = "Ajouter une note de version";
-    document.getElementById('changelog-submit-btn').innerHTML = '<i class="fa-solid fa-paper-plane"></i> Publier';
-    document.getElementById('changelog-editing-notice').style.display = 'none';
-}
-
-async function handleChangelogSubmit(e) {
-    e.preventDefault();
-    const id = document.getElementById('changelog-id').value;
-    const version = document.getElementById('versionInput').value;
-    const description = document.getElementById('descInput').value;
-
-    const payload = { version, description };
-
-    const res = id 
-        ? await supabaseClient.from('changelog').update(payload).eq('id', id)
-        : await supabaseClient.from('changelog').insert([payload]);
-
-    if (res.error) {
-        alert("Erreur enregistrement changelog : " + res.error.message);
-    } else {
-        resetChangelogForm();
-        fetchChangelog();
-    }
-}
-
-async function deleteChangelog(id) {
-    if (confirm("Voulez-vous vraiment supprimer cette note de version ?")) {
-        const { error } = await supabaseClient.from('changelog').delete().eq('id', id);
-        if (error) alert("Erreur suppression : " + error.message);
-        else fetchChangelog();
-    }
-}
-
-// =============================================================================
-// INITIALISATION
-// =============================================================================
-
 document.addEventListener('DOMContentLoaded', () => {
     renderRoleCheckboxes();
     fetchThemes();
     fetchLogos();
     fetchMembers();
     fetchChangelog();
-    fetchPresenceList(); // Charge directement les présences au démarrage
+    fetchPresenceList();
 
-    // Date du jour par défaut dans le sélecteur d'export PDF
     const today = new Date().toISOString().split('T')[0];
     const dateInput = document.getElementById('reunion-date');
     if (dateInput) dateInput.value = today;
 
-    // Écouteurs pour auto-générer l'email à la frappe du prénom / nom
     document.getElementById('member-prenom')?.addEventListener('input', autoGenerateEmail);
     document.getElementById('member-nom')?.addEventListener('input', autoGenerateEmail);
 });
