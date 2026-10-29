@@ -534,8 +534,8 @@ function autoGenerateEmail() {
     const emailInput = document.getElementById('member-email');
 
     if (prenom && nom) {
-        const cleanPrenom = prenom.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/\s+/g, '');
-        const cleanNom = nom.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/\s+/g, '');
+        const cleanPrenom = prenom.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '');
+        const cleanNom = nom.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '');
         const initialNom = cleanNom.charAt(0);
 
         emailInput.value = `${cleanPrenom}.${initialNom}@la1337.com`;
