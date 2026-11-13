@@ -1,4 +1,3 @@
-OK
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -417,6 +416,7 @@ OK
                     <select id="member-statut">
                         <option value="Actif">Membre Actif (Obligatoire / Votant)</option>
                         <option value="Essai">Membre en Période d'Essai (Invité)</option>
+                        <option value="Membre externe">Membre externe (Non obligatoire AG / Obligatoire RE)</option>
                         <option value="Retrait">Membre en Retrait Provisoire</option>
                         <option value="Inactif">Membre en Inactivité Temporaire</option>
                     </select>
@@ -582,13 +582,24 @@ async function fetchPresenceList() {
         // Couleur du badge de statut
         let badgeColor = 'var(--success)';
         if (statut === 'Essai') badgeColor = 'var(--warning)';
-        if (statut === 'Retrait' || statut === 'Inactif' || statut === 'Membre extérieur') badgeColor = 'var(--text-muted)';
+        if (statut === 'Membre externe' || statut === 'Membre extérieur') badgeColor = '#3b82f6';
+        if (statut === 'Retrait' || statut === 'Inactif') badgeColor = 'var(--text-muted)';
+
+        const typeReunionVal = document.getElementById('reunion-type').value;
+        const isAGVal = typeReunionVal.includes('AGO') || typeReunionVal.includes('AGE');
+        
+        let obligationText = '❌ Non obligatoire / Invité';
+        if (isActif) {
+            obligationText = '✅ Actif (Votant / Quorum)';
+        } else if ((statut === 'Membre externe' || statut === 'Membre extérieur') && !isAGVal) {
+            obligationText = '✅ Obligatoire (Réunion d'équipe)';
+        }
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td><strong>${m.prenom || ''} ${(m.nom || '').toUpperCase()}</strong><br><span style="font-size:11px; color:var(--text-muted);">${m.email || ''}</span></td>
             <td><span style="color: ${badgeColor}; font-weight: 600;">${statut}</span></td>
-            <td>${isActif ? '✅ Actif (Votant / Quorum)' : '❌ Non obligatoire / Invité'}</td>
+            <td>${obligationText}</td>
             <td>
                 <select onchange="updatePresence('${m.id}', this.value)" style="background: var(--bg-primary); padding: 8px; border-radius: 6px; color: #fff; border: 1px solid var(--border); cursor: pointer;">
                     <option value="absent" ${(!isPresent && m.etat_presence !== 'excuse') ? 'selected' : ''}>🔴 Absent / Non excusé</option>
